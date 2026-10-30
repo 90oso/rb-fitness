@@ -17,5 +17,6 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm run test:metrics
+      - run: npm run test:cycles
       - run: npm run typecheck
       - run: npm run build

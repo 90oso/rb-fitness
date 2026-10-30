@@ -6,7 +6,8 @@ export function mondayOf(date: Date): Date {
 }
 export function weekWorkouts(workouts: Workout[], date = new Date()) {
   const begin = mondayOf(date).getTime();
-  return workouts.filter(w => new Date(w.endedAt).getTime() >= begin);
+  const end = new Date(mondayOf(date)); end.setDate(end.getDate() + 7);
+  return workouts.filter(w => { const t = new Date(w.endedAt).getTime(); return t >= begin && t < end.getTime() && t <= date.getTime(); });
 }
 export function allSets(workouts: Workout[]): SetEntry[] { return workouts.flatMap(w => w.sets); }
 export function setVolume(set: SetEntry) { return set.reps * set.weight; }
@@ -32,6 +33,22 @@ export function suggestions(data: AppData) {
     { id:'shoulders-arms', label:'Hombros y brazos', details:'Enfócate en accesorios', score:counts.Hombros+counts.Tríceps+counts.Bíceps, exercises:['shoulder-press','lateral-raise','tricep-pushdown','preacher-curl'] },
   ];
   return groups.sort((a,b)=>a.score-b.score);
+}
+/** Conservative training suggestion based only on logged sessions, not a medical prescription. */
+export function progressionAdvice(workouts: Workout[], exerciseId: string, targetSets: number, maxReps: number) {
+  const workout = [...workouts].sort((a, b) => b.endedAt.localeCompare(a.endedAt))
+    .find(w => w.sets.some(s => s.exerciseId === exerciseId));
+  if (!workout) return null;
+  const sets = workout.sets.filter(s => s.exerciseId === exerciseId);
+  if (!sets.length) return null;
+  const weightKg = sets.at(-1)!.weight;
+  const eligible = weightKg > 0 && sets.length >= targetSets &&
+    sets.slice(-targetSets).every(s => s.reps >= maxReps && Math.abs(s.weight - weightKg) < 0.001);
+  if (eligible) {
+    const incrementKg = Math.max(0.5, Math.round(weightKg * 0.025 * 2) / 2);
+    return { kind: 'increase' as const, lastWeightKg: weightKg, proposedWeightKg: weightKg + incrementKg };
+  }
+  return { kind: 'repeat' as const, lastWeightKg: weightKg, proposedWeightKg: weightKg };
 }
 export function recentSetForExercise(workouts: Workout[], exerciseId: string) {
   const recent = [...workouts].sort((a,b)=> b.endedAt.localeCompare(a.endedAt));

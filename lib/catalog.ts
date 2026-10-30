@@ -26,7 +26,7 @@ export const defaultRoutines: Routine[] = [
   { id:'pull', name:'Espalda y bíceps', subtitle:'Día 2 · Tracción', tag:'PULL DAY', exercises:[Rx('lat-pulldown'),Rx('seated-row'),Rx('one-arm-row'),Rx('bicep-curl'),Rx('preacher-curl')] },
   { id:'rest', name:'Recuperación', subtitle:'Día 3 · Descanso', tag:'REST DAY', isRest:true, exercises:[] },
   { id:'legs', name:'Piernas y abdominales', subtitle:'Día 4 · Tren inferior', tag:'LEG DAY', exercises:[Rx('leg-press'),Rx('smith-squat'),Rx('leg-curl'),Rx('leg-extension'),Rx('calf-raise',3,12,20,60),Rx('ab-crunch',3,12,15,60)] },
-  { id:'flex', name:'Día flexible', subtitle:'Día 5 · Tú decides', tag:'FLEX DAY', exercises:[Rx('chest-press'),Rx('seated-row'),Rx('lateral-raise'),Rx('bicep-curl')] }
+  { id:'flex', isFlexible:true, name:'Día flexible', subtitle:'Día 5 · Tú decides', tag:'FLEX DAY', exercises:[Rx('chest-press'),Rx('seated-row'),Rx('lateral-raise'),Rx('bicep-curl')] }
 ];
 export const initialData: AppData = {
   version:1, profile:{name:'Atleta', gym:'Planet Fitness', goal:'muscle', daysPerWeek:4, bodyweightKg:null, weightUnit:'kg'},

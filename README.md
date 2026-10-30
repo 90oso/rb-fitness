@@ -1,81 +1,84 @@
-# RB Fitness — MVP 0.1
+# RB Fitness 0.3 — ciclos personales + progreso en la nube
 
-Aplicación de seguimiento de entrenamientos, **mobile first**, desarrollada con **Next.js (App Router), React, TypeScript, Tailwind, Lucide y Recharts**. Preparada para despliegue en **Vercel**. Inspirada visualmente en el dashboard PULSE compartido, adaptada al proyecto RB.
+App de entrenamiento Next.js, TypeScript, Tailwind y Supabase Auth. Mobile-first y PWA.
 
-## Qué funciona
+## Cambios v0.3
 
-- Panel con progreso **real** (sesiones, series, minutos y volumen semanal). No contiene métricas fisiológicas inventadas.
-- Rutina inicial editable: empuje, tracción, descanso, piernas y día flexible.
-- Sesiones activas, captura rápida de peso y repeticiones, temporizador de descanso, reanudación al recargar y guardar sesión.
-- Último peso y repeticiones visibles por ejercicio.
-- Historial con detalle y opción de eliminar sesiones, gráficas de volumen, series por músculo y 1RM aproximado.
-- Día flexible con tres propuestas basadas en series registradas esa semana (no IA).
-- Biblioteca con instrucciones generales para máquinas y ejercicios típicos de Planet Fitness.
-- Perfil, metas, gimnasio, unidades kg/lb y modos claro/oscuro.
-- Persistencia local (`localStorage`) y respaldo JSON con importación y exportación.
-- Manifest PWA, iconos 192/512, service worker sencillo para cachear shell en producción.
+- Construye tu ciclo de entrenamiento: crear, duplicar, reordenar y eliminar días de fuerza o descanso. No está limitado a cinco días ni a Push/Pull/Legs.
+- Personaliza nombre, descripción, grupo de ejercicios, series, rango de repeticiones y tiempo de descanso. Los días flexibles pueden activar recomendaciones heurísticas.
+- Se preserva el historial al eliminar/modificar una rutina. No se puede eliminar la rutina de la sesión activa.
+- Los datos de entrenamiento **se guardan exclusivamente en Supabase** al iniciar sesión, no en `localStorage`. Supabase Auth sí puede almacenar el token de sesión en el navegador.
+- Indicador `EN NUBE / GUARDANDO / NO GUARDADO`; protección contra cerrar la pestaña cuando hay escrituras pendientes y control optimista de conflictos entre dispositivos.
+- Importación opcional y explícita de los registros de la versión local anterior; los datos originales se borran del navegador únicamente cuando el servidor confirma que recibió la migración.
+- Exportación/importación JSON como respaldo manual.
 
-## Desarrollo local
+**Importante:** la versión 0.3 no funcionará para registrar entrenamientos hasta configurar Supabase. No se simula guardar progreso si no hay backend. No fusionar con `main` antes de que Supabase y Vercel estén configurados y un despliegue Preview pase las pruebas.
 
-Requisitos: Node.js 20.9+ (recomendado Node 22) y npm.
+## Configurar Supabase (una vez por proyecto)
 
-```bash
-npm install
-npm run dev
-```
+1. Crea un proyecto en [Supabase](https://supabase.com/dashboard). Conserva el acceso únicamente en la cuenta administradora.
+2. Abre **SQL Editor**, ejecuta íntegramente `supabase/schema.sql`. Habilita RLS y una función RPC con control de versión por usuario.
+3. Ve a **Authentication > URL Configuration**: configura `Site URL` con la URL de RB en producción; añade los dominios de Preview necesarios en Redirect URLs si vas a probar Preview.
+4. Comprueba que el acceso por correo esté habilitado en **Authentication > Providers > Email**. `signInWithOtp` usa enlace de acceso por correo; los correos pueden estar sujetos a límites de Supabase. Para producción, configura un proveedor SMTP propio.
+5. En **Vercel > RB Fitness > Settings > Environment Variables** añade para los entornos que uses:
+    - `NEXT_PUBLIC_SUPABASE_URL`: URL del proyecto (`https://...supabase.co`).
+    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: clave **publishable** (`sb_publishable_...`). No uses clave `service_role` ni `secret` en variables `NEXT_PUBLIC_*`.
+6. Vuelve a desplegar. El usuario inicia sesión con su correo, completa su ciclo y se guarda en la tabla `public.rb_user_data`.
 
-Abrir `http://localhost:3000`. Para verificar el paquete:
+El SQL incluye políticas RLS que requieren `auth.uid() = user_id`. Ningún usuario puede leer/escribir el JSON de otro usuario con el cliente público. **La cuenta es obligatoria** para usar la versión cloud-first.
+
+## Migrar datos de RB 0.2
+
+**Antes:** en la app 0.2, ve a Perfil > Exportar JSON. Guarda ese archivo fuera del navegador.
+
+**Después:** inicia sesión en 0.3. En Perfil > Tus datos, usa *Importar historial anterior de este navegador* o *Importar JSON*. Se solicitará confirmación antes de reemplazar tus datos de nube. Espera a que el indicador marque **EN NUBE**. El archivo JSON sigue siendo tu copia de seguridad externa.
+
+No se mezclan automáticamente dos historiales de cuentas distintas, porque podrían compartir identificadores y modificar fechas/series. La migración actualmente es por reemplazo explícito, no una fusión.
+
+## Desarrollo y validación
+
+Requisitos Node.js 22. `npm install` instala dependencias, `npm run dev` inicia localmente. Para comprobaciones:
 
 ```bash
 npm run test:metrics
+npm run test:cycles
 npm run typecheck
 npm run build
 ```
 
-## Publicar en Vercel
-
-1. Crear repositorio **privado** nuevo en GitHub, por ejemplo `rb-fitness`, y subir los archivos del proyecto (sin carpetas `node_modules` ni `.next`).
-2. Abrir Vercel -> **Add New -> Project** -> importar el repositorio.
-3. Framework: **Next.js** (detección automática). Root Directory: `/`.
-4. Publicar usando **Deploy**. No hay variables de entorno obligatorias en esta versión.
-5. En Android/Chrome, usar menú **Instalar aplicación** o **Añadir a pantalla de inicio**. En iPhone/Safari usar **Compartir -> Añadir a pantalla de inicio**.
-
-### Advertencia sobre el almacenamiento
-
-Esta versión usa `localStorage` y NO sincroniza entre dispositivos. Si borras los datos del navegador, pierdes tus registros salvo que tengas un respaldo JSON. La exportación es especialmente importante si la instalas como PWA. No almacenes aquí datos médicos sensibles. Se incluye un esquema SQL `supabase/schema.sql` solo como punto de partida para una versión multiusuario con Supabase Auth y políticas RLS; **Supabase no está conectado todavía**.
-
-### Sobre el uso sin conexión
-
-El service worker cachea la página inicial y los recursos visitados. La instalación offline y las actualizaciones de la caché deben validarse en el dispositivo y navegador final. No se ofrece garantía de sincronización offline/online porque no hay backend conectado.
-
-## Lógica
-
-- Sesiones semanales: lunes a domingo, calculadas en la zona local del dispositivo.
-- El volumen se muestra en **kg·rep**: peso registrado (kg) × repeticiones. Esto no equivale a calorías, ni a gasto energético. En ejercicios con peso corporal cero, el volumen de carga externa será cero.
-- 1RM estimado: fórmula de Epley, calculada solo para series de 1–12 repeticiones con peso adicional registrado.
-- Día flexible: compara el número de series por grandes grupos; la sugerencia con menos series totales aparece primero. Es una **heurística exploratoria**, no una prescripción deportiva.
-- Cambio de unidades kg/lb: los datos se almacenan internamente en kg y se convierten para mostrar/capturar en lb.
-- Descanso: es una etapa del ciclo, marcada manualmente; no produce sesión de entrenamiento.
+Recomendamos abrir un pull request a `main`: GitHub Actions ejecuta esas comprobaciones. Una vez configuradas las variables de la Preview y revisado el build en Vercel, realizar prueba manual de inicio de sesión, rutina de 2 días, guardar una sesión, cerrar/abrir en otro dispositivo, importar respaldo y verificar RLS con dos usuarios.
 
 ## Arquitectura
 
+- `app`: App Router, estilo y PWA.
+- `components/rb-app.tsx`: UI actual; modularizar tras estabilizar el flujo.
+- `components/cloud-gate.tsx`: inicio de sesión por enlace de correo.
+- `lib/cycles.ts`: funciones puras para gestión del ciclo.
+- `lib/cloud.ts`: cliente Supabase, lectura y escritura con control de revisión.
+- `lib/metrics.ts`: estadísticas y progresión orientativa.
+- `lib/storage.ts`: validación de respaldos y lector *únicamente* de datos legacy para migración.
+- `supabase/schema.sql`: datos por usuario, política RLS y RPC.
+
+## Límites actuales
+
+- Al estar en cloud-first, para modificar datos necesitas conexión. No hay cola de escritura offline persistente en el navegador: eso sería una función futura, con consentimiento explícito.
+- Aun con Supabase, el navegador conserva tokens de autenticación para seguir conectado; **no son registros de progreso**.
+- En conflictos entre dos dispositivos, RB suspende la escritura y muestra error; el usuario debe exportar sus cambios no guardados antes de recargar. La fusión automática queda para una etapa posterior.
+- La versión 0.3 requiere compilar y verificar en Vercel antes de declararse lista para producción. No está conectada al proyecto real de Supabase hasta que se complete la configuración anterior.
+
+## Publicación directamente en `main` (flujo acordado)
+
+Se utiliza exclusivamente la rama `main` para cambios a partir de RB 0.3. **Un push a `main` puede actualizar la aplicación en Vercel automáticamente**. La versión 0.3 exige Supabase: sin proyecto, SQL, correo de acceso y variables en Vercel, la interfaz de registro permanecerá bloqueada. No publiques antes de completar esta configuración.
+
+1. En la versión 0.2, exporta tu historial a JSON desde Perfil. Guarda el archivo como respaldo fuera del navegador.
+2. Crea/configura Supabase: ejecuta `supabase/schema.sql`, activa el proveedor Email y establece las URL de redirección correctas.
+3. En Vercel configura `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` para producción.
+4. Desde esta carpeta extraída (la de 0.3), ejecuta el script de PowerShell apuntando al repositorio Git original que contiene `.git`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\publicar-v03-main.ps1" -RepoPath "$HOME\Downloads\RB-v0.2\rb-fitness" -SupabaseConfigurado
 ```
-app/                 Layout, pantalla, manifest PWA y estilos
-components/rb-app.tsx UI, navegación, eventos y lógica de interacción
-components/rings.tsx   Anillos de metas semanales
-components/volume-chart.tsx Gráfica Recharts
-lib/types.ts         Contratos de datos
-lib/catalog.ts       Catálogo y rutinas predeterminadas
-lib/metrics.ts       Cálculos puros
-lib/storage.ts       Persistencia y respaldo
-public/sw.js         Caché básica PWA
-supabase/schema.sql  Esquema futuro (NO conectado)
-```
 
-## Próxima fase
+El script comprueba el remoto `90oso/rb-fitness`, exige que estés en `main` y que el árbol esté limpio, actualiza `main` con `--ff-only`, instala dependencias, prueba ciclos y métricas, comprueba TypeScript, compila Next.js y solo entonces hace commit y push a `main`.
 
-Dividir `rb-app.tsx` en módulos y agregar tests automatizados (funciones puras y E2E), migrar almacenamiento a IndexedDB si aumenta el volumen de registros, habilitar Supabase Auth + sync por usuario, añadir ilustraciones específicas verificadas de máquinas, integrar analíticas/coach IA con endpoints del lado servidor y políticas de privacidad apropiadas.
-
-**Estado de verificación**: 10 pruebas de lógica y respaldo superadas mediante el compilador global TypeScript, y revisión sintáctica de 12 archivos TS/TSX. **No se ha ejecutado `next build`** porque el entorno no tiene acceso al registro de npm. Se incluye CI de GitHub para probar el paquete en un entorno conectado.
-
-**Nota**: fuente generada en un entorno sin acceso a npm registry; compilar y validar en un entorno con `npm install` antes de llamar a la versión lista para producción.
+Si falta el parámetro `-SupabaseConfigurado`, **no modificará ni publicará nada**. El parámetro es una confirmación manual del usuario, no una verificación automática de que la base de datos realmente funciona. Después de publicar, verifica login, guardar sesión, reabrir en otro dispositivo y políticas RLS.
