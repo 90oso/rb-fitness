@@ -10,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#0B0F17',
     icons: [
       { src: '/rb-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-      { src: '/rb-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }
-    ]
+      { src: '/rb-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    ],
   };
 }
