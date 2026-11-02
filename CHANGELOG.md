@@ -16,6 +16,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Vers
 
 ### Cambiado
 
+- Acceso con una sola acción primaria (Entrar); «Crear cuenta» y «¿Olvidaste tu contraseña?» como enlaces secundarios. El último correo usado queda recordado en el dispositivo y aparece prellenado.
+- Editor de rutinas rediseñado como hoja con borrador y botones Guardar/Cancelar: una tarjeta por ejercicio con controles −/+ (series, repeticiones, descanso), subir/bajar/quitar, y un selector con búsqueda y filtros por músculo para añadir ejercicios.
+- Perfil simplificado: desaparecen «Importar historial anterior» e «Importar JSON» (los datos viven en la cuenta); «Descargar una copia de mis datos» pasa a la tarjeta Cuenta.
 - `components/rb-app.tsx` dividido en hooks (`useAuth`, `useCloudSync`, `useTheme`, `useConfirm`, `useToast`), vistas por pestaña, modales y shell.
 - El guardado en la nube se agrupa con un retardo de 600 ms (`SAVE_DEBOUNCE_MS`): escribir en el perfil ya no envía una petición por tecla. Si la pestaña pasa a segundo plano con cambios pendientes, se envían de inmediato.
 - Pantalla de acceso rediseñada: fondo con formas de color en movimiento, tarjeta que aparece al entrar, selector Entrar/Crear cuenta deslizante, campos con foco animado, texto mínimo. Las animaciones respetan `prefers-reduced-motion`.

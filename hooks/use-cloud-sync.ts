@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { initialData } from '@/lib/catalog';
 import { readCloudState, writeCloudState } from '@/lib/cloud';
-import { loadData } from '@/lib/storage';
 import type { AppData } from '@/lib/types';
 
 export type SyncStatus = 'loading' | 'saved' | 'saving' | 'error';
@@ -11,7 +10,6 @@ export type DataUpdate = AppData | ((prev: AppData) => AppData);
 
 /** Changes are batched for this long before the whole state is written to Supabase. */
 export const SAVE_DEBOUNCE_MS = 600;
-const LEGACY_KEY = 'rb-fitness:v1';
 
 interface Loaded {
   forUser: string;
@@ -33,7 +31,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
   const [loadError, setLoadError] = useState<LoadError | null>(null);
   const [status, setStatus] = useState<SyncStatus>('loading');
   const [error, setError] = useState('');
-  const [hasLegacyData, setHasLegacyData] = useState(false);
 
   const dataRef = useRef<AppData>(initialData);
   const hydratedRef = useRef(false);
@@ -42,7 +39,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
   const pendingRef = useRef(false);
   const writingRef = useRef(false);
   const accountRef = useRef<string | null>(null);
-  const legacyImportRef = useRef(false);
   const timerRef = useRef<number | null>(null);
 
   const hydrated = loaded !== null && loaded.forUser === userId;
@@ -77,11 +73,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
         if (accountRef.current !== user) break;
         revisionRef.current = revision;
         persistedRef.current = signature;
-        if (legacyImportRef.current) {
-          window.localStorage.removeItem(LEGACY_KEY);
-          legacyImportRef.current = false;
-          setHasLegacyData(false);
-        }
       } catch (err) {
         pendingRef.current = true;
         setError(err instanceof Error ? err.message : 'Error de sincronización');
@@ -129,7 +120,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
     pendingRef.current = false;
     revisionRef.current = 0;
     persistedRef.current = '';
-    legacyImportRef.current = false;
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -143,12 +133,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
         persistedRef.current = JSON.stringify(record.data);
         dataRef.current = record.data;
         hydratedRef.current = true;
-        const legacy = loadData();
-        setHasLegacyData(
-          legacy.workouts.length > 0 ||
-            legacy.active !== null ||
-            JSON.stringify(legacy.routines) !== JSON.stringify(initialData.routines)
-        );
         setLoaded({ forUser: userId, data: record.data });
         setLoadError(null);
         setStatus('saved');
@@ -188,12 +172,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
     };
   }, [flush]);
 
-  const importLegacy = useCallback(() => {
-    const legacy = loadData();
-    legacyImportRef.current = true;
-    setData(legacy);
-  }, [setData]);
-
   const isBusy = useCallback(() => pendingRef.current || writingRef.current, []);
 
   return {
@@ -203,8 +181,6 @@ export function useCloudSync(client: SupabaseClient | null, userId: string | nul
     hydrated,
     status: effectiveStatus,
     error: effectiveError,
-    hasLegacyData,
-    importLegacy,
     retry: flush,
     isBusy,
   };

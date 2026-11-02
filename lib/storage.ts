@@ -1,7 +1,5 @@
-import { initialData } from './catalog';
 import type { ActiveWorkout, AppData, Routine, SetEntry, Workout } from './types';
 
-const KEY = 'rb-fitness:v1';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 const isText = (value: unknown, max = 160): value is string =>
@@ -136,22 +134,6 @@ export function safeParse(raw: string, includeActive = false): AppData {
     theme: value.theme === 'light' ? 'light' : 'dark',
     lastRestDate: isDate(value.lastRestDate) ? value.lastRestDate : null,
   };
-}
-export function loadData(): AppData {
-  if (typeof window === 'undefined') return structuredClone(initialData);
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return structuredClone(initialData);
-    const data = safeParse(raw);
-    const original = JSON.parse(raw) as Record<string, unknown>;
-    const active = original.active;
-    if (validActive(active) && data.routines.some((r) => r.id === active.routineId)) {
-      data.active = active;
-    }
-    return data;
-  } catch {
-    return structuredClone(initialData);
-  }
 }
 export function downloadBackup(data: AppData) {
   const date = new Date().toISOString().slice(0, 10);
