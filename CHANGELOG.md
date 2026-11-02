@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.5.0] — 2026-11-02
+
+### Añadido
+
+- Catálogo de **100 ejercicios** (antes 19) curado para el equipo habitual de Planet Fitness: máquinas selectorizadas, poleas, mancuernas, Smith y peso corporal, con nombre, instrucción y consejo en español.
+- Cada ejercicio tiene **dos fotos (posición inicial y final)** que se alternan como guía de movimiento en la ficha; miniaturas en la biblioteca, en el selector de ejercicios, en el editor de rutinas y en la sesión activa («Ver cómo se hace»). Imágenes de Free Exercise DB (dominio público), optimizadas a WebP de 640 px; créditos en `public/exercises/CREDITS.md`.
+- Filtro por tipo de equipo en la biblioteca, además del filtro por músculo.
+- Campo `media` en `Exercise` (fotogramas, video opcional, origen).
+
 ## [0.4.0] — 2026-11-01
 
 ### Añadido

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ArrowDown, ArrowUp, Check, Dumbbell, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import ExercisePicker from './exercise-picker';
 import Stepper from '@/components/ui/stepper';
+import { ExerciseThumb } from '@/components/ui/exercise-media';
 import { getExercise } from '@/lib/catalog';
 import { makeRx } from '@/lib/format';
 import type { Routine, RoutineExercise } from '@/lib/types';
@@ -132,6 +133,7 @@ export default function RoutineEditorModal({
                       <article className="ex-card" key={`${rx.exerciseId}-${index}`}>
                         <div className="ex-card-top">
                           <span className="ex-ordinal">{index + 1}</span>
+                          <ExerciseThumb exercise={exercise} size={44} />
                           <div className="ex-name">
                             <strong>{exercise?.name ?? rx.exerciseId}</strong>
                             {exercise && (

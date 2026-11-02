@@ -3214,3 +3214,130 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   font-size: 13px;
   text-align: center;
 }
+
+/* ---- Exercise media (frames from Free Exercise DB) ---- */
+.ex-thumb {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--stroke);
+}
+.ex-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.ex-thumb-empty {
+  background: var(--panel-high);
+  color: var(--acid-ink);
+}
+.exercise-tile .ex-thumb {
+  border-radius: 14px;
+}
+.motion {
+  margin: 18px 0 20px;
+}
+.motion-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--stroke);
+}
+.motion-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.motion-frame-b {
+  opacity: 0;
+  animation: rb-frame 2.4s steps(1, end) infinite;
+}
+.motion-badge {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 5px 9px;
+  border-radius: 9px;
+  background: #0b0f17cc;
+  color: #f3f6fa;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.motion-badge-b {
+  opacity: 0;
+  animation: rb-frame 2.4s steps(1, end) infinite;
+}
+@keyframes rb-frame {
+  0%,
+  49% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-stage {
+    aspect-ratio: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--stroke);
+  }
+  .motion-frame,
+  .motion-frame-b {
+    position: static;
+    opacity: 1;
+    animation: none;
+    aspect-ratio: 3 / 2;
+  }
+  .motion-badge {
+    display: none;
+  }
+}
+.media-credit {
+  display: block;
+  margin-top: 14px;
+  font-size: 10px;
+  color: var(--subtle);
+  text-align: center;
+}
+.log-exercise {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-top: 18px;
+}
+.log-exercise > div {
+  flex: 1;
+  min-width: 0;
+}
+.log-card .log-exercise h2 {
+  margin-top: 0;
+}
+.log-card .log-exercise p {
+  margin: 6px 0 4px;
+}
+.log-guide {
+  padding: 4px 0;
+  font-size: 12px;
+}
+.filter-secondary {
+  margin-top: -8px;
+}
+.filter-secondary button {
+  font-size: 10.5px;
+  padding: 7px 10px;
+}

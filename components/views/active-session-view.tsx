@@ -1,5 +1,6 @@
 'use client';
 import {
+  BookOpen,
   Check,
   CheckCircle2,
   Clock3,
@@ -12,6 +13,7 @@ import {
   TrendingUp,
   X,
 } from 'lucide-react';
+import { ExerciseThumb } from '@/components/ui/exercise-media';
 import { getExercise } from '@/lib/catalog';
 import { prettyDuration, type progressionAdvice } from '@/lib/metrics';
 import type { ActiveWorkout, Exercise, Routine, RoutineExercise, SetEntry } from '@/lib/types';
@@ -38,6 +40,7 @@ export default function ActiveSessionView({
   onSkipRest,
   onFinish,
   onDiscard,
+  onOpenGuide,
 }: {
   active: ActiveWorkout;
   routine: Routine | undefined;
@@ -60,6 +63,7 @@ export default function ActiveSessionView({
   onSkipRest: () => void;
   onFinish: () => void;
   onDiscard: () => void;
+  onOpenGuide: (exerciseId: string) => void;
 }) {
   const setsForCurrent = active.sets.filter((set) => set.exerciseId === selectedExercise);
   const weightStep = unit === 'kg' ? 2.5 : 5;
@@ -118,11 +122,25 @@ export default function ActiveSessionView({
             </span>
             <span className="today-chip">SERIE {setsForCurrent.length + 1}</span>
           </div>
-          <h2>{currentExercise?.name || 'Elige un ejercicio'}</h2>
-          <p>
-            {currentExercise?.muscle} · {currentExercise?.equipment} · Objetivo {currentRx?.targetSets} ×{' '}
-            {currentRx?.minReps}–{currentRx?.maxReps}
-          </p>
+          <div className="log-exercise">
+            <ExerciseThumb exercise={currentExercise} size={64} />
+            <div>
+              <h2>{currentExercise?.name || 'Elige un ejercicio'}</h2>
+              <p>
+                {currentExercise?.muscle} · {currentExercise?.equipment} · Objetivo {currentRx?.targetSets} ×{' '}
+                {currentRx?.minReps}–{currentRx?.maxReps}
+              </p>
+              {currentExercise && (
+                <button
+                  type="button"
+                  className="text-link log-guide"
+                  onClick={() => onOpenGuide(currentExercise.id)}
+                >
+                  Ver cómo se hace <BookOpen size={14} />
+                </button>
+              )}
+            </div>
+          </div>
 
           {previousSet && (
             <div className="previous-result">

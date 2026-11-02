@@ -1,16 +1,19 @@
 'use client';
 import { useState } from 'react';
-import { ArrowUpRight, Dumbbell, Search } from 'lucide-react';
+import { ArrowUpRight, Search } from 'lucide-react';
 import { Empty, PageHead } from '@/components/ui/bits';
-import { catalog, majorMuscles } from '@/lib/catalog';
+import { ExerciseThumb } from '@/components/ui/exercise-media';
+import { catalog, equipmentKinds, majorMuscles } from '@/lib/catalog';
 
 export default function LibraryView({ onOpenExercise }: { onOpenExercise: (exerciseId: string) => void }) {
   const [search, setSearch] = useState('');
   const [muscleFilter, setMuscleFilter] = useState<string>('Todos');
+  const [equipmentFilter, setEquipmentFilter] = useState<string>('Todos');
   const needle = search.trim().toLowerCase();
   const results = catalog.filter(
     (exercise) =>
       (muscleFilter === 'Todos' || exercise.muscle === muscleFilter) &&
+      (equipmentFilter === 'Todos' || exercise.equipment === equipmentFilter) &&
       `${exercise.name} ${exercise.equipment} ${exercise.muscle}`.toLowerCase().includes(needle)
   );
 
@@ -19,7 +22,7 @@ export default function LibraryView({ onOpenExercise }: { onOpenExercise: (exerc
       <PageHead
         overline="APRENDE CADA MOVIMIENTO"
         title="Conoce tus ejercicios."
-        sub="Una guía inicial editable y centrada en equipos habituales de Planet Fitness. Confirma siempre el modelo y sus ajustes en el gimnasio."
+        sub={`${catalog.length} ejercicios con el equipo habitual de Planet Fitness. Toca uno para ver cómo se hace.`}
       />
       <div className="search-row">
         <label className="search-field">
@@ -32,7 +35,7 @@ export default function LibraryView({ onOpenExercise }: { onOpenExercise: (exerc
           />
         </label>
       </div>
-      <div className="filter-scroll">
+      <div className="filter-scroll" aria-label="Filtrar por músculo">
         <button className={muscleFilter === 'Todos' ? 'chosen' : ''} onClick={() => setMuscleFilter('Todos')}>
           Todos
         </button>
@@ -46,26 +49,45 @@ export default function LibraryView({ onOpenExercise }: { onOpenExercise: (exerc
           </button>
         ))}
       </div>
+      <div className="filter-scroll filter-secondary" aria-label="Filtrar por equipo">
+        <button
+          className={equipmentFilter === 'Todos' ? 'chosen' : ''}
+          onClick={() => setEquipmentFilter('Todos')}
+        >
+          Todo el equipo
+        </button>
+        {equipmentKinds.map((kind) => (
+          <button
+            key={kind}
+            className={equipmentFilter === kind ? 'chosen' : ''}
+            onClick={() => setEquipmentFilter(kind)}
+          >
+            {kind}
+          </button>
+        ))}
+      </div>
       <div className="catalog-grid">
         {results.map((exercise) => (
           <button key={exercise.id} className="exercise-tile" onClick={() => onOpenExercise(exercise.id)}>
-            <span className="exercise-icon">
-              <Dumbbell size={25} />
-            </span>
+            <ExerciseThumb exercise={exercise} size={56} />
             <span>
               <small>
                 {exercise.muscle.toUpperCase()} • {exercise.equipment.toUpperCase()}
               </small>
               <strong>{exercise.name}</strong>
               <em>
-                Ver cómo se usa <ArrowUpRight size={14} />
+                Ver cómo se hace <ArrowUpRight size={14} />
               </em>
             </span>
           </button>
         ))}
       </div>
       {results.length === 0 && (
-        <Empty icon={Search} title="Sin resultados" text="Intenta buscar otra máquina o grupo muscular." />
+        <Empty
+          icon={Search}
+          title="Sin resultados"
+          text="Prueba con otro nombre, músculo o tipo de equipo."
+        />
       )}
     </>
   );

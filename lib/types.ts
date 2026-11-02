@@ -10,6 +10,13 @@ export type Muscle =
   | 'Gemelos'
   | 'Abdomen';
 export type Equipment = 'Máquina' | 'Mancuernas' | 'Polea' | 'Smith' | 'Peso corporal';
+/** Visual guide for an exercise: two frames (start, end) and, later, an optional short video. */
+export interface ExerciseMedia {
+  frames: [string, string];
+  video?: string;
+  /** Identifier in the source database the frames were taken from (for credits). */
+  source?: string;
+}
 export interface Exercise {
   id: string;
   name: string;
@@ -17,6 +24,7 @@ export interface Exercise {
   equipment: Equipment;
   instruction: string;
   tip: string;
+  media?: ExerciseMedia;
 }
 export interface RoutineExercise {
   exerciseId: string;

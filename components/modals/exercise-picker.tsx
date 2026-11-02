@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { ArrowLeft, Check, Plus, Search } from 'lucide-react';
+import { ExerciseThumb } from '@/components/ui/exercise-media';
 import { catalog, majorMuscles } from '@/lib/catalog';
 
 /** Searchable list to add exercises to a routine. Stays open so several can be added in a row. */
@@ -68,6 +69,7 @@ export default function ExercisePicker({
           const inRoutine = excluded.includes(exercise.id) || added.includes(exercise.id);
           return (
             <li key={exercise.id} className={`picker-row ${inRoutine ? 'picker-row-added' : ''}`}>
+              <ExerciseThumb exercise={exercise} size={44} />
               <div>
                 <strong>{exercise.name}</strong>
                 <small>
