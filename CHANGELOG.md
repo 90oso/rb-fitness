@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.6.0] — 2026-11-02
+
+### Añadido
+
+- **Video como opción** en la ficha de cada ejercicio: botón «Buscar video» (YouTube, pestaña nueva) para los 100 ejercicios y, cuando hay un clip registrado en `lib/exercise-videos.ts`, pestañas Fotos/Video con reproductor integrado (`preload="none"`, sin audio por defecto, con la foto inicial como póster) y crédito propio.
+- `ExerciseVideo` (`src`, `credit`) en `lib/types.ts`; `lib/video.ts` con el enlace de búsqueda; comprobación en `npm run verify` de que cada clip registrado apunta a un ejercicio real y a un archivo existente.
+
+### Cambiado
+
+- El service worker no intercepta videos ni peticiones con `Range` (caché `rb-shell-v5`).
+- README: sección «Videos de ejercicios»; se elimina la guía de importación de historial, que ya no existe desde 0.4.
+
 ## [0.5.0] — 2026-11-02
 
 ### Añadido

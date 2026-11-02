@@ -24,6 +24,30 @@ const {
   weekWorkouts,
 } = require(path.join(root, 'lib/metrics.ts'));
 const { safeParse } = require(path.join(root, 'lib/storage.ts'));
+const { exerciseVideos } = require(path.join(root, 'lib/exercise-videos.ts'));
+const { videoSearchUrl } = require(path.join(root, 'lib/video.ts'));
+const { catalog: exerciseCatalog } = require(path.join(root, 'lib/catalog.ts'));
+// Optional clips: every entry must point to a real exercise and, if local, to a file that exists.
+for (const [id, video] of Object.entries(exerciseVideos)) {
+  const exercise = exerciseCatalog.find((item) => item.id === id);
+  assert.ok(exercise, `exercise-videos: unknown exercise id "${id}"`);
+  assert.deepEqual(exercise.media.video, video, `exercise-videos: "${id}" was not merged into the catalog`);
+  assert.match(
+    video.src,
+    /^(\/exercises\/[\w./-]+\.(mp4|webm)|https:\/\/\S+)$/,
+    `exercise-videos: bad src for "${id}"`
+  );
+  if (video.src.startsWith('/')) {
+    assert.ok(
+      fs.existsSync(path.join(root, 'public', video.src)),
+      `exercise-videos: missing file ${video.src}`
+    );
+  }
+}
+assert.equal(
+  videoSearchUrl('Press de pecho en máquina'),
+  'https://www.youtube.com/results?search_query=Press%20de%20pecho%20en%20m%C3%A1quina%20t%C3%A9cnica%20correcta'
+);
 let data = structuredClone(initialData);
 const now = new Date();
 const set = (id, weight, reps) => ({

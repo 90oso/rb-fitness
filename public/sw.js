@@ -1,10 +1,13 @@
 // Minimal same-origin offline shell (HTML + static assets). Training data lives in Supabase, not here.
-const CACHE='rb-shell-v4';
+const CACHE='rb-shell-v5';
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(['/','/rb-icon-192.png'])));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
 self.addEventListener('fetch',event=>{
   const req=event.request;
-  if(req.method!=='GET'||new URL(req.url).origin!==self.location.origin)return;
+  const url=new URL(req.url);
+  if(req.method!=='GET'||url.origin!==self.location.origin)return;
+  // Video streams use Range requests (206) and are large: let the browser handle them, never cache.
+  if(req.headers.has('range')||/\.(mp4|webm|mov)$/i.test(url.pathname))return;
   if(req.mode==='navigate'){
     event.respondWith(fetch(req).then(response=>{const copy=response.clone();if(response.ok)caches.open(CACHE).then(c=>c.put('/',copy));return response;}).catch(()=>caches.match('/')||Response.error()));
     return;

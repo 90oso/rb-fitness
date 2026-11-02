@@ -1,4 +1,5 @@
 import type { AppData, Exercise, Muscle, Routine } from './types';
+import { exerciseVideos } from './exercise-videos';
 
 /**
  * Catálogo RB: 100 ejercicios curados para el equipo habitual de Planet Fitness
@@ -1363,6 +1364,12 @@ export const majorMuscles: Muscle[] = [
   'Abdomen',
 ];
 export const equipmentKinds = ['Máquina', 'Polea', 'Mancuernas', 'Smith', 'Peso corporal'] as const;
+
+// Optional clips live in lib/exercise-videos.ts so the generated catalog above never needs editing.
+for (const exercise of catalog) {
+  const video = exerciseVideos[exercise.id];
+  if (video && exercise.media) exercise.media.video = video;
+}
 
 const byId = new Map(catalog.map((exercise) => [exercise.id, exercise]));
 export const getExercise = (id: string) => byId.get(id);
