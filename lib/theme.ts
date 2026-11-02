@@ -1,6 +1,6 @@
 /**
  * Theme is a device preference, not account data: it lives in localStorage and is applied
- * before the first paint by the inline script in app/layout.tsx, so there is no dark→light flash.
+ * before the first paint by the inline script in app/layout.tsx, so there is no theme flash.
  */
 export type ThemePreference = 'dark' | 'light' | 'system';
 export type ResolvedTheme = 'dark' | 'light';
@@ -8,29 +8,30 @@ export type ResolvedTheme = 'dark' | 'light';
 export const THEME_KEY = 'rb-theme';
 
 /** Runs in <head> before hydration. Keep it dependency-free and tiny. */
-export const themeBootScript = `(function(){try{var p=localStorage.getItem('${THEME_KEY}');var t=p==='light'||p==='dark'?p:p==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+export const themeBootScript = `(function(){try{var p=localStorage.getItem('${THEME_KEY}');var t=p==='light'||p==='dark'?p:p==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
 const listeners = new Set<() => void>();
 let mediaQuery: MediaQueryList | null = null;
 
 function media(): MediaQueryList | null {
   if (typeof window === 'undefined' || !window.matchMedia) return null;
-  if (!mediaQuery) mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+  if (!mediaQuery) mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   return mediaQuery;
 }
 
+/** Default is light; dark and system are opt-in per device. */
 export function readThemePreference(): ThemePreference {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   try {
     const stored = window.localStorage.getItem(THEME_KEY);
-    return stored === 'light' || stored === 'system' ? stored : 'dark';
+    return stored === 'dark' || stored === 'system' ? stored : 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
 }
 
 export function resolveTheme(preference: ThemePreference): ResolvedTheme {
-  if (preference === 'system') return media()?.matches ? 'light' : 'dark';
+  if (preference === 'system') return media()?.matches ? 'dark' : 'light';
   return preference;
 }
 

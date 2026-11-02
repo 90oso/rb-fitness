@@ -9,8 +9,8 @@ import {
   type ThemePreference,
 } from '@/lib/theme';
 
-const serverPreference = (): ThemePreference => 'dark';
-const serverResolved = (): ResolvedTheme => 'dark';
+const serverPreference = (): ThemePreference => 'light';
+const serverResolved = (): ResolvedTheme => 'light';
 const clientResolved = (): ResolvedTheme => resolveTheme(readThemePreference());
 
 export function useTheme() {
