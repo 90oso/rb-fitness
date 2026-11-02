@@ -53,3 +53,25 @@ export function ExerciseMotion({ exercise }: { exercise: Exercise }) {
     </figure>
   );
 }
+
+/** Looping clip served from /public or any https URL. Nothing is downloaded until the user presses play. */
+export function ExerciseVideo({ exercise }: { exercise: Exercise }) {
+  const video = exercise.media?.video;
+  if (!exercise.media || !video) return null;
+  return (
+    <figure className="motion">
+      <div className="video-stage">
+        <video
+          src={video.src}
+          poster={exercise.media.frames[0]}
+          controls
+          loop
+          muted
+          playsInline
+          preload="none"
+          aria-label={`Video: ${exercise.name}`}
+        />
+      </div>
+    </figure>
+  );
+}

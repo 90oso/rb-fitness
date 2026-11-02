@@ -10,10 +10,16 @@ export type Muscle =
   | 'Gemelos'
   | 'Abdomen';
 export type Equipment = 'Máquina' | 'Mancuernas' | 'Polea' | 'Smith' | 'Peso corporal';
-/** Visual guide for an exercise: two frames (start, end) and, later, an optional short video. */
+/** Optional short clip for an exercise: a same-origin path (`/exercises/<id>/loop.mp4`) or an https URL. */
+export interface ExerciseVideo {
+  src: string;
+  /** Who made it and under which license, shown under the player. */
+  credit?: string;
+}
+/** Visual guide for an exercise: two frames (start, end) and an optional short video. */
 export interface ExerciseMedia {
   frames: [string, string];
-  video?: string;
+  video?: ExerciseVideo;
   /** Identifier in the source database the frames were taken from (for credits). */
   source?: string;
 }
