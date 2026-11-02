@@ -1,20 +1,31 @@
 'use client';
-import { useState, type FormEvent } from 'react';
+import { useState, type CSSProperties, type FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Cloud, Eye, EyeOff, KeyRound, LogIn, Mail, UserPlus } from 'lucide-react';
-import ThemeToggle from '@/components/ui/theme-toggle';
+import { ArrowRight, Cloud, Eye, EyeOff, Mail } from 'lucide-react';
+import { AuthBrand, AuthFrame } from '@/components/ui/auth-frame';
 import { describeAuthError } from '@/lib/auth-errors';
 
 type Mode = 'login' | 'signup' | 'reset' | 'update';
 const MIN_PASSWORD = 8;
 
-function redirectHome() {
-  return `${window.location.origin}/`;
-}
+const TITLE: Record<Mode, string> = {
+  login: 'Hola de nuevo.',
+  signup: 'Empieza hoy.',
+  reset: 'Recupera tu acceso.',
+  update: 'Nueva contraseña.',
+};
+const ACTION: Record<Mode, string> = {
+  login: 'Entrar',
+  signup: 'Crear cuenta',
+  reset: 'Enviar enlace',
+  update: 'Guardar',
+};
+
+const redirectHome = () => `${window.location.origin}/`;
 
 /**
- * Access screen: email + password, account creation, password recovery and the "new password" step
- * reached from a recovery link. Same visual language as the app (tokens, cards, lime button).
+ * Access screen: email + password, account creation, recovery and the "new password" step from a
+ * recovery link. Light-first, minimal copy, motion handled in CSS (respects prefers-reduced-motion).
  */
 export default function AuthScreen({
   client,
@@ -27,7 +38,7 @@ export default function AuthScreen({
   recovery?: boolean;
   onRecoveryDone?: () => void;
 }) {
-  const [mode, setMode] = useState<Mode>(recovery ? 'update' : 'login');
+  const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
@@ -36,7 +47,8 @@ export default function AuthScreen({
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
-  const effectiveMode: Mode = recovery ? 'update' : mode;
+  const current: Mode = recovery ? 'update' : mode;
+  const tabIndex = current === 'signup' ? 1 : 0;
 
   const switchMode = (next: Mode) => {
     setMode(next);
@@ -61,10 +73,10 @@ export default function AuthScreen({
 
   function validPassword(): boolean {
     if (password.length < MIN_PASSWORD) {
-      setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.`);
+      setError(`La contraseña necesita al menos ${MIN_PASSWORD} caracteres.`);
       return false;
     }
-    if ((effectiveMode === 'signup' || effectiveMode === 'update') && password !== password2) {
+    if (password !== password2) {
       setError('Las contraseñas no coinciden.');
       return false;
     }
@@ -73,14 +85,14 @@ export default function AuthScreen({
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!client) return;
+    if (!client || busy) return;
     const address = email.trim();
-    if (effectiveMode === 'login') {
+    if (current === 'login') {
       void run(async () => {
         const { error: err } = await client.auth.signInWithPassword({ email: address, password });
         if (err) throw err;
       });
-    } else if (effectiveMode === 'signup') {
+    } else if (current === 'signup') {
       if (!validPassword()) return;
       void run(async () => {
         const { data, error: err } = await client.auth.signUp({
@@ -90,30 +102,25 @@ export default function AuthScreen({
         });
         if (err) throw err;
         if (!data.session) {
-          setNotice(
-            'Cuenta creada. Te enviamos un correo para confirmarla; ábrelo en este dispositivo y luego entra.'
-          );
           setMode('login');
           setPassword('');
           setPassword2('');
+          setNotice('Revisa tu correo y confirma la cuenta para entrar.');
         }
       });
-    } else if (effectiveMode === 'reset') {
+    } else if (current === 'reset') {
       void run(async () => {
         const { error: err } = await client.auth.resetPasswordForEmail(address, {
           redirectTo: redirectHome(),
         });
         if (err) throw err;
-        setNotice(
-          'Si ese correo tiene cuenta, recibirás un enlace para crear una nueva contraseña. Ábrelo en este dispositivo.'
-        );
+        setNotice('Si el correo existe, te enviamos un enlace. Ábrelo en este dispositivo.');
       });
     } else {
       if (!validPassword()) return;
       void run(async () => {
         const { error: err } = await client.auth.updateUser({ password });
         if (err) throw err;
-        setNotice('Contraseña actualizada. Ya estás dentro.');
         setPassword('');
         setPassword2('');
         onRecoveryDone?.();
@@ -121,28 +128,12 @@ export default function AuthScreen({
     }
   }
 
-  const titles: Record<Mode, { title: string; sub: string }> = {
-    login: {
-      title: 'Tu progreso, contigo.',
-      sub: 'Entra para sincronizar tus entrenamientos y tus ciclos personalizados.',
-    },
-    signup: {
-      title: 'Crea tu cuenta RB.',
-      sub: 'Tus rutinas y tu historial quedan en tu cuenta, disponibles en cualquier dispositivo.',
-    },
-    reset: {
-      title: 'Recupera tu acceso.',
-      sub: 'Te enviamos un enlace al correo para crear una nueva contraseña.',
-    },
-    update: { title: 'Nueva contraseña.', sub: 'Elige una contraseña nueva para tu cuenta RB.' },
-  };
-  const copy = titles[effectiveMode];
-
   const passwordField = (
     label: string,
     value: string,
     onChange: (v: string) => void,
-    autoComplete: string
+    autoComplete: string,
+    placeholder?: string
   ) => (
     <label className="form-label">
       {label}
@@ -153,6 +144,7 @@ export default function AuthScreen({
           minLength={MIN_PASSWORD}
           maxLength={72}
           autoComplete={autoComplete}
+          placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -161,6 +153,7 @@ export default function AuthScreen({
           className="field-eye"
           onClick={() => setShowPassword((v) => !v)}
           aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          tabIndex={-1}
         >
           {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
         </button>
@@ -169,135 +162,118 @@ export default function AuthScreen({
   );
 
   return (
-    <main className="auth-screen">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
-      <section className="card auth-card">
-        <div className="auth-top">
-          <div className="auth-brand">
-            RB<span>.</span>
+    <AuthFrame>
+      <AuthBrand />
+      <span className="overline auth-overline">TU ESPACIO FITNESS</span>
+      <h1 className="auth-title" key={current}>
+        {TITLE[current]}
+      </h1>
+
+      {configured === null ? (
+        <span className="auth-spinner" aria-label="Cargando" />
+      ) : !configured ? (
+        <div className="gate-alert">
+          <Cloud size={20} />
+          <div>
+            <strong>Falta configurar Supabase</strong>
+            <p>Variables públicas en Vercel, esquema SQL y proveedor Email. Hasta entonces no hay acceso.</p>
           </div>
-          <ThemeToggle />
         </div>
-        <span className="overline">TU ESPACIO FITNESS</span>
-        <h1>{copy.title}</h1>
-        <p className="auth-sub">{copy.sub}</p>
-
-        {configured === null ? (
-          <p className="muted">Iniciando RB...</p>
-        ) : !configured ? (
-          <div className="gate-alert">
-            <Cloud size={20} />
-            <div>
-              <strong>Sincronización pendiente de configuración</strong>
-              <p>
-                Configura Supabase Auth, ejecuta el esquema SQL y añade las variables públicas de Supabase en
-                Vercel. Hasta entonces el acceso está deshabilitado para evitar datos que se puedan perder.
-              </p>
+      ) : (
+        <>
+          {current !== 'update' && (
+            <div
+              className="segmented"
+              role="tablist"
+              aria-label="Entrar o crear cuenta"
+              style={{ '--seg': tabIndex } as CSSProperties}
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tabIndex === 0}
+                className={tabIndex === 0 ? 'segment-selected' : ''}
+                onClick={() => switchMode('login')}
+              >
+                Entrar
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tabIndex === 1}
+                className={tabIndex === 1 ? 'segment-selected' : ''}
+                onClick={() => switchMode('signup')}
+              >
+                Crear cuenta
+              </button>
             </div>
-          </div>
-        ) : (
-          <>
-            {effectiveMode !== 'update' && (
-              <div className="segmented" role="tablist" aria-label="Entrar o crear cuenta">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={effectiveMode === 'login' || effectiveMode === 'reset'}
-                  className={effectiveMode === 'login' || effectiveMode === 'reset' ? 'segment-selected' : ''}
-                  onClick={() => switchMode('login')}
-                >
-                  <LogIn size={16} /> Entrar
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={effectiveMode === 'signup'}
-                  className={effectiveMode === 'signup' ? 'segment-selected' : ''}
-                  onClick={() => switchMode('signup')}
-                >
-                  <UserPlus size={16} /> Crear cuenta
-                </button>
-              </div>
-            )}
+          )}
 
+          <form onSubmit={submit} className="auth-form auth-pane" key={`form-${current}`}>
             {notice && (
               <div className="gate-alert gate-notice" role="status">
-                <Mail size={20} />
+                <Mail size={18} />
                 <p>{notice}</p>
               </div>
             )}
+            {current !== 'update' && (
+              <label className="form-label">
+                Correo
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  maxLength={254}
+                  placeholder="tu@correo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
+            )}
+            {current === 'login' && passwordField('Contraseña', password, setPassword, 'current-password')}
+            {(current === 'signup' || current === 'update') && (
+              <>
+                {passwordField(
+                  current === 'update' ? 'Nueva contraseña' : 'Contraseña',
+                  password,
+                  setPassword,
+                  'new-password',
+                  `Mínimo ${MIN_PASSWORD} caracteres`
+                )}
+                {passwordField('Repite la contraseña', password2, setPassword2, 'new-password')}
+              </>
+            )}
 
-            <form onSubmit={submit} className="auth-form">
-              {effectiveMode !== 'update' && (
-                <label className="form-label">
-                  Correo electrónico
-                  <input
-                    type="email"
-                    required
-                    autoComplete="email"
-                    maxLength={254}
-                    placeholder="tu@correo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </label>
-              )}
-              {effectiveMode === 'login' &&
-                passwordField('Contraseña', password, setPassword, 'current-password')}
-              {(effectiveMode === 'signup' || effectiveMode === 'update') && (
+            <button type="submit" className={`lime-btn gate-submit ${busy ? 'is-busy' : ''}`} disabled={busy}>
+              {busy ? (
+                <span className="auth-spinner auth-spinner-sm" aria-label="Un momento" />
+              ) : (
                 <>
-                  {passwordField(
-                    effectiveMode === 'update' ? 'Nueva contraseña' : 'Contraseña',
-                    password,
-                    setPassword,
-                    'new-password'
-                  )}
-                  {passwordField('Repite la contraseña', password2, setPassword2, 'new-password')}
-                  <small className="auth-hint">Mínimo {MIN_PASSWORD} caracteres.</small>
+                  {ACTION[current]} <ArrowRight size={18} />
                 </>
               )}
+            </button>
+            {error && (
+              <p role="alert" className="gate-error">
+                {error}
+              </p>
+            )}
+          </form>
 
-              <button type="submit" className="lime-btn gate-submit" disabled={busy}>
-                {effectiveMode === 'login' && <LogIn size={17} />}
-                {effectiveMode === 'signup' && <UserPlus size={17} />}
-                {(effectiveMode === 'reset' || effectiveMode === 'update') && <KeyRound size={17} />}
-                {busy
-                  ? 'Un momento...'
-                  : effectiveMode === 'login'
-                    ? 'Entrar'
-                    : effectiveMode === 'signup'
-                      ? 'Crear cuenta'
-                      : effectiveMode === 'reset'
-                        ? 'Enviar enlace'
-                        : 'Guardar contraseña'}
+          <div className="auth-links">
+            {current === 'login' && (
+              <button type="button" className="text-link" onClick={() => switchMode('reset')}>
+                ¿Olvidaste tu contraseña?
               </button>
-              {error && (
-                <p role="alert" className="gate-error">
-                  {error}
-                </p>
-              )}
-            </form>
-
-            <div className="auth-links">
-              {effectiveMode === 'login' && (
-                <button type="button" className="text-link" onClick={() => switchMode('reset')}>
-                  ¿Olvidaste tu contraseña?
-                </button>
-              )}
-              {effectiveMode === 'reset' && (
-                <button type="button" className="text-link" onClick={() => switchMode('login')}>
-                  Volver a entrar
-                </button>
-              )}
-            </div>
-            <small className="auth-foot">
-              Seguirás conectado en este dispositivo hasta que cierres sesión. Tu cuenta se protege mediante
-              Supabase Auth.
-            </small>
-          </>
-        )}
-      </section>
-    </main>
+            )}
+            {current === 'reset' && (
+              <button type="button" className="text-link" onClick={() => switchMode('login')}>
+                Volver
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </AuthFrame>
   );
 }

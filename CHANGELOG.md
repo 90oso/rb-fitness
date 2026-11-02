@@ -8,7 +8,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Vers
 
 - Acceso con **correo y contraseña** (crear cuenta, entrar, recuperar contraseña, nueva contraseña desde el enlace de recuperación). Sustituye al enlace mágico, que chocaba con el límite de 2 correos/hora del SMTP integrado de Supabase.
 - La sesión queda guardada en el dispositivo hasta cerrar sesión (token con refresco automático).
-- Botón de **tema** (oscuro/claro) en la barra superior y en la pantalla de acceso; opción «Sistema» en Perfil. La preferencia se guarda en el dispositivo y se aplica antes de pintar: sin parpadeo al cargar.
+- Botón de **tema** (claro/oscuro) en la barra superior y en la pantalla de acceso; opción «Sistema» en Perfil. La app inicia en **modo claro** por defecto; la preferencia se guarda en el dispositivo y se aplica antes de pintar: sin parpadeo al cargar.
 - Diálogo de confirmación propio (`ConfirmDialog`) en lugar de `window.confirm()`.
 - ESLint (config de Next 16) y Prettier, con `npm run lint`, `npm run format` y `npm run verify`; CI ejecuta lint y formato.
 - `scripts/dev/mock-supabase.mjs`: Supabase simulado en memoria para pruebas locales sin proyecto real.
@@ -18,7 +18,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Vers
 
 - `components/rb-app.tsx` dividido en hooks (`useAuth`, `useCloudSync`, `useTheme`, `useConfirm`, `useToast`), vistas por pestaña, modales y shell.
 - El guardado en la nube se agrupa con un retardo de 600 ms (`SAVE_DEBOUNCE_MS`): escribir en el perfil ya no envía una petición por tecla. Si la pestaña pasa a segundo plano con cambios pendientes, se envían de inmediato.
-- Pantalla de acceso con el mismo estilo que la app (tokens de tema, tarjeta, fondos ambientales, botón lima).
+- Pantalla de acceso rediseñada: fondo con formas de color en movimiento, tarjeta que aparece al entrar, selector Entrar/Crear cuenta deslizante, campos con foco animado, texto mínimo. Las animaciones respetan `prefers-reduced-motion`.
 - Texto en lima legible en tema claro (`--acid-ink`).
 - Código formateado con Prettier (líneas largas eliminadas).
 

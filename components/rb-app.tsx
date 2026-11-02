@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CloudOff } from 'lucide-react';
 import AuthScreen from './auth-screen';
+import { AuthLoading } from './ui/auth-frame';
 import ExerciseDetailModal from './modals/exercise-detail-modal';
 import RoutineEditorModal from './modals/routine-editor-modal';
 import { BottomNav, Sidebar, Topbar, type Tab } from './shell/app-shell';
@@ -28,7 +29,6 @@ import {
   weekMetrics,
 } from '@/lib/metrics';
 import { downloadBackup, safeParse } from '@/lib/storage';
-import { hasStoredThemePreference, setThemePreference } from '@/lib/theme';
 import type { AppData, Profile, Routine, Workout } from '@/lib/types';
 
 const KG_PER_LB = 1 / 2.2046226218;
@@ -64,11 +64,6 @@ export default function RBApp() {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
   }, []);
-
-  // 0.3 kept the theme inside the account; adopt it once on devices that never chose one.
-  useEffect(() => {
-    if (hydrated && data.theme === 'light' && !hasStoredThemePreference()) setThemePreference('light');
-  }, [hydrated, data.theme]);
 
   const unit = data.profile.weightUnit;
   const fromKg = (kg: number) => (unit === 'kg' ? kg : kg / KG_PER_LB);
@@ -345,13 +340,7 @@ export default function RBApp() {
 
   // ---- Screens before the app --------------------------------------------------------------
   if (auth.configured === null || (auth.configured && auth.session === 'checking')) {
-    return (
-      <main className="auth-screen">
-        <section className="card auth-card">
-          <h1>Iniciando RB...</h1>
-        </section>
-      </main>
-    );
+    return <AuthLoading title="Iniciando RB" />;
   }
   if (!auth.configured || auth.session === 'signed-out' || auth.recovery) {
     return (
@@ -364,28 +353,24 @@ export default function RBApp() {
     );
   }
   if (!hydrated) {
+    const failed = sync.status === 'error';
     return (
-      <main className="auth-screen">
-        <section className="card auth-card">
-          <div className="auth-brand">
-            RB<span>.</span>
-          </div>
-          <h1>{sync.status === 'error' ? 'No pudimos cargar tus datos' : 'Cargando tu cuenta...'}</h1>
-          <p className="auth-sub">
-            {sync.status === 'error' ? sync.error : 'Consultando tu historial de entrenamiento en la nube.'}
-          </p>
+      <AuthLoading
+        title={failed ? 'No pudimos cargar tus datos' : 'Cargando tu cuenta'}
+        detail={failed ? sync.error : undefined}
+        pulse={!failed}
+      >
+        {failed && (
           <div className="settings-buttons">
             <button className="secondary-btn" onClick={() => window.location.reload()}>
               Reintentar
             </button>
-            {sync.status === 'error' && (
-              <button className="secondary-btn" onClick={() => void auth.signOut()}>
-                Cerrar sesión
-              </button>
-            )}
+            <button className="secondary-btn" onClick={() => void auth.signOut()}>
+              Cerrar sesión
+            </button>
           </div>
-        </section>
-      </main>
+        )}
+      </AuthLoading>
     );
   }
 
