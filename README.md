@@ -1,4 +1,4 @@
-# RB Fitness 0.6 — ciclos personales, progreso en la nube y guía visual de 100 ejercicios (fotos y video opcional)
+# RB Fitness 0.7 — ciclos personales, progreso en la nube y guía visual de 100 ejercicios (fotos y video opcional)
 
 App de entrenamiento en gimnasio: Next.js 16, React 19, TypeScript y Supabase (Auth + Postgres). Mobile-first y PWA. Los cambios por versión están en [CHANGELOG.md](CHANGELOG.md).
 
@@ -10,17 +10,19 @@ App de entrenamiento en gimnasio: Next.js 16, React 19, TypeScript y Supabase (A
 - Cuenta con correo y contraseña; los datos viven en Supabase (`public.rb_user_data`, una fila JSON por usuario protegida con RLS). Indicador `EN NUBE / GUARDANDO / NO GUARDADO` y control de conflictos entre dispositivos.
 - Biblioteca de 100 ejercicios para el equipo de Planet Fitness, con dos fotos por ejercicio (inicio y final) como guía de movimiento. Fotos de [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), dominio público; ver `public/exercises/CREDITS.md`.
 - Video opcional: cada ficha tiene «Buscar video» (abre YouTube con la técnica del ejercicio) y, cuando existe un clip propio en `lib/exercise-videos.ts`, pestañas Fotos/Video con reproductor integrado. Ver «Videos de ejercicios».
+- Eliminación de cuenta desde Perfil (borra cuenta, historial y rutinas) y página de privacidad, ambas requeridas por Google Play y App Store.
 - Tema claro/oscuro/sistema guardado por dispositivo; descarga de una copia de los datos en JSON.
 
 ## Configurar Supabase (una vez por proyecto)
 
 1. Crea un proyecto en [Supabase](https://supabase.com/dashboard).
-2. **SQL Editor** → ejecuta íntegramente `supabase/schema.sql` (tabla, RLS y RPC `rb_save_state`).
+2. **SQL Editor** → ejecuta íntegramente `supabase/schema.sql` (tabla, RLS y las RPC `rb_save_state` y `rb_delete_account`). Es idempotente: si ya tenías el esquema, puedes volver a ejecutarlo completo o solo el bloque final «Eliminación de cuenta». Sin esa función, «Eliminar mi cuenta» muestra un aviso en lugar de borrar.
 3. **Authentication → Providers → Email**: habilitado, con acceso por contraseña. «Confirm email» encendido para producción (configura antes un SMTP propio en Project Settings → Auth; el servicio integrado permite 2 correos por hora) o apagado mientras pruebas.
 4. **Authentication → URL Configuration**: `Site URL` = URL de producción (`https://TU-DOMINIO.vercel.app`) y la misma URL en `Redirect URLs`. Añade los dominios de Preview si los usas. Los enlaces de confirmación y de recuperación vuelven a `/`.
 5. **Vercel → Settings → Environment Variables** (tipo _Config_, entorno _Production_):
    - `NEXT_PUBLIC_SUPABASE_URL`: `https://...supabase.co`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: clave `sb_publishable_...` (nunca `sb_secret_...` ni `service_role`)
+   - `NEXT_PUBLIC_CONTACT_EMAIL` (opcional): correo que aparece al final de `/privacidad`. Las tiendas piden un contacto; si no se define, la línea no se muestra.
 6. Redespliega (Deployments → Redeploy, sin caché). Abre la URL en una ventana de incógnito: debe aparecer el formulario de acceso.
 
 Sin estas variables la app muestra «Sincronización pendiente de configuración» y no permite entrar.
@@ -58,7 +60,8 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_mock npm run dev
 - `hooks/use-theme.ts`, `lib/theme.ts`: preferencia de tema por dispositivo.
 - `lib/cycles.ts`, `lib/metrics.ts`, `lib/storage.ts`: funciones puras (ciclo, estadísticas, validación de respaldos). Probadas por `scripts/check-*.{cjs,mjs}`.
 - `lib/catalog.ts`: los 100 ejercicios con sus fotogramas en `public/exercises/<id>/{0,1}.webp`. `lib/exercise-videos.ts`: clips opcionales por ejercicio; `lib/video.ts`: enlace de búsqueda de video.
-- `lib/cloud.ts`: lectura y escritura en Supabase. `supabase/schema.sql`: tabla, RLS y RPC.
+- `app/privacidad/page.tsx`: política de privacidad (página estática enlazada desde el acceso y el Perfil).
+- `lib/cloud.ts`: lectura y escritura en Supabase y eliminación de cuenta. `supabase/schema.sql`: tabla, RLS y RPC.
 
 ## Videos de ejercicios
 
@@ -83,7 +86,7 @@ Desde 0.4 los datos viven solo en la cuenta; ya no hay importación de historial
 
 - Cloud-first: sin conexión no se puede iniciar una sesión de entrenamiento ni guardar. La cola de escritura sin conexión está planificada.
 - En un conflicto entre dos dispositivos RB detiene la escritura y muestra el error; exporta antes de recargar.
-- Aún no hay eliminación de cuenta dentro de la app (requisito para publicar en tiendas).
+- La política de `/privacidad` es un borrador razonable para el estado actual de la app; revísala (idealmente con asesoría legal) antes de publicar en tiendas y actualízala si añades analítica o reporte de errores de terceros.
 
 ## Flujo de trabajo
 

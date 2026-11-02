@@ -57,14 +57,21 @@ export function useAuth() {
     };
   }, [client]);
 
-  const signOut = useCallback(async () => {
-    if (!client) return;
-    await client.auth.signOut();
-    setUserId(null);
-    setEmail(null);
-    setSession('signed-out');
-    setRecovery(false);
-  }, [client]);
+  // 'local' ends only this device's session (used after deleting the account: the server session no longer exists).
+  const signOut = useCallback(
+    async (scope: 'global' | 'local' = 'global') => {
+      if (!client) return;
+      try {
+        await client.auth.signOut({ scope });
+      } finally {
+        setUserId(null);
+        setEmail(null);
+        setSession('signed-out');
+        setRecovery(false);
+      }
+    },
+    [client]
+  );
 
   const finishRecovery = useCallback(() => setRecovery(false), []);
 

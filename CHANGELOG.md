@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.7.0] — 2026-11-02
+
+### Añadido
+
+- **Eliminar mi cuenta** en Perfil: pide escribir «ELIMINAR», borra de forma definitiva la cuenta, el perfil, las rutinas y el historial (RPC `rb_delete_account`, `SECURITY DEFINER`, solo sobre `auth.uid()`; `rb_user_data` se borra en cascada), cierra la sesión del dispositivo, olvida el correo recordado y avisa en la pantalla de acceso. Requisito de Google Play y App Store.
+- Página **/privacidad** (qué datos se guardan, proveedores, derechos, cómo eliminar la cuenta), enlazada desde el acceso y desde Perfil → Cuenta. Correo de contacto opcional vía `NEXT_PUBLIC_CONTACT_EMAIL`.
+- `ConfirmDialog` admite `requireText` para acciones irreversibles.
+- `lib/remembered-email.ts` (el correo recordado, antes dentro de `auth-screen.tsx`).
+
+### Cambiado
+
+- Service worker (`rb-shell-v6`): cada página navegable se guarda con clave propia; visitar `/privacidad` ya no puede reemplazar el shell de la app guardado para modo sin conexión.
+- `signOut` acepta `scope` (`'local'` tras eliminar la cuenta) y siempre limpia el estado aunque el servidor falle.
+- Perfil: «Borrar historial y rutinas» y «Eliminar mi cuenta» quedan apilados en la tarjeta de datos.
+
 ## [0.6.0] — 2026-11-02
 
 ### Añadido

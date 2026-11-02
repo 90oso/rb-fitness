@@ -1,5 +1,17 @@
 'use client';
-import { Download, LogOut, Monitor, Moon, RotateCcw, Sun, Trash2, UserRound } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Download,
+  LogOut,
+  Monitor,
+  Moon,
+  RotateCcw,
+  ShieldCheck,
+  Sun,
+  Trash2,
+  UserRound,
+  UserX,
+} from 'lucide-react';
 import { PageHead } from '@/components/ui/bits';
 import type { SyncStatus } from '@/hooks/use-cloud-sync';
 import { useTheme } from '@/hooks/use-theme';
@@ -14,6 +26,7 @@ export default function ProfileView({
   onExport,
   onSignOut,
   onReset,
+  onDeleteAccount,
 }: {
   data: AppData;
   email: string | null;
@@ -23,6 +36,7 @@ export default function ProfileView({
   onExport: () => void;
   onSignOut: () => void;
   onReset: () => void;
+  onDeleteAccount: () => void;
 }) {
   const { preference, setPreference } = useTheme();
   const profile = data.profile;
@@ -173,17 +187,27 @@ export default function ProfileView({
                 <LogOut size={16} /> Cerrar sesión
               </button>
             </div>
-            <button className="text-link account-export" onClick={onExport}>
-              <Download size={15} /> Descargar una copia de mis datos
-            </button>
+            <div className="account-links">
+              <button className="text-link" onClick={onExport}>
+                <Download size={15} /> Descargar una copia de mis datos
+              </button>
+              <Link className="text-link" href="/privacidad">
+                <ShieldCheck size={15} /> Política de privacidad
+              </Link>
+            </div>
           </section>
 
           <section className="card settings-card danger-card">
             <h3>Borrar mis datos</h3>
-            <p>Deja tu cuenta como el primer día. No se puede deshacer.</p>
-            <button className="danger-link" onClick={onReset}>
-              <Trash2 size={16} /> Borrar historial y rutinas
-            </button>
+            <p>Reinicia tu historial o elimina la cuenta por completo. No se puede deshacer.</p>
+            <div className="danger-actions">
+              <button className="danger-link" onClick={onReset}>
+                <Trash2 size={16} /> Borrar historial y rutinas
+              </button>
+              <button className="danger-link" onClick={onDeleteAccount}>
+                <UserX size={16} /> Eliminar mi cuenta
+              </button>
+            </div>
           </section>
         </section>
       </div>

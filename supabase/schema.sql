@@ -48,3 +48,16 @@ end;
 $$;
 revoke all on function public.rb_save_state(bigint,jsonb) from public,anon;
 grant execute on function public.rb_save_state(bigint,jsonb) to authenticated;
+
+-- Eliminación de cuenta (requisito de Google Play y App Store): la persona autenticada borra su propio
+-- usuario de Auth; rb_user_data se elimina en cascada. SECURITY DEFINER porque auth.users no es accesible
+-- para el rol authenticated. Solo puede borrarse a sí misma (auth.uid()).
+create or replace function public.rb_delete_account()
+returns void language plpgsql security definer set search_path=public,auth as $$
+begin
+  if auth.uid() is null then raise exception 'Sesión requerida' using errcode='42501'; end if;
+  delete from auth.users where id=auth.uid();
+end;
+$$;
+revoke all on function public.rb_delete_account() from public,anon;
+grant execute on function public.rb_delete_account() to authenticated;

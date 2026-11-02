@@ -57,3 +57,14 @@ export async function writeCloudState(
   if (typeof data !== 'number') throw new Error('El servidor no confirmó la revisión guardada.');
   return data;
 }
+
+/** Deletes the signed-in account and all its data (RPC rb_delete_account, see supabase/schema.sql). */
+export async function deleteCloudAccount(db: SupabaseClient): Promise<void> {
+  const { error } = await db.rpc('rb_delete_account');
+  if (!error) return;
+  if (error.code === 'PGRST202' || /rb_delete_account/.test(error.message))
+    throw new Error(
+      'Falta ejecutar en Supabase la actualización SQL de «eliminar cuenta» (supabase/schema.sql).'
+    );
+  throw new Error(`No se pudo eliminar la cuenta: ${error.message}`);
+}
