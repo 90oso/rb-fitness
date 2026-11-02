@@ -28,7 +28,7 @@ import {
   volumeByWeek,
   weekMetrics,
 } from '@/lib/metrics';
-import { downloadBackup, safeParse } from '@/lib/storage';
+import { downloadBackup } from '@/lib/storage';
 import type { AppData, Profile, Routine, Workout } from '@/lib/types';
 
 const KG_PER_LB = 1 / 2.2046226218;
@@ -274,40 +274,6 @@ export default function RBApp() {
     setData((current) => ({ ...current, workouts: current.workouts.filter((w) => w.id !== workoutId) }));
     toast('Sesión eliminada.');
   }
-  async function importBackup(file: File) {
-    if (file.size > 10 * 1024 * 1024) {
-      toast('El respaldo supera 10 MB.');
-      return;
-    }
-    try {
-      const parsed = safeParse(await file.text());
-      const ok = await confirm({
-        title: '¿Reemplazar los datos de tu cuenta?',
-        message: 'Todas las rutinas y sesiones de tu cuenta en la nube se sustituirán por este respaldo.',
-        confirmLabel: 'Reemplazar',
-        danger: true,
-      });
-      if (!ok) return;
-      setData(parsed);
-      setTab('today');
-      setEditingRoutine(null);
-      toast('Respaldo preparado. Comprueba el estado de sincronización.');
-    } catch (err) {
-      toast(err instanceof Error ? err.message : 'No se pudo importar el respaldo.');
-    }
-  }
-  async function migrateLegacy() {
-    const ok = await confirm({
-      title: 'Importar entrenamientos anteriores',
-      message:
-        'Los datos guardados en este navegador por RB 0.2 REEMPLAZARÁN el contenido actual de tu cuenta.',
-      confirmLabel: 'Importar y reemplazar',
-      danger: true,
-    });
-    if (!ok) return;
-    sync.importLegacy();
-    toast('Importación preparada. Espera la confirmación de sincronización.');
-  }
   async function resetAll() {
     const first = await confirm({
       title: 'Borrar mis datos',
@@ -481,12 +447,9 @@ export default function RBApp() {
               data={data}
               email={auth.email}
               syncStatus={sync.status}
-              hasLegacyData={sync.hasLegacyData}
               onProfileChange={updateProfile}
               onSkipTo={skipTo}
               onExport={() => downloadBackup(data)}
-              onImportFile={(file) => void importBackup(file)}
-              onImportLegacy={() => void migrateLegacy()}
               onSignOut={() => void signOut()}
               onReset={() => void resetAll()}
             />
@@ -507,7 +470,7 @@ export default function RBApp() {
           return routine ? (
             <RoutineEditorModal
               routine={routine}
-              onChange={(update) => editRoutine(routine.id, update)}
+              onSave={(saved) => editRoutine(routine.id, () => saved)}
               onClose={() => setEditingRoutine(null)}
             />
           ) : null;

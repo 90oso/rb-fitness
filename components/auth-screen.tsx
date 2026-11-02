@@ -1,5 +1,5 @@
 'use client';
-import { useState, type CSSProperties, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowRight, Cloud, Eye, EyeOff, Mail } from 'lucide-react';
 import { AuthBrand, AuthFrame } from '@/components/ui/auth-frame';
@@ -7,10 +7,11 @@ import { describeAuthError } from '@/lib/auth-errors';
 
 type Mode = 'login' | 'signup' | 'reset' | 'update';
 const MIN_PASSWORD = 8;
+const LAST_EMAIL_KEY = 'rb-last-email';
 
 const TITLE: Record<Mode, string> = {
   login: 'Hola de nuevo.',
-  signup: 'Empieza hoy.',
+  signup: 'Crea tu cuenta.',
   reset: 'Recupera tu acceso.',
   update: 'Nueva contraseña.',
 };
@@ -23,9 +24,24 @@ const ACTION: Record<Mode, string> = {
 
 const redirectHome = () => `${window.location.origin}/`;
 
+function readLastEmail(): string {
+  try {
+    return window.localStorage.getItem(LAST_EMAIL_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+function rememberEmail(email: string) {
+  try {
+    window.localStorage.setItem(LAST_EMAIL_KEY, email);
+  } catch {
+    // storage blocked: nothing to remember
+  }
+}
+
 /**
- * Access screen: email + password, account creation, recovery and the "new password" step from a
- * recovery link. Light-first, minimal copy, motion handled in CSS (respects prefers-reduced-motion).
+ * Access screen. One primary action per mode (Entrar), account creation as a secondary link,
+ * the last email used on this device prefilled, and the "new password" step from a recovery link.
  */
 export default function AuthScreen({
   client,
@@ -39,7 +55,7 @@ export default function AuthScreen({
   onRecoveryDone?: () => void;
 }) {
   const [mode, setMode] = useState<Mode>('login');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => (typeof window === 'undefined' ? '' : readLastEmail()));
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +64,7 @@ export default function AuthScreen({
   const [notice, setNotice] = useState('');
 
   const current: Mode = recovery ? 'update' : mode;
-  const tabIndex = current === 'signup' ? 1 : 0;
+  const remembered = email !== '' && mode === 'login';
 
   const switchMode = (next: Mode) => {
     setMode(next);
@@ -86,11 +102,12 @@ export default function AuthScreen({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!client || busy) return;
-    const address = email.trim();
+    const address = email.trim().toLowerCase();
     if (current === 'login') {
       void run(async () => {
         const { error: err } = await client.auth.signInWithPassword({ email: address, password });
         if (err) throw err;
+        rememberEmail(address);
       });
     } else if (current === 'signup') {
       if (!validPassword()) return;
@@ -101,6 +118,7 @@ export default function AuthScreen({
           options: { emailRedirectTo: redirectHome() },
         });
         if (err) throw err;
+        rememberEmail(address);
         if (!data.session) {
           setMode('login');
           setPassword('');
@@ -133,7 +151,8 @@ export default function AuthScreen({
     value: string,
     onChange: (v: string) => void,
     autoComplete: string,
-    placeholder?: string
+    placeholder?: string,
+    autoFocus = false
   ) => (
     <label className="form-label">
       {label}
@@ -145,6 +164,7 @@ export default function AuthScreen({
           maxLength={72}
           autoComplete={autoComplete}
           placeholder={placeholder}
+          autoFocus={autoFocus}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -181,34 +201,6 @@ export default function AuthScreen({
         </div>
       ) : (
         <>
-          {current !== 'update' && (
-            <div
-              className="segmented"
-              role="tablist"
-              aria-label="Entrar o crear cuenta"
-              style={{ '--seg': tabIndex } as CSSProperties}
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tabIndex === 0}
-                className={tabIndex === 0 ? 'segment-selected' : ''}
-                onClick={() => switchMode('login')}
-              >
-                Entrar
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tabIndex === 1}
-                className={tabIndex === 1 ? 'segment-selected' : ''}
-                onClick={() => switchMode('signup')}
-              >
-                Crear cuenta
-              </button>
-            </div>
-          )}
-
           <form onSubmit={submit} className="auth-form auth-pane" key={`form-${current}`}>
             {notice && (
               <div className="gate-alert gate-notice" role="status">
@@ -225,12 +217,14 @@ export default function AuthScreen({
                   autoComplete="email"
                   maxLength={254}
                   placeholder="tu@correo.com"
+                  autoFocus={!remembered}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </label>
             )}
-            {current === 'login' && passwordField('Contraseña', password, setPassword, 'current-password')}
+            {current === 'login' &&
+              passwordField('Contraseña', password, setPassword, 'current-password', undefined, remembered)}
             {(current === 'signup' || current === 'update') && (
               <>
                 {passwordField(
@@ -238,7 +232,8 @@ export default function AuthScreen({
                   password,
                   setPassword,
                   'new-password',
-                  `Mínimo ${MIN_PASSWORD} caracteres`
+                  `Mínimo ${MIN_PASSWORD} caracteres`,
+                  current === 'update'
                 )}
                 {passwordField('Repite la contraseña', password2, setPassword2, 'new-password')}
               </>
@@ -262,9 +257,25 @@ export default function AuthScreen({
 
           <div className="auth-links">
             {current === 'login' && (
-              <button type="button" className="text-link" onClick={() => switchMode('reset')}>
-                ¿Olvidaste tu contraseña?
-              </button>
+              <>
+                <button type="button" className="text-link" onClick={() => switchMode('reset')}>
+                  ¿Olvidaste tu contraseña?
+                </button>
+                <p className="auth-alt">
+                  ¿Primera vez en RB?{' '}
+                  <button type="button" className="text-link" onClick={() => switchMode('signup')}>
+                    Crear cuenta
+                  </button>
+                </p>
+              </>
+            )}
+            {current === 'signup' && (
+              <p className="auth-alt">
+                ¿Ya tienes cuenta?{' '}
+                <button type="button" className="text-link" onClick={() => switchMode('login')}>
+                  Entrar
+                </button>
+              </p>
             )}
             {current === 'reset' && (
               <button type="button" className="text-link" onClick={() => switchMode('login')}>

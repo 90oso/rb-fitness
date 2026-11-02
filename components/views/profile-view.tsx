@@ -1,17 +1,5 @@
 'use client';
-import { useRef } from 'react';
-import {
-  Download,
-  LogOut,
-  Monitor,
-  Moon,
-  RotateCcw,
-  ShieldCheck,
-  Sun,
-  Trash2,
-  Upload,
-  UserRound,
-} from 'lucide-react';
+import { Download, LogOut, Monitor, Moon, RotateCcw, Sun, Trash2, UserRound } from 'lucide-react';
 import { PageHead } from '@/components/ui/bits';
 import type { SyncStatus } from '@/hooks/use-cloud-sync';
 import { useTheme } from '@/hooks/use-theme';
@@ -21,39 +9,32 @@ export default function ProfileView({
   data,
   email,
   syncStatus,
-  hasLegacyData,
   onProfileChange,
   onSkipTo,
   onExport,
-  onImportFile,
-  onImportLegacy,
   onSignOut,
   onReset,
 }: {
   data: AppData;
   email: string | null;
   syncStatus: SyncStatus;
-  hasLegacyData: boolean;
   onProfileChange: (patch: Partial<Profile>) => void;
   onSkipTo: (index: number) => void;
   onExport: () => void;
-  onImportFile: (file: File) => void;
-  onImportLegacy: () => void;
   onSignOut: () => void;
   onReset: () => void;
 }) {
-  const fileInput = useRef<HTMLInputElement | null>(null);
   const { preference, setPreference } = useTheme();
   const profile = data.profile;
   const syncLabel =
-    syncStatus === 'saved' ? 'guardado' : syncStatus === 'saving' ? 'guardando' : 'requiere atención';
+    syncStatus === 'saved' ? 'Todo guardado' : syncStatus === 'saving' ? 'Guardando…' : 'Sin guardar';
 
   return (
     <>
       <PageHead
         overline="TU CONFIGURACIÓN"
         title="Tu perfil RB."
-        sub="Personaliza tu experiencia y conserva el control sobre tus registros."
+        sub="Ajusta la app a tu forma de entrenar."
       />
       <div className="profile-grid">
         <section className="card profile-card">
@@ -61,7 +42,7 @@ export default function ProfileView({
             <span className="section-label">
               <UserRound size={16} /> DATOS PERSONALES
             </span>
-            <span className="today-chip">EDITABLE</span>
+            <span className="today-chip">{syncLabel.toUpperCase()}</span>
           </div>
           <label className="form-label">
             Nombre
@@ -141,22 +122,18 @@ export default function ProfileView({
                 <Sun size={16} /> APARIENCIA
               </span>
             </div>
-            <h3>Elige tu ambiente</h3>
-            <p>
-              Se guarda en este dispositivo. También puedes cambiarlo desde el botón de la barra superior.
-            </p>
             <div className="theme-switch">
-              <button
-                className={preference === 'dark' ? 'theme-selected' : ''}
-                onClick={() => setPreference('dark')}
-              >
-                <Moon size={18} /> Oscuro
-              </button>
               <button
                 className={preference === 'light' ? 'theme-selected' : ''}
                 onClick={() => setPreference('light')}
               >
                 <Sun size={18} /> Claro
+              </button>
+              <button
+                className={preference === 'dark' ? 'theme-selected' : ''}
+                onClick={() => setPreference('dark')}
+              >
+                <Moon size={18} /> Oscuro
               </button>
               <button
                 className={preference === 'system' ? 'theme-selected' : ''}
@@ -170,50 +147,10 @@ export default function ProfileView({
           <section className="card settings-card">
             <div className="card-top">
               <span className="section-label">
-                <ShieldCheck size={16} /> TUS DATOS
+                <RotateCcw size={16} /> CICLO
               </span>
             </div>
-            <h3>Respaldo y privacidad</h3>
-            <p>
-              Las rutinas y los entrenamientos se guardan en tu cuenta. El navegador solo mantiene la sesión
-              de acceso, no una copia permanente del progreso. Los respaldos JSON siguen disponibles como
-              medida adicional.
-            </p>
-            <p className="muted">Estado de sincronización: {syncLabel}.</p>
-            {hasLegacyData && (
-              <button className="secondary-btn" onClick={onImportLegacy}>
-                <Upload size={16} /> Importar historial anterior de este navegador
-              </button>
-            )}
-            <div className="settings-buttons">
-              <button className="secondary-btn" onClick={onExport}>
-                <Download size={17} /> Exportar JSON
-              </button>
-              <button className="secondary-btn" onClick={() => fileInput.current?.click()}>
-                <Upload size={17} /> Importar JSON
-              </button>
-              <input
-                ref={fileInput}
-                type="file"
-                accept=".json,application/json"
-                hidden
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) onImportFile(file);
-                  event.target.value = '';
-                }}
-              />
-            </div>
-          </section>
-
-          <section className="card settings-card">
-            <div className="card-top">
-              <span className="section-label">
-                <RotateCcw size={16} /> CICLO DE RUTINAS
-              </span>
-            </div>
-            <h3>Cambiar día del ciclo</h3>
-            <p>Elige el siguiente día cuando quieras. No se marcan faltas por días de calendario.</p>
+            <h3>Siguiente día del ciclo</h3>
             <select
               className="cycle-selector"
               value={data.cycleIndex}
@@ -229,27 +166,23 @@ export default function ProfileView({
           </section>
 
           <section className="card settings-card">
-            <h3>Cuenta y sincronización</h3>
-            <p>
-              {email ? (
-                <>
-                  Sesión iniciada como <strong>{email}</strong>. Puedes continuar desde otro teléfono con la
-                  misma cuenta.
-                </>
-              ) : (
-                'Tu información está vinculada a tu correo. Puedes continuar desde otro teléfono con la misma cuenta.'
-              )}
-            </p>
-            <button className="secondary-btn" onClick={onSignOut}>
-              <LogOut size={16} /> Cerrar sesión
+            <h3>Cuenta</h3>
+            {email && <p className="account-email">{email}</p>}
+            <div className="settings-buttons">
+              <button className="secondary-btn" onClick={onSignOut}>
+                <LogOut size={16} /> Cerrar sesión
+              </button>
+            </div>
+            <button className="text-link account-export" onClick={onExport}>
+              <Download size={15} /> Descargar una copia de mis datos
             </button>
           </section>
 
           <section className="card settings-card danger-card">
-            <h3>Reiniciar datos</h3>
-            <p>Reemplaza en la nube tu historial y tus rutinas por los datos iniciales.</p>
+            <h3>Borrar mis datos</h3>
+            <p>Deja tu cuenta como el primer día. No se puede deshacer.</p>
             <button className="danger-link" onClick={onReset}>
-              <Trash2 size={16} /> Borrar mis datos
+              <Trash2 size={16} /> Borrar historial y rutinas
             </button>
           </section>
         </section>
