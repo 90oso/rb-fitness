@@ -1,30 +1,34 @@
 {
   "name": "rb-fitness",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test:metrics": "node scripts/check-metrics.cjs",
-    "test:cycles": "node --experimental-strip-types scripts/check-cycles.mjs"
+    "test:cycles": "node --no-warnings --experimental-strip-types scripts/check-cycles.mjs",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test:metrics && npm run test:cycles"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
+    "lucide-react": "^0.468.0",
     "next": "^16.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "lucide-react": "^0.468.0",
-    "recharts": "^3.2.0",
-    "@supabase/supabase-js": "2.118.0"
+    "recharts": "^3.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
-    "tailwindcss": "^3.4.17",
-    "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20"
+    "eslint": "^10.14.0",
+    "eslint-config-next": "^16.4.3",
+    "prettier": "^3.9.10",
+    "typescript": "^5.8.3"
   }
 }
