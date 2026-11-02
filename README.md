@@ -1,4 +1,4 @@
-# RB Fitness 0.4 — ciclos personales, progreso en la nube y acceso con contraseña
+# RB Fitness 0.5 — ciclos personales, progreso en la nube y guía visual de 100 ejercicios
 
 App de entrenamiento en gimnasio: Next.js 16, React 19, TypeScript y Supabase (Auth + Postgres). Mobile-first y PWA. Los cambios por versión están en [CHANGELOG.md](CHANGELOG.md).
 
@@ -8,7 +8,8 @@ App de entrenamiento en gimnasio: Next.js 16, React 19, TypeScript y Supabase (A
 - Sesión activa con registro de series (peso × reps), temporizador de descanso y sugerencia conservadora de progresión.
 - Progreso: anillos semanales, volumen por semana, series por músculo, historial y 1RM estimado.
 - Cuenta con correo y contraseña; los datos viven en Supabase (`public.rb_user_data`, una fila JSON por usuario protegida con RLS). Indicador `EN NUBE / GUARDANDO / NO GUARDADO` y control de conflictos entre dispositivos.
-- Tema oscuro/claro/sistema guardado por dispositivo; respaldo e importación JSON.
+- Biblioteca de 100 ejercicios para el equipo de Planet Fitness, con dos fotos por ejercicio (inicio y final) como guía de movimiento. Fotos de [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), dominio público; ver `public/exercises/CREDITS.md`.
+- Tema claro/oscuro/sistema guardado por dispositivo; descarga de una copia de los datos en JSON.
 
 ## Configurar Supabase (una vez por proyecto)
 
@@ -55,6 +56,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_mock npm run dev
 - `hooks/use-cloud-sync.ts`: estado `AppData`, cola de escritura serializada con debounce y control de revisión.
 - `hooks/use-theme.ts`, `lib/theme.ts`: preferencia de tema por dispositivo.
 - `lib/cycles.ts`, `lib/metrics.ts`, `lib/storage.ts`: funciones puras (ciclo, estadísticas, validación de respaldos). Probadas por `scripts/check-*.{cjs,mjs}`.
+- `lib/catalog.ts`: los 100 ejercicios con sus fotogramas en `public/exercises/<id>/{0,1}.webp`.
 - `lib/cloud.ts`: lectura y escritura en Supabase. `supabase/schema.sql`: tabla, RLS y RPC.
 
 ## Migrar datos de RB 0.2

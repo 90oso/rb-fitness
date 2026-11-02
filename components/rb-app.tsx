@@ -408,6 +408,7 @@ export default function RBApp() {
                 onSkipRest={() => setRestEnd(null)}
                 onFinish={finishWorkout}
                 onDiscard={() => void discardWorkout()}
+                onOpenGuide={setDetailId}
               />
             ) : (
               <TrainView

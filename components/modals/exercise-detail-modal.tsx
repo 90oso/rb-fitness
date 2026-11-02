@@ -1,6 +1,7 @@
 'use client';
-import { Check, Dumbbell, Info, X } from 'lucide-react';
-import { getExercise } from '@/lib/catalog';
+import { Check, Info, X } from 'lucide-react';
+import { ExerciseMotion } from '@/components/ui/exercise-media';
+import { MEDIA_CREDIT, getExercise } from '@/lib/catalog';
 
 export default function ExerciseDetailModal({
   exerciseId,
@@ -23,24 +24,22 @@ export default function ExerciseDetailModal({
         <button className="modal-close" onClick={onClose} aria-label="Cerrar">
           <X size={21} />
         </button>
-        <span className="overline">GUÍA DE EQUIPAMIENTO</span>
-        <div className="modal-illustration">
-          <Dumbbell size={56} />
-        </div>
+        <span className="overline">CÓMO SE HACE</span>
         <h2 id="detail-title">{exercise.name}</h2>
         <div className="modal-chips">
           <span>{exercise.muscle}</span>
           <span>{exercise.equipment}</span>
         </div>
-        <h3>Cómo realizarlo</h3>
+        <ExerciseMotion exercise={exercise} />
         <p>{exercise.instruction}</p>
         <div className="safe-tip">
           <Info size={19} />
-          <span>{exercise.tip} Si tienes dudas con una máquina, pide ayuda al personal del gimnasio.</span>
+          <span>{exercise.tip}</span>
         </div>
         <button className="lime-btn modal-ok" onClick={onClose}>
           Entendido <Check size={17} />
         </button>
+        {exercise.media && <small className="media-credit">{MEDIA_CREDIT}</small>}
       </div>
     </div>
   );
