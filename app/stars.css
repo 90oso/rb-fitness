@@ -47,7 +47,7 @@ html[data-theme='light'] {
   --panel-high: #e3e3e3;
   --text: #121212;
   --muted: #595959;
-  --subtle: #6e6e6e;
+  --subtle: #636363;
   --stroke: #d2d2d2;
   --field: #f3f3f3;
   --ring-track: #dadada;
@@ -227,7 +227,7 @@ h3 {
   font-size: 12px;
 }
 .brand-caption {
-  font-size: 11px;
+  font-size: 12px;
 }
 .aside-link {
   font-weight: 700;
@@ -274,7 +274,7 @@ h3 {
 .muscle-card h2 {
   font-size: 27px;
 }
-.settings-card h3 {
+.settings-card h2 {
   font-size: 23px;
 }
 .modal h2 {
@@ -617,4 +617,83 @@ html[data-theme='light'] .danger-card {
 .auth-form .form-label input:focus {
   border-color: var(--focus);
   box-shadow: 0 0 0 3px rgb(var(--acid-rgb) / 0.28);
+}
+
+/* ---- Revisión de GUI: áreas táctiles de 44 px y lectura cómoda en el móvil ---- */
+@media (pointer: coarse), (max-width: 800px) {
+  .theme-toggle,
+  .modal-close,
+  .icon-action,
+  .ex-actions button,
+  .number-control button {
+    width: 44px;
+    height: 44px;
+    flex: none;
+  }
+  .number-control input {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+  .avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    flex: none;
+  }
+  .mobile-brand {
+    min-height: 44px;
+  }
+  .field-eye {
+    width: 44px;
+    height: 44px;
+    right: 4px;
+  }
+  .stepper-row button {
+    width: 44px;
+  }
+  .number-control input {
+    min-height: 44px;
+  }
+  .filter-scroll button,
+  .filter-secondary button {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+  .search-field input {
+    align-self: stretch;
+    min-height: 48px;
+  }
+  /* El enlace sigue viéndose igual: el área extra se compensa con margen negativo */
+  .text-link {
+    min-height: 44px;
+    padding-inline: 8px;
+    margin-block: -12px;
+    margin-inline: -8px;
+  }
+  /* Con botones de 44 px, el nombre del ejercicio pasa a ocupar su fila y las acciones bajan a la derecha */
+  .ex-card-top {
+    flex-wrap: wrap;
+  }
+  .ex-name {
+    flex: 1 1 130px;
+  }
+  .ex-actions {
+    margin-left: auto;
+  }
+  .account-links .text-link {
+    min-height: 44px;
+    margin-block: 0;
+  }
+  .auth-legal {
+    display: inline-block;
+    padding: 14px 14px;
+  }
+}
+
+/* En pantallas muy angostas, peso y repeticiones se apilan para conservar botones de 44 px */
+@media (max-width: 359px) {
+  .numbers-row {
+    grid-template-columns: 1fr;
+  }
 }

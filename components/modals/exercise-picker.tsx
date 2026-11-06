@@ -26,7 +26,7 @@ export default function ExercisePicker({
 
   return (
     <div className="picker">
-      <header className="picker-head">
+      <div className="picker-head">
         <button type="button" className="icon-action" onClick={onClose} aria-label="Volver a la rutina">
           <ArrowLeft size={20} />
         </button>
@@ -39,7 +39,7 @@ export default function ExercisePicker({
         <button type="button" className="lime-btn picker-done" onClick={onClose}>
           Listo <Check size={16} />
         </button>
-      </header>
+      </div>
       <label className="search-field picker-search">
         <Search size={18} />
         <input

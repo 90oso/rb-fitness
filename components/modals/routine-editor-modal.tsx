@@ -63,7 +63,7 @@ export default function RoutineEditorModal({
           />
         ) : (
           <>
-            <header className="editor-head">
+            <div className="editor-head">
               <div>
                 <span className="overline">{draft.isRest ? 'DÍA DE DESCANSO' : 'RUTINA'}</span>
                 <h2 id="edit-title">{draft.name.trim() || 'Nueva rutina'}</h2>
@@ -71,7 +71,7 @@ export default function RoutineEditorModal({
               <button type="button" className="icon-action" onClick={onClose} aria-label="Cerrar sin guardar">
                 <X size={20} />
               </button>
-            </header>
+            </div>
 
             <div className="editor-body">
               <label className="form-label">
@@ -208,14 +208,14 @@ export default function RoutineEditorModal({
               )}
             </div>
 
-            <footer className="editor-foot">
+            <div className="editor-foot">
               <button type="button" className="secondary-btn" onClick={onClose}>
                 Cancelar
               </button>
               <button type="button" className="lime-btn" onClick={save} disabled={!dirty}>
                 <Check size={17} /> Guardar
               </button>
-            </footer>
+            </div>
           </>
         )}
       </div>
