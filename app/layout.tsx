@@ -1,6 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import { themeBootScript } from '@/lib/theme';
+import '@fontsource/barlow/latin-400.css';
+import '@fontsource/barlow/latin-500.css';
+import '@fontsource/barlow/latin-600.css';
+import '@fontsource/barlow/latin-700.css';
+import '@fontsource/barlow-condensed/latin-600.css';
+import '@fontsource/barlow-condensed/latin-700.css';
+import '@fontsource/barlow-condensed/latin-800.css';
 import './globals.css';
+import './stars.css';
 
 export const metadata: Metadata = {
   title: 'RB — Tu entrenamiento, en progreso',
@@ -15,8 +23,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0B0F17' },
-    { media: '(prefers-color-scheme: light)', color: '#f1f4f7' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: light)', color: '#e8e8e8' },
   ],
 };
 

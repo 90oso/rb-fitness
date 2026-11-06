@@ -6,8 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Tu entrenador de progreso personal',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f1f4f7',
-    theme_color: '#f1f4f7',
+    background_color: '#e8e8e8',
+    theme_color: '#e8e8e8',
     icons: [
       { src: '/rb-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
       { src: '/rb-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
