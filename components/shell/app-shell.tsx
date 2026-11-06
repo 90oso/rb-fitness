@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import type { SyncStatus } from '@/hooks/use-cloud-sync';
+import { useHideOnScroll } from '@/hooks/use-hide-on-scroll';
 
 export type Tab = 'today' | 'train' | 'progress' | 'library' | 'profile';
 
@@ -83,18 +84,22 @@ export function Topbar({
   syncStatus,
   syncError,
   inSession,
+  resetKey,
   onSelect,
 }: {
   tab: Tab;
   syncStatus: SyncStatus;
   syncError: string;
   inSession: boolean;
+  /** Cambia al navegar o abrir una ventana: la barra vuelve a mostrarse. */
+  resetKey: string;
   onSelect: (tab: Tab) => void;
 }) {
+  const { hidden, reveal } = useHideOnScroll(resetKey);
   const statusLabel =
     syncStatus === 'saved' ? 'EN NUBE' : syncStatus === 'saving' ? 'GUARDANDO...' : 'NO GUARDADO';
   return (
-    <header className="topbar">
+    <header className="topbar" data-hidden={hidden} onFocus={reveal}>
       <button className="mobile-brand" aria-label="Volver al inicio" onClick={() => onSelect('today')}>
         <span className="mark">RB</span>
         <span className="mobile-brand-text">
@@ -114,7 +119,14 @@ export function Topbar({
           {syncStatus === 'saved' ? <Cloud size={15} /> : <CloudOff size={15} />} {statusLabel}
         </span>
         <span className="activity-pill">
-          <span className="blip" /> {inSession ? 'EN SESIÓN' : 'LISTO PARA ENTRENAR'}
+          <span className="blip" />{' '}
+          {inSession ? (
+            'EN SESIÓN'
+          ) : (
+            <span>
+              LISTO<span className="pill-extra"> PARA ENTRENAR</span>
+            </span>
+          )}
         </span>
         <ThemeToggle />
         <button

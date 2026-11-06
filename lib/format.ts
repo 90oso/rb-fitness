@@ -24,3 +24,7 @@ export const greeting = (date: Date) => {
   const hour = date.getHours();
   return hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 };
+
+/** "vie, 6 nov" style date. */
+export const shortDate = (date: Date) =>
+  date.toLocaleDateString('es-PA', { weekday: 'short', day: 'numeric', month: 'short' });

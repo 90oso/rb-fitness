@@ -67,7 +67,7 @@ export default function ActiveSessionView({
 }) {
   const setsForCurrent = active.sets.filter((set) => set.exerciseId === selectedExercise);
   const weightStep = unit === 'kg' ? 2.5 : 5;
-  const elapsedMinutes = Math.floor((now - new Date(active.startedAt).getTime()) / 60000);
+  const elapsedMinutes = Math.max(0, Math.floor((now - new Date(active.startedAt).getTime()) / 60000));
 
   return (
     <>
