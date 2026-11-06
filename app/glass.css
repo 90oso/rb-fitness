@@ -1285,6 +1285,240 @@ html[data-theme='light'] .danger-card {
   }
 }
 
+/* ---- Móvil: más liviano (letras y piezas más chicas, menos peso, más aire entre bloques) ---- */
+@media (max-width: 600px) {
+  .main-content {
+    --gutter: 20px;
+    padding-inline: var(--gutter);
+  }
+  /* Titulares y cifras: Barlow 700 en lugar de 800, y una escala más contenida */
+  h1,
+  h2,
+  h3,
+  .brand-title,
+  .brand-icon,
+  .auth-brand,
+  .auth-title,
+  .stat-tile strong,
+  .pr-tile strong,
+  .history-vol,
+  .number-control input,
+  .stepper-value,
+  .hoy-tile strong,
+  .cycle-num,
+  .routine-index {
+    font-weight: 700;
+  }
+  .hoy-mark {
+    top: 96px;
+    right: -8px;
+    font-size: 250px;
+    -webkit-text-stroke-width: 1.5px;
+  }
+  .hoy-greet h1 {
+    font-size: 22px;
+  }
+  .hoy-greet time {
+    font-size: 12px;
+  }
+  .hoy-hero {
+    padding: 18px;
+  }
+  .hoy-hero h2 {
+    font-size: 26px;
+    line-height: 1.1;
+  }
+  .hoy-meta {
+    font-size: 14px;
+  }
+  .hoy-cta {
+    min-height: 48px;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+  }
+  .hoy-tile {
+    min-height: 88px;
+    padding: 12px 14px;
+  }
+  .hoy-tile strong {
+    font-size: 28px;
+  }
+  .hoy-vol strong {
+    font-size: 26px;
+  }
+  .hoy-tile-ring strong {
+    font-size: 26px;
+  }
+  .hoy-cycle-head h2 {
+    font-size: 20px;
+  }
+  .cycle-card {
+    flex-basis: 138px;
+    min-height: 108px;
+    padding: 12px;
+  }
+  .cycle-card.cycle-current {
+    padding: 11px;
+  }
+  .cycle-num {
+    font-size: 28px;
+  }
+  .cycle-body strong {
+    font-size: 14px;
+  }
+  .page-head h1 {
+    font-size: 26px;
+  }
+  .session-header h1 {
+    font-size: 24px;
+  }
+  .session-card h2,
+  .section-heading h2,
+  .routine-tile h2,
+  .log-card h2 {
+    font-size: 20px;
+  }
+  .chart-card h2,
+  .muscle-card h2,
+  .settings-card h2 {
+    font-size: 18px;
+  }
+  .modal h2 {
+    font-size: 24px;
+  }
+  .modal h3 {
+    font-size: 16px;
+  }
+  .confirm-dialog h2,
+  .editor-head h2 {
+    font-size: 22px;
+  }
+  .stat-tile strong {
+    font-size: 30px;
+  }
+  .pr-tile strong {
+    font-size: 22px;
+  }
+  .history-vol {
+    font-size: 16px;
+  }
+  .number-control input {
+    font-size: 24px;
+  }
+  .routine-index {
+    font-size: 36px;
+  }
+  .auth-brand {
+    font-size: 40px;
+  }
+  .auth-title {
+    font-size: 30px;
+  }
+  .exercise-tile strong,
+  .cycle-toolbar strong,
+  .cycle-manage-label strong,
+  .history-main strong,
+  .ex-name,
+  .exercise-choice strong,
+  .current-exercise strong,
+  .log-exercise strong,
+  .suggestion strong {
+    font-size: 16px;
+  }
+  /* Botones y etiquetas: más finos y con menos separación entre letras */
+  .secondary-btn,
+  .lime-btn,
+  .small-primary,
+  .finish-btn,
+  .save-set,
+  .danger-btn {
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
+  .overline,
+  .section-label,
+  .aside-label,
+  .brand-caption,
+  .cycle-day,
+  .hoy-label,
+  .hoy-row h2 {
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+  .status-tag,
+  .metric-badge,
+  .today-chip,
+  .routine-tag,
+  .hoy-tag,
+  .cycle-badge {
+    letter-spacing: 0.08em;
+  }
+  .text-link,
+  .danger-link {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+  /* Luz de los botones amarillos más discreta */
+  .lime-btn,
+  .small-primary {
+    box-shadow:
+      0 6px 14px -10px rgba(255, 212, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  /* Más aire entre bloques */
+  .card {
+    padding: 20px;
+  }
+  .routine-grid,
+  .progress-panels {
+    gap: 18px;
+  }
+  .progress-metrics {
+    gap: 12px;
+  }
+  .routine-tile > p {
+    margin-top: 4px;
+  }
+  .routine-previews {
+    margin: 16px 0 20px;
+    gap: 8px;
+  }
+  /* Barra superior: iconos sin recuadro (el área táctil sigue siendo de 44 px) y más baja */
+  .topbar {
+    --topbar-h: 60px;
+  }
+  .theme-toggle,
+  .avatar {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  /* Navegación inferior más compacta */
+  .bottom-nav {
+    left: 16px;
+    right: 16px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    height: 58px;
+    border-radius: 29px;
+  }
+  .bottom-nav button {
+    border-radius: 24px;
+    gap: 1px;
+  }
+  .bottom-nav button svg {
+    width: 20px;
+    height: 20px;
+  }
+  .app-root::after {
+    height: calc(104px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (max-width: 359px) {
+  .main-content {
+    --gutter: 16px;
+  }
+}
+
 /* ---- Movimiento y transparencia reducidos, y navegadores sin desenfoque ---- */
 @media (prefers-reduced-motion: reduce) {
   .topbar,
