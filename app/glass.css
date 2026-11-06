@@ -1,0 +1,1219 @@
+/*
+ * RB Fitness — capa visual "Cristal" (solo presentación; no cambia lógica, ids ni nombres de clase
+ * de las pantallas existentes).
+ *
+ * Principios (versión 3 del diseño aprobado):
+ *  - Cristal: paneles translúcidos con desenfoque del fondo, borde fino y brillo en el canto superior.
+ *    Solo los contenedores grandes desenfocan; las filas y tarjetas de listas usan relleno translúcido
+ *    sin desenfoque para que las listas largas sigan fluidas en el móvil.
+ *  - Fondo: malla de degradados enormes (nada de círculos) y grano fino. En Hoy, el número del día
+ *    gigante en contorno detrás del cristal.
+ *  - Redondeo medio y con jerarquía: panel 18 px, tarjetas y botones 14 px, campos 12 px, chips 10 px,
+ *    etiquetas 7 px. La navegación inferior en cápsula es lo único totalmente redondo.
+ *  - Marca: amarillo como color de acción, rojo como acento, Barlow (titulares y cifras en mixtas) y
+ *    Barlow Condensed en mayúsculas solo para botones y etiquetas.
+ *  - Accesibilidad: contraste medido en el peor fondo, `prefers-reduced-transparency` y navegadores sin
+ *    `backdrop-filter` caen a paneles casi opacos.
+ * Los nombres de token (--acid, --aqua) vienen del diseño anterior: --acid es el amarillo de acción y
+ * --aqua el rojo de acento.
+ */
+/* ---- Tokens: oscuro ---- */
+html[data-theme='dark'] {
+  --bg: #0a0a0d;
+  --panel: rgba(16, 16, 22, 0.6);
+  --panel-deep: rgba(8, 8, 12, 0.68);
+  --panel-high: rgba(255, 255, 255, 0.09);
+  --text: #f5f5f5;
+  --muted: #d6d6d6;
+  --subtle: #b4b4b4;
+  --stroke: rgba(255, 255, 255, 0.16);
+  --field: rgba(0, 0, 0, 0.34);
+  --ring-track: rgba(255, 255, 255, 0.2);
+  --chart-grid: rgba(255, 255, 255, 0.12);
+  --acid: #ffd400;
+  --acid-ink: #ffd400;
+  --aqua: #ff6b5e;
+  --acidtext: #111111;
+  --acid-rgb: 255 212 0;
+  --aqua-rgb: 255 107 94;
+  --red: #d10000;
+  --red-deep: #9b0000;
+  --focus: #ffd400;
+  --statusbar-bg: #000000;
+  --series-1: #ffd400;
+  --chart-bar: #ffd400;
+  --series-2: #ff3d33;
+  --series-3: #f5f5f5;
+  --wave-a: #ffd400;
+  --wave-b: #ff3d33;
+
+  --glass-bg:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04)), rgba(10, 10, 14, 0.42);
+  --glass-strong:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)), rgba(12, 12, 16, 0.86);
+  --glass-blur: blur(24px) saturate(1.8);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    0 24px 40px -22px rgba(0, 0, 0, 0.7);
+  --flat-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --chip-hover: rgba(255, 255, 255, 0.16);
+  --nav-active-bg: rgba(255, 255, 255, 0.18);
+  --nav-active-border: rgba(255, 255, 255, 0.3);
+  --topbar-bg: rgba(10, 10, 13, 0.78);
+  --cta-shadow: 0 10px 22px -10px rgba(255, 212, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --mark-stroke: rgba(255, 255, 255, 0.14);
+  --grain: var(--grain-white);
+  --grain-opacity: 0.1;
+  --mesh:
+    radial-gradient(140% 60% at 100% 0%, #9a1010 0%, rgba(154, 16, 16, 0) 60%),
+    radial-gradient(120% 55% at 0% 100%, #5a4600 0%, rgba(90, 70, 0, 0) 62%),
+    radial-gradient(100% 50% at 0% 0%, #2a0808 0%, rgba(42, 8, 8, 0) 60%), #0a0a0d;
+}
+/* ---- Tokens: claro ---- */
+:root,
+html[data-theme='light'] {
+  --bg: #e8e8e8;
+  --panel: rgba(255, 255, 255, 0.66);
+  --panel-deep: rgba(255, 255, 255, 0.8);
+  --panel-high: rgba(18, 18, 18, 0.06);
+  --text: #121212;
+  --muted: #4a4a4a;
+  --subtle: #5c5c5c;
+  --stroke: rgba(18, 18, 18, 0.14);
+  --field: rgba(255, 255, 255, 0.72);
+  --ring-track: rgba(0, 0, 0, 0.13);
+  --chart-grid: rgba(0, 0, 0, 0.1);
+  --acid: #ffd400;
+  --acid-ink: #9b0000;
+  --aqua: #b00000;
+  --acidtext: #111111;
+  --acid-rgb: 255 212 0;
+  --aqua-rgb: 155 0 0;
+  --red: #b30000;
+  --red-deep: #9b0000;
+  --focus: #9b0000;
+  --statusbar-bg: #0a0a0a;
+  --series-1: #ffd400;
+  --chart-bar: #b00000;
+  --series-2: #b00000;
+  --series-3: #121212;
+  --wave-a: #ffd400;
+  --wave-b: #b00000;
+
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.5));
+  --glass-strong: rgba(255, 255, 255, 0.92);
+  --glass-blur: blur(22px) saturate(1.6);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-shadow:
+    0 0 0 1px rgba(18, 18, 18, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 14px 30px -18px rgba(0, 0, 0, 0.45);
+  --flat-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 18px -14px rgba(0, 0, 0, 0.35);
+  --chip-hover: rgba(18, 18, 18, 0.1);
+  --nav-active-bg: rgba(255, 212, 0, 0.34);
+  --nav-active-border: rgba(155, 0, 0, 0.3);
+  --topbar-bg: rgba(232, 232, 232, 0.82);
+  --cta-shadow: 0 10px 20px -12px rgba(120, 90, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --mark-stroke: rgba(18, 18, 18, 0.14);
+  --grain: var(--grain-black);
+  --grain-opacity: 0.07;
+  --mesh:
+    radial-gradient(140% 60% at 100% 0%, rgba(179, 0, 0, 0.2) 0%, rgba(179, 0, 0, 0) 60%),
+    radial-gradient(120% 55% at 0% 100%, rgba(255, 212, 0, 0.5) 0%, rgba(255, 212, 0, 0) 62%),
+    radial-gradient(100% 50% at 0% 0%, rgba(255, 212, 0, 0.3) 0%, rgba(255, 212, 0, 0) 60%), #e8e8e8;
+}
+/* Fuentes y grano (imágenes SVG incrustadas: ruido fractal blanco para oscuro y negro para claro) */
+:root {
+  --r-panel: 18px;
+  --r-card: 14px;
+  --r-field: 12px;
+  --r-chip: 10px;
+  --r-tag: 7px;
+  --grain-white: url('data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27160%27 height=%27160%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.85%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix values=%270 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 0%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E');
+  --grain-black: url('data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27160%27 height=%27160%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.85%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix values=%270 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .7 0%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E');
+}
+:root,
+html[data-theme='light'],
+html[data-theme='dark'] {
+  --font-display: 'Barlow', system-ui, sans-serif;
+  --font-cond: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+}
+/* ---- Fondo: malla y grano fijos detrás de todo (acceso, app y páginas legales) ---- */
+html {
+  background: var(--bg);
+}
+body {
+  background: transparent;
+  font-weight: 500;
+}
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+body::before {
+  background: var(--mesh);
+}
+body::after {
+  background-image: var(--grain);
+  opacity: var(--grain-opacity);
+}
+/* Texto solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+/* ---- Redondeo con jerarquía (sustituye las esquinas angulares) ---- */
+.card,
+.modal,
+.auth-card,
+.sidebar-bottom,
+.first-tip,
+.modal-illustration,
+.motion-stage,
+.video-stage {
+  border-radius: var(--r-panel);
+}
+.cycle-card,
+.exercise-tile,
+.ex-card,
+.suggestion,
+.exercise-choice,
+.previous-result,
+.rest-timer,
+.pr-tile,
+.switch-row,
+.safe-tip,
+.progression-hint,
+.gate-alert,
+.confirm-icon,
+.editor-empty,
+.empty > span,
+.toast,
+.routine-glyph,
+.history-icon,
+.exercise-icon,
+.sidebar-icon,
+.aside-link,
+.secondary-btn,
+.lime-btn,
+.small-primary,
+.finish-btn,
+.save-set,
+.danger-btn,
+.gate-submit,
+.icon-action,
+.number-control button,
+.number-control > div,
+.modal-close,
+.theme-toggle,
+.avatar,
+.ex-actions button,
+.field-eye,
+.picker-add {
+  border-radius: var(--r-card);
+}
+.form-label input,
+.form-label select,
+.auth-form .form-label input,
+.cycle-selector,
+.search-field,
+.segmented,
+.stepper-row {
+  border-radius: var(--r-field);
+}
+.segmented::before,
+.segmented button,
+.filter-scroll button,
+.activity-pill,
+.modal-chips span,
+.routine-previews span,
+.set-index {
+  border-radius: var(--r-chip);
+}
+.today-chip,
+.routine-tag {
+  border-radius: var(--r-tag);
+}
+.brand-icon,
+.mobile-brand .mark {
+  border-radius: 10px;
+}
+/* ---- Superficies de cristal ---- */
+/* Contenedores grandes: desenfoque del fondo */
+.card,
+.modal,
+.auth-card,
+.sidebar-bottom,
+.first-tip,
+.toast {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.modal {
+  background: var(--glass-strong);
+}
+.toast {
+  background: var(--glass-strong);
+  color: var(--text);
+}
+/* Filas y tarjetas de listas: relleno translúcido sin desenfoque (listas largas, más fluidas) */
+.cycle-card,
+.exercise-tile,
+.ex-card,
+.suggestion,
+.exercise-choice,
+.pr-tile,
+.switch-row,
+.search-field,
+.stepper-row,
+.previous-result,
+.rest-timer,
+.progression-hint,
+.safe-tip,
+.editor-empty,
+.gate-alert,
+.history-item {
+  background: var(--panel);
+  border-color: var(--stroke);
+  box-shadow: var(--flat-shadow);
+}
+.ex-card {
+  background: var(--panel-high);
+}
+.card {
+  border-top-width: 1px;
+}
+.modal-backdrop {
+  background: rgba(5, 5, 8, 0.55);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.first-tip {
+  color: var(--acid-ink);
+  background: var(--glass-bg);
+}
+.toast svg {
+  color: var(--acid-ink);
+}
+/* ---- Tipografía: Barlow en mixtas para titulares y cifras; condensada en mayúsculas solo en botones y etiquetas ---- */
+h1,
+h2,
+h3,
+.brand-title,
+.brand-icon,
+.auth-brand,
+.auth-title,
+.stat-tile strong,
+.pr-tile strong,
+.history-vol,
+.number-control input,
+.stepper-value,
+.hoy-tile strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.overline,
+.section-label,
+.aside-label,
+.brand-caption,
+.app-footer {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  font-size: 12px;
+}
+.secondary-btn,
+.lime-btn,
+.small-primary,
+.finish-btn,
+.save-set,
+.danger-btn,
+.today-chip,
+.routine-tag,
+.activity-pill {
+  font-family: var(--font-cond);
+  text-transform: uppercase;
+}
+.secondary-btn,
+.lime-btn,
+.small-primary,
+.finish-btn,
+.save-set,
+.danger-btn {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+.today-chip,
+.routine-tag,
+.activity-pill {
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+.text-link,
+.danger-link {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+.aside-link {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+.bottom-nav button span {
+  font-family: var(--font-display);
+  text-transform: none;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.page-head h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.02;
+}
+.session-header h1 {
+  font-size: clamp(30px, 4.5vw, 46px);
+}
+.section-heading h2,
+.routine-tile h2,
+.log-card h2 {
+  font-size: 26px;
+}
+.chart-card h2,
+.muscle-card h2 {
+  font-size: 22px;
+}
+.settings-card h2 {
+  font-size: 20px;
+}
+.modal h2 {
+  font-size: 30px;
+}
+.modal h3 {
+  font-size: 18px;
+}
+.confirm-dialog h2,
+.editor-head h2 {
+  font-size: 26px;
+}
+.stat-tile strong {
+  font-size: 40px;
+}
+.pr-tile strong {
+  font-size: 26px;
+}
+.history-vol {
+  font-size: 19px;
+}
+.number-control input {
+  font-size: 28px;
+}
+.stepper-value {
+  font-size: 19px;
+}
+.brand-title {
+  font-size: 26px;
+}
+.brand-icon {
+  font-size: 24px;
+  font-family: var(--font-cond);
+}
+.brand-dot {
+  background: #111111;
+}
+.auth-brand {
+  font-size: 48px;
+}
+.auth-title {
+  font-size: clamp(34px, 9vw, 46px);
+  line-height: 1.02;
+}
+/* Nombres de ejercicio, rutina e historial: mixtas, legibles */
+.exercise-tile strong,
+.cycle-toolbar strong,
+.cycle-manage-label strong,
+.history-main strong,
+.ex-name,
+.exercise-choice strong,
+.current-exercise strong,
+.log-exercise strong,
+.suggestion strong {
+  font-family: var(--font-display);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.15;
+}
+/* ---- Botones, etiquetas y campos ---- */
+.lime-btn,
+.small-primary {
+  border: 0;
+  background: linear-gradient(180deg, #ffe45c, #ffd400);
+  color: var(--acidtext);
+  box-shadow: var(--cta-shadow);
+  transition:
+    transform 0.12s,
+    filter 0.12s;
+}
+.lime-btn:hover,
+.small-primary:hover {
+  filter: brightness(1.05);
+}
+.lime-btn:active,
+.small-primary:active {
+  transform: translateY(1px);
+}
+.secondary-btn,
+.finish-btn {
+  background: var(--panel-high);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  box-shadow: var(--flat-shadow);
+}
+.secondary-btn:hover,
+.finish-btn:hover {
+  background: var(--chip-hover);
+  color: var(--text);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+input,
+select {
+  border-width: 1px;
+}
+.form-label input,
+.form-label select {
+  background: var(--field);
+  border-color: var(--stroke);
+}
+.today-chip,
+.routine-tag,
+.activity-pill {
+  background: rgb(var(--acid-rgb) / 0.2);
+  border: 1px solid rgb(var(--acid-rgb) / 0.4);
+  color: var(--acid-ink);
+  padding: 5px 10px;
+}
+.activity-pill {
+  background: var(--panel);
+  border-color: var(--stroke);
+}
+.icon-action,
+.avatar,
+.theme-toggle,
+.modal-close,
+.number-control button {
+  background: var(--panel-high);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--flat-shadow);
+}
+.routine-index {
+  font: 800 52px/1 var(--font-display);
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--subtle);
+  letter-spacing: 0;
+}
+.segmented {
+  background: var(--panel-high);
+}
+.segmented::before {
+  background: var(--glass-strong);
+  box-shadow: var(--flat-shadow);
+}
+.filter-scroll button.chosen {
+  background: rgb(var(--acid-rgb) / 0.28);
+  border-color: rgb(var(--acid-rgb) / 0.55);
+  color: var(--text);
+}
+/* ---- Sin adornos angulares: cintas, rayas y cortes ---- */
+.page-head::after,
+.topbar::after,
+.app-root::before {
+  content: none;
+}
+/* ---- Barra superior translúcida; la franja de la zona segura es un elemento aparte ---- */
+.topbar {
+  border-bottom: 0;
+  background: var(--topbar-bg);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 1px 0 var(--stroke);
+}
+.topbar::before {
+  content: none;
+}
+.statusbar-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--statusbar-bg);
+  z-index: 60;
+  pointer-events: none;
+}
+.mobile-brand-text b {
+  color: var(--acid);
+}
+.mobile-brand .mark {
+  background: var(--acid);
+  color: var(--acidtext);
+  font-family: var(--font-cond);
+  letter-spacing: 0;
+}
+/* Estado de sincronización: etiqueta pequeña; en pantallas angostas solo queda el icono */
+.cloud-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 12px/1 var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.cloud-error {
+  color: var(--aqua);
+}
+@media (max-width: 550px) {
+  .cloud-state {
+    font-size: 0;
+    gap: 0;
+  }
+}
+/* ---- Navegación lateral (escritorio) ---- */
+.sidebar {
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--stroke);
+}
+.aside-link.selected {
+  background: var(--nav-active-bg);
+  border: 1px solid var(--nav-active-border);
+  color: var(--acid-ink);
+  box-shadow: none;
+}
+.aside-active-dot {
+  display: none;
+}
+/* ---- Navegación inferior en cápsula (móvil): lo único totalmente redondo ---- */
+@media (max-width: 800px) {
+  .bottom-nav {
+    left: 14px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    height: 64px;
+    padding: 5px;
+    gap: 2px;
+    justify-content: stretch;
+    border: 1px solid var(--glass-border);
+    border-radius: 32px;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+  }
+  .bottom-nav button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    gap: 2px;
+    border: 1px solid transparent;
+    border-radius: 27px;
+    color: var(--muted);
+  }
+  .bottom-nav button.active {
+    background: var(--nav-active-bg);
+    border-color: var(--nav-active-border);
+    color: var(--acid-ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+  .bottom-nav button.active:before {
+    content: none;
+  }
+  .toast {
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+  .main-content {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+  .pill-extra {
+    display: none;
+  }
+  /* La barra superior se esconde al bajar y vuelve al subir (ver hooks/use-hide-on-scroll.ts) */
+  .topbar {
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .topbar[data-hidden='true'] {
+    transform: translateY(-100%);
+  }
+}
+/* ---- Hoy: hero primero, semana en dos fichas y ciclo con la siguiente tarjeta asomando ---- */
+.main-content {
+  --gutter: clamp(22px, 5vw, 80px);
+}
+@media (max-width: 1100px) {
+  .main-content {
+    --gutter: 26px;
+  }
+}
+@media (max-width: 800px) {
+  .main-content {
+    --gutter: 19px;
+  }
+}
+@media (max-width: 600px) {
+  .main-content {
+    --gutter: 16px;
+  }
+}
+.hoy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hoy > :not(.hoy-mark) {
+  position: relative;
+  z-index: 1;
+}
+/* El número del día, gigante y en contorno, detrás del cristal (decorativo) */
+.hoy-mark {
+  position: absolute;
+  z-index: 0;
+  right: -14px;
+  top: 190px;
+  font: 800 340px/0.8 var(--font-cond);
+  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--mark-stroke);
+  pointer-events: none;
+  user-select: none;
+}
+.hoy-greet {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hoy-greet h1 {
+  font-size: 28px;
+  line-height: 1.1;
+}
+.hoy-greet time {
+  font: 700 13px/1 var(--font-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.hoy-hero,
+.hoy-tile {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.hoy-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 20px;
+  border-radius: var(--r-panel);
+  /* Tapa roja arriba (acento de marca) y brillo en el canto */
+  box-shadow:
+    inset 0 3px 0 var(--red),
+    inset 0 4px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 22px 36px -22px rgba(0, 0, 0, 0.6);
+}
+.hoy-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.hoy-label {
+  font: 700 12px/1.3 var(--font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hoy-tag,
+.cycle-badge {
+  flex: none;
+  font: 800 12px/1.3 var(--font-cond);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--acid);
+  color: var(--acidtext);
+  padding: 3px 10px;
+}
+.hoy-tag {
+  border-radius: var(--r-tag);
+}
+.cycle-badge {
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+.hoy-hero h2 {
+  font-size: 34px;
+  line-height: 1.02;
+}
+.hoy-meta {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.hoy-preview {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hoy-cta {
+  margin-top: 4px;
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 20px;
+}
+.hoy-week {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hoy-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hoy-row h2 {
+  font: 700 12px/1.2 var(--font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hoy-row span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.hoy-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.hoy-tile {
+  min-width: 0;
+  min-height: 100px;
+  padding: 14px;
+  border-radius: var(--r-card);
+  display: flex;
+}
+.hoy-tile-ring {
+  align-items: center;
+  gap: 12px;
+}
+.hoy-tile-vol {
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+}
+.hoy-tile strong {
+  display: block;
+  font-size: 36px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hoy-tile small {
+  display: block;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.hoy-vol {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.hoy-vol strong {
+  font-size: 34px;
+}
+.hoy-vol small {
+  margin: 0;
+  font-size: 12px;
+}
+.hoy-ring {
+  flex: none;
+}
+.hoy-ring-track {
+  stroke: var(--ring-track);
+}
+.hoy-ring-fill {
+  stroke: var(--series-1);
+  transition: stroke-dashoffset 0.6s ease;
+}
+html[data-theme='light'] .hoy-ring-fill,
+:root:not([data-theme]) .hoy-ring-fill {
+  stroke: var(--series-2);
+}
+.hoy-spark {
+  width: 100%;
+  height: 28px;
+  overflow: visible;
+}
+.hoy-spark polyline {
+  fill: none;
+  stroke: var(--series-1);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+html[data-theme='light'] .hoy-spark polyline,
+:root:not([data-theme]) .hoy-spark polyline {
+  stroke: var(--series-2);
+}
+.hoy-cycle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hoy-cycle-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+.hoy-cycle-head h2 {
+  font-size: 24px;
+}
+.cycle-scroller {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-inline: calc(var(--gutter) * -1);
+  padding: 0 var(--gutter) 8px;
+  scroll-padding-inline: var(--gutter);
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.cycle-scroller::-webkit-scrollbar {
+  display: none;
+}
+.cycle-card {
+  flex: 0 0 150px;
+  min-width: 0;
+  min-height: 126px;
+  scroll-snap-align: start;
+  padding: 12px 14px;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 12px;
+}
+.cycle-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+.cycle-num {
+  font: 800 38px/1 var(--font-display);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.cycle-body strong {
+  display: block;
+  font: 600 14px/1.2 var(--font-display);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+.cycle-body small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.cycle-card.cycle-current {
+  border: 1.5px solid var(--acid-ink);
+  background: var(--glass-bg);
+  box-shadow:
+    0 0 0 3px rgb(var(--acid-rgb) / 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.cycle-current .cycle-num {
+  color: var(--acid-ink);
+}
+.cycle-rest {
+  background: transparent;
+  border-style: dashed;
+  box-shadow: none;
+}
+.cycle-rest .cycle-num,
+.cycle-rest .cycle-body strong {
+  color: var(--muted);
+}
+.hoy-tip {
+  margin-top: 0;
+}
+@media (min-width: 801px) {
+  .hoy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 18px 20px;
+    align-items: start;
+  }
+  .hoy-greet,
+  .hoy-cycle,
+  .hoy-tip {
+    grid-column: 1 / -1;
+  }
+  .hoy-greet h1 {
+    font-size: 36px;
+  }
+  .hoy-hero {
+    padding: 24px 26px 26px;
+    gap: 12px;
+  }
+  .hoy-hero h2 {
+    font-size: 46px;
+  }
+  .hoy-cta {
+    width: auto;
+    align-self: flex-start;
+    padding-inline: 28px;
+  }
+  .hoy-tiles {
+    grid-template-columns: 1fr;
+  }
+  .hoy-mark {
+    right: 24px;
+    top: 30px;
+    font-size: 380px;
+  }
+  .cycle-scroller {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    overflow: visible;
+    margin-inline: 0;
+    padding: 0 0 8px;
+  }
+  .cycle-card {
+    flex: none;
+  }
+}
+/* ---- Acceso: el mismo fondo que la app, sin cintas ---- */
+.auth-screen,
+.legal {
+  background: transparent;
+}
+.auth-blob {
+  display: none;
+}
+.auth-card {
+  background: var(--glass-bg);
+  box-shadow: var(--glass-shadow);
+}
+/* Acciones destructivas legibles en tema claro (el rosa anterior casi no se veía sobre blanco) */
+html[data-theme='light'] .danger-link,
+html[data-theme='light'] .gate-error {
+  color: var(--red);
+}
+html[data-theme='light'] .danger-card {
+  border-color: rgb(var(--aqua-rgb) / 0.35);
+}
+/* El campo del acceso ya marca su foco con borde propio: sin doble anillo */
+.auth-form .form-label input:focus-visible {
+  outline: none;
+}
+.auth-form .form-label input:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgb(var(--acid-rgb) / 0.28);
+}
+/* ---- Revisión de GUI: áreas táctiles de 44 px y lectura cómoda en el móvil ---- */
+@media (pointer: coarse), (max-width: 800px) {
+  .theme-toggle,
+  .modal-close,
+  .icon-action,
+  .ex-actions button,
+  .number-control button {
+    width: 44px;
+    height: 44px;
+    flex: none;
+  }
+  .number-control input {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+  .avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    flex: none;
+  }
+  .mobile-brand {
+    min-height: 44px;
+  }
+  .field-eye {
+    width: 44px;
+    height: 44px;
+    right: 4px;
+  }
+  .stepper-row button {
+    width: 44px;
+  }
+  .number-control input {
+    min-height: 44px;
+  }
+  .filter-scroll button,
+  .filter-secondary button {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+  .search-field input {
+    align-self: stretch;
+    min-height: 48px;
+  }
+  /* El enlace sigue viéndose igual: el área extra se compensa con margen negativo */
+  .text-link {
+    min-height: 44px;
+    padding-inline: 8px;
+    margin-block: -12px;
+    margin-inline: -8px;
+  }
+  /* Con botones de 44 px, el nombre del ejercicio pasa a ocupar su fila y las acciones bajan a la derecha */
+  .ex-card-top {
+    flex-wrap: wrap;
+  }
+  .ex-name {
+    flex: 1 1 130px;
+  }
+  .ex-actions {
+    margin-left: auto;
+  }
+  .account-links .text-link {
+    min-height: 44px;
+    margin-block: 0;
+  }
+  .auth-legal {
+    display: inline-block;
+    padding: 14px 14px;
+  }
+  .hoy-cycle-head .text-link {
+    margin-block: 0;
+  }
+}
+/* En pantallas muy angostas, peso y repeticiones se apilan para conservar botones de 44 px */
+@media (max-width: 399px) {
+  .hoy-tile-ring {
+    gap: 10px;
+  }
+  .hoy-tile-ring .hoy-ring {
+    width: 52px;
+    height: 52px;
+  }
+  .hoy-tile-ring strong {
+    font-size: 32px;
+  }
+}
+@media (max-width: 359px) {
+  .numbers-row {
+    grid-template-columns: 1fr;
+  }
+  .hoy-tiles {
+    grid-template-columns: 1fr;
+  }
+  .hoy-cta {
+    font-size: 17px;
+  }
+  .hoy-greet h1 {
+    font-size: 24px;
+  }
+  .hoy-hero h2 {
+    font-size: 28px;
+  }
+}
+/* ---- Movimiento y transparencia reducidos, y navegadores sin desenfoque ---- */
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .hoy-ring-fill {
+    transition: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-theme='dark'] {
+    --glass-bg: rgba(20, 20, 26, 0.96);
+    --glass-strong: rgba(20, 20, 26, 0.98);
+    --panel: rgba(24, 24, 30, 0.96);
+    --topbar-bg: rgba(10, 10, 13, 0.98);
+  }
+  :root,
+  html[data-theme='light'] {
+    --glass-bg: rgba(255, 255, 255, 0.97);
+    --glass-strong: rgba(255, 255, 255, 0.99);
+    --panel: rgba(255, 255, 255, 0.96);
+    --topbar-bg: rgba(232, 232, 232, 0.98);
+  }
+  body::after {
+    display: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-theme='dark'] {
+    --glass-bg: rgba(20, 20, 26, 0.9);
+    --topbar-bg: rgba(10, 10, 13, 0.96);
+  }
+  :root,
+  html[data-theme='light'] {
+    --glass-bg: rgba(255, 255, 255, 0.92);
+    --topbar-bg: rgba(232, 232, 232, 0.96);
+  }
+}

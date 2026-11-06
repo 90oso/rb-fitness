@@ -2,6 +2,25 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.8.0] — 2026-11-06
+
+### Cambiado
+
+- **Nuevo estilo «Cristal» en toda la app** (reemplaza la capa «Stars»): paneles translúcidos con desenfoque del fondo, borde fino y brillo en el canto superior, sobre una malla de degradados con grano fino (sin círculos). Redondeo medio con jerarquía (panel 18 px, tarjetas y botones 14 px, campos 12 px, chips 10 px, etiquetas 7 px); la navegación inferior en cápsula es lo único totalmente redondo. Acción principal en amarillo, acento en rojo; titulares y cifras en Barlow, y Barlow Condensed en mayúsculas solo en botones y etiquetas. Aplica a acceso, Hoy, Entrenar, Progreso, Ejercicios, Perfil, sesión activa, modales, avisos y /privacidad, en claro y oscuro.
+- **Hoy rediseñado, con la próxima sesión primero**: saludo, tarjeta de la próxima sesión con un único botón de acción, dos fichas de la semana (anillo de sesiones y volumen con su tendencia real de las últimas semanas) y el ciclo en carrusel. El número del día aparece enorme y en contorno detrás del cristal. En escritorio la próxima sesión y las fichas de la semana van en dos columnas.
+- La barra superior **se esconde al bajar y reaparece al subir** (solo en móvil), y vuelve a mostrarse al cambiar de pestaña, abrir una ventana o enfocarla con el teclado. La franja bajo la barra de estado del iPhone queda siempre oscura (`.statusbar-scrim`).
+- Gráfica de volumen y avisos usan los colores del tema (barra roja en claro, amarilla en oscuro).
+- Estado de sincronización con etiqueta propia; en el móvil la etiqueta de la barra pasa a «Listo».
+
+### Corregido
+
+- En el carrusel «Tu ciclo» la primera tarjeta ya no queda pegada al borde (`scroll-padding-inline` igual al margen de la página) y en tabletas y escritorio las tarjetas se reparten el ancho en lugar de dejar cinco columnas fijas.
+- «-1 min transcurridos» al empezar una sesión: el tiempo transcurrido nunca es negativo.
+
+### Eliminado
+
+- `components/rings.tsx` (tres anillos), el saludo gigante, las cintas y rayas, las esquinas cortadas, las manchas redondas de fondo y la barra de progreso de scroll del estilo anterior; también las reglas de CSS de Hoy que ya no se usan.
+
 ## [0.7.0] — 2026-11-02
 
 ### Añadido

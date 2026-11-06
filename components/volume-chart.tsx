@@ -14,16 +14,22 @@ export default function VolumeChart({ data }: { data: { label: string; volumen: 
             dy={12}
           />
           <Tooltip
-            cursor={{ fill: 'rgba(195,244,0,.06)' }}
+            cursor={{ fill: 'var(--panel-high)' }}
             contentStyle={{
-              background: '#212a35',
-              border: '1px solid #384252',
+              background: 'var(--glass-strong)',
+              border: '1px solid var(--glass-border)',
               borderRadius: 14,
-              color: '#fff',
+              color: 'var(--text)',
             }}
             formatter={(value) => [`${Number(value ?? 0).toLocaleString('es-PA')} kg·rep`, 'Volumen']}
           />
-          <Bar dataKey="volumen" name="Volumen" radius={[7, 7, 0, 0]} fill="#C3F400" maxBarSize={38} />
+          <Bar
+            dataKey="volumen"
+            name="Volumen"
+            radius={[5, 5, 0, 0]}
+            fill="var(--chart-bar)"
+            maxBarSize={38}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

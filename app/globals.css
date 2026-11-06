@@ -89,8 +89,6 @@ html[data-theme='dark'] {
   --acidtext: #243000;
   --acid-rgb: 195 244 0;
   --aqua-rgb: 0 229 237;
-  --ambient-1: #9cc900;
-  --ambient-2: #008a9c;
   --font-display: 'Barlow Condensed', system-ui, sans-serif;
   --series-1: #c3f400;
   --series-2: #00e5ed;
@@ -120,8 +118,6 @@ html[data-theme='light'] {
   --acidtext: #1d2900;
   --acid-rgb: 172 216 0;
   --aqua-rgb: 0 167 176;
-  --ambient-1: #9cc900;
-  --ambient-2: #008a9c;
   --font-display: 'Barlow Condensed', system-ui, sans-serif;
   --series-1: #c3f400;
   --series-2: #00e5ed;
@@ -187,29 +183,6 @@ button:disabled {
   isolation: isolate;
   overflow: clip; /* not hidden: hidden makes this a scroll container and breaks sticky */
 }
-.ambient {
-  position: fixed;
-  z-index: -1;
-  pointer-events: none;
-  filter: blur(100px);
-  border-radius: 50%;
-  opacity: 0.22;
-}
-.ambient-one {
-  height: 460px;
-  width: 460px;
-  top: -300px;
-  right: 8%;
-  background: var(--ambient-1);
-}
-.ambient-two {
-  height: 460px;
-  width: 460px;
-  top: 58%;
-  left: -360px;
-  background: var(--ambient-2);
-  opacity: 0.13;
-}
 .sidebar {
   width: 250px;
   position: sticky;
@@ -258,7 +231,7 @@ button:disabled {
   color: var(--acid);
 }
 .brand-caption {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.22em;
   color: var(--muted);
   font-weight: 700;
@@ -266,7 +239,7 @@ button:disabled {
 }
 .aside-label {
   color: var(--subtle);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   font-weight: 800;
   margin: 0 12px 17px;
@@ -335,7 +308,7 @@ button:disabled {
 .sidebar-bottom small {
   display: block;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 5px;
 }
 .content-shell {
@@ -369,7 +342,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 13px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   color: var(--muted);
   font-weight: 800;
@@ -386,7 +359,7 @@ button:disabled {
 }
 .activity-pill {
   font-weight: 800;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   color: var(--acid);
   display: flex;
@@ -424,60 +397,11 @@ button:disabled {
   padding: 40px clamp(22px, 5vw, 80px) 80px;
   min-height: calc(100vh - 160px);
 }
-.eyebrow-line {
-  display: flex;
-  gap: 13px;
-  align-items: center;
-  color: var(--muted);
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  font-size: 10px;
-}
-.eyebrow-spark {
-  color: var(--aqua);
-}
-.welcome {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 16px 0 30px;
-}
-.welcome h1 {
-  font-size: clamp(38px, 4.8vw, 59px);
-  line-height: 1.09;
-  font-weight: 800;
-  letter-spacing: -0.068em;
-  margin: 7px 0 14px;
-}
-.welcome h1 span {
-  color: var(--acid);
-}
-.welcome p {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
-}
 .overline {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   font-weight: 800;
   color: var(--acid);
-}
-.header-flourish {
-  height: 58px;
-  width: 58px;
-  display: grid;
-  place-items: center;
-  color: var(--acid);
-  border: 1px solid var(--stroke);
-  border-radius: 17px;
-  background: var(--panel);
-  transform: rotate(-8deg);
-}
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1.12fr 0.88fr;
-  gap: 19px;
 }
 .card {
   background: var(--panel);
@@ -489,16 +413,6 @@ button:disabled {
   overflow: hidden;
   box-shadow: 0 16px 48px #0000000b;
 }
-.activity-card:before {
-  content: '';
-  position: absolute;
-  right: -80px;
-  top: -100px;
-  height: 260px;
-  width: 260px;
-  background: radial-gradient(circle, rgb(var(--acid-rgb) / 0.09), transparent 70%);
-  pointer-events: none;
-}
 .card-top {
   display: flex;
   justify-content: space-between;
@@ -508,20 +422,12 @@ button:disabled {
 }
 .section-label {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.12em;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-}
-.lime-point {
-  background: var(--acid);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  box-shadow: 0 0 12px var(--acid);
-  display: inline-block;
 }
 .lime-text {
   color: var(--acid);
@@ -529,249 +435,15 @@ button:disabled {
 .muted {
   color: var(--muted);
 }
-.metric-badge,
-.status-tag,
 .today-chip {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--acid);
   font-weight: 800;
   letter-spacing: 0.04em;
 }
-.status-tag {
-  background: rgb(var(--acid-rgb) / 0.11);
-  padding: 6px 10px;
-  border-radius: 13px;
-}
-.ring-content {
-  display: grid;
-  grid-template-columns: minmax(160px, 0.95fr) 1.05fr;
-  align-items: center;
-  gap: 20px;
-  margin-top: 17px;
-}
-.rings-wrap {
-  width: min(100%, 220px);
-  aspect-ratio: 1;
-  margin: auto;
-  position: relative;
-}
-.rings-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 0 6px rgb(var(--acid-rgb) / 0.1));
-}
-.ring-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-.ring-center strong {
-  font-size: 31px;
-  font-family: var(--font-display);
-  letter-spacing: -0.06em;
-}
-.ring-center span {
-  font-size: 9px;
-  font-weight: 800;
-  color: var(--muted);
-  letter-spacing: 0.09em;
-}
-.ring-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.ring-legend > div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-}
-.ring-legend i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.ring-legend > div > span {
-  color: var(--muted);
-  flex: 1;
-}
-.ring-legend strong {
-  font-size: 17px;
-  font-family: var(--font-display);
-  white-space: nowrap;
-}
-.ring-legend small {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: var(--font-body);
-  font-weight: 500;
-}
-.card-footnote {
-  color: var(--subtle);
-  font-size: 10px;
-  line-height: 1.5;
-  margin-top: 10px;
-}
-.status-card {
-  display: flex;
-  flex-direction: column;
-}
-.performance-stat {
-  display: flex;
-  flex-direction: column;
-  margin-top: 28px;
-}
-.performance-stat strong {
-  font: 800 clamp(36px, 4vw, 48px)/1 var(--font-display);
-  letter-spacing: -0.06em;
-}
-.performance-stat span {
-  margin-top: 7px;
-  font-size: 12px;
-  color: var(--acid);
-  font-weight: 700;
-}
-.wave-line {
-  width: 100%;
-  height: 64px;
-  margin: 8px 0 14px;
-}
-.performance-duo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: auto;
-}
-.performance-duo > div {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  background: var(--panel-high);
-  border-radius: 13px;
-  padding: 14px;
-}
-.performance-duo svg {
-  color: var(--aqua);
-}
-.performance-duo > div:first-child svg {
-  color: #ffa3b0;
-}
-.performance-duo small {
-  color: var(--muted);
-  font-size: 11px;
-}
-.performance-duo strong {
-  font: 800 22px var(--font-display);
-}
-.session-card {
-  grid-column: 1/2;
-  min-height: 164px;
-}
-.session-card .up-next-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 13px;
-}
-.training-kicker {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: var(--acid);
-  font-weight: 800;
-  margin-bottom: 5px;
-}
-.session-card h2 {
-  font-size: 24px;
-  line-height: 1.22;
-  max-width: 340px;
-}
-.session-card p {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 12px;
-}
-.session-card p svg {
-  color: var(--aqua);
-}
-.primary-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 0;
-  white-space: nowrap;
-  background: var(--acid);
-  border-radius: 30px;
-  color: var(--acidtext);
-  font-weight: 800;
-  padding: 14px 17px;
-  box-shadow: 0 0 24px rgb(var(--acid-rgb) / 0.2);
-  transition: transform 0.15s;
-}
-.primary-circle:hover,
 .lime-btn:hover,
 .save-set:hover {
   transform: translateY(-2px);
-}
-.quick-card {
-  grid-column: 2;
-  min-height: 164px;
-}
-.mini-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 24px;
-}
-.mini-stats > div {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-}
-.mini-icon {
-  height: 30px;
-  width: 30px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 7px;
-}
-.mini-icon.cyan {
-  color: var(--aqua);
-}
-.mini-icon.lime {
-  color: var(--acid);
-}
-.mini-stats small {
-  color: var(--muted);
-  font-size: 11px;
-}
-.mini-stats strong {
-  margin-top: 4px;
-  font-size: 23px;
-  font-family: var(--font-display);
-  letter-spacing: -0.04em;
-}
-.mini-stats em {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 500;
-  font-style: normal;
-  font-family: var(--font-body);
-}
-.below-grid {
-  margin-top: 38px;
 }
 .section-heading {
   display: flex;
@@ -822,31 +494,12 @@ button:disabled {
   border-color: rgb(var(--acid-rgb) / 0.44);
   background: linear-gradient(135deg, rgb(var(--acid-rgb) / 0.07), var(--panel));
 }
-.cycle-day {
-  font-size: 10px;
-  color: var(--muted);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-.cycle-day span {
-  color: var(--acid);
-}
-.cycle-icon {
-  display: grid;
-  place-items: center;
-  background: var(--panel-high);
-  height: 40px;
-  width: 40px;
-  border-radius: 13px;
-  color: var(--acid);
-  margin: 16px 0 12px;
-}
 .cycle-card strong {
   font-size: 13px;
   line-height: 1.4;
 }
 .cycle-card small {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 5px;
 }
@@ -869,7 +522,7 @@ button:disabled {
 .first-tip span {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 4px;
 }
 .app-footer {
@@ -878,7 +531,7 @@ button:disabled {
   justify-content: space-between;
   gap: 8px;
   color: var(--subtle);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
@@ -920,12 +573,12 @@ button:disabled {
   justify-content: space-between;
 }
 .routine-index {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   font-weight: 800;
 }
 .routine-tag {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--acid);
   letter-spacing: 0.1em;
   font-weight: 800;
@@ -963,7 +616,7 @@ button:disabled {
   padding: 6px 8px;
   background: var(--panel-high);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .routine-actions {
   margin-top: auto;
@@ -1043,7 +696,7 @@ button:disabled {
   gap: 8px;
 }
 .suggestion-num {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--acid);
   font-weight: 800;
 }
@@ -1053,7 +706,7 @@ button:disabled {
 .suggestion small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 5px;
   line-height: 1.5;
 }
@@ -1062,7 +715,7 @@ button:disabled {
   background: transparent;
   color: var(--acid);
   font-weight: 800;
-  font-size: 11px;
+  font-size: 12px;
   display: flex;
   gap: 5px;
   align-items: center;
@@ -1124,7 +777,7 @@ button:disabled {
   text-align: left;
   background: var(--panel-high);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .exercise-choice.active {
   border-color: rgb(var(--acid-rgb) / 0.5);
@@ -1139,7 +792,7 @@ button:disabled {
   display: grid;
   place-items: center;
   color: var(--acid);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
 }
 .exercise-choice > span:nth-child(2) {
@@ -1148,7 +801,7 @@ button:disabled {
 }
 .exercise-choice strong {
   color: var(--aqua);
-  font-size: 11px;
+  font-size: 12px;
 }
 .log-card h2 {
   font-size: 25px;
@@ -1183,7 +836,7 @@ button:disabled {
   min-width: 0;
 }
 .number-control > span {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   font-weight: 800;
   color: var(--muted);
@@ -1269,7 +922,7 @@ button:disabled {
   display: grid;
   place-items: center;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .logged-set strong {
   flex: 1;
@@ -1305,7 +958,7 @@ button:disabled {
   background: transparent;
   border: 0;
   color: var(--text);
-  font-size: 11px;
+  font-size: 12px;
 }
 .finish-btn {
   background: var(--panel-high);
@@ -1339,7 +992,7 @@ button:disabled {
 .stat-tile small {
   color: var(--muted);
   font-weight: 800;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.1em;
 }
 .stat-tile strong {
@@ -1350,7 +1003,7 @@ button:disabled {
 .stat-tile em {
   color: var(--muted);
   font-style: normal;
-  font-size: 11px;
+  font-size: 12px;
 }
 .progress-panels {
   display: grid;
@@ -1378,7 +1031,7 @@ button:disabled {
   margin-bottom: 7px;
 }
 .muscle-row strong {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .muscle-track {
@@ -1430,7 +1083,7 @@ button:disabled {
   margin-bottom: 12px;
 }
 .session-count {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .history-item {
@@ -1469,7 +1122,7 @@ button:disabled {
   display: block;
   margin-top: 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .history-vol {
   font: 800 16px var(--font-display);
@@ -1491,7 +1144,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 11px;
+  font-size: 12px;
   padding: 9px 0;
   border-bottom: 1px solid var(--stroke);
 }
@@ -1508,7 +1161,7 @@ button:disabled {
   background: transparent;
   color: #ff9ca6;
   border: 0;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   padding: 13px 0;
 }
@@ -1516,7 +1169,7 @@ button:disabled {
   padding: 18px 0 0;
 }
 .pr-card > p {
-  font-size: 11px;
+  font-size: 12px;
   margin-bottom: 15px;
 }
 .pr-grid {
@@ -1535,7 +1188,7 @@ button:disabled {
 }
 .pr-tile small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   min-height: 29px;
 }
 .pr-tile strong {
@@ -1543,7 +1196,7 @@ button:disabled {
   margin: 7px 0;
 }
 .pr-tile span {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--aqua);
 }
 .search-row {
@@ -1581,7 +1234,7 @@ button:disabled {
   padding: 9px 12px;
   border-radius: 20px;
   background: var(--panel);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   font-weight: 700;
   white-space: nowrap;
@@ -1628,7 +1281,7 @@ button:disabled {
   gap: 10px;
 }
 .exercise-tile small {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
   letter-spacing: 0.04em;
   line-height: 1.4;
@@ -1644,7 +1297,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 .profile-grid {
@@ -1660,7 +1313,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--muted);
   margin-bottom: 16px;
@@ -1687,7 +1340,7 @@ button:disabled {
   flex-direction: column;
   gap: 17px;
 }
-.settings-card h3 {
+.settings-card h2 {
   font-size: 17px;
   margin: 14px 0 10px;
 }
@@ -1792,7 +1445,7 @@ button:disabled {
   margin-bottom: 25px;
 }
 .modal-chips span {
-  font-size: 11px;
+  font-size: 12px;
   background: var(--panel-high);
   border-radius: 8px;
   padding: 7px 10px;
@@ -1835,9 +1488,6 @@ button:disabled {
   }
   .topbar {
     padding: env(safe-area-inset-top, 0px) 26px 0;
-  }
-  .ring-content {
-    gap: 8px;
   }
   .card {
     padding: 20px;
@@ -1897,9 +1547,6 @@ button:disabled {
     padding: 24px 19px calc(104px + env(safe-area-inset-bottom, 0px));
     min-height: calc(100dvh - 150px);
   }
-  .dashboard-grid {
-    gap: 15px;
-  }
   .bottom-nav {
     display: flex;
     position: fixed;
@@ -1925,7 +1572,7 @@ button:disabled {
     gap: 5px;
     min-width: 57px;
     min-height: 49px;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     position: relative;
   }
@@ -1958,7 +1605,7 @@ button:disabled {
     padding: env(safe-area-inset-top, 0px) 18px 0;
   }
   .activity-pill {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 0;
     padding: 8px 10px;
   }
@@ -1972,103 +1619,9 @@ button:disabled {
   .main-content {
     padding: 23px 16px calc(108px + env(safe-area-inset-bottom, 0px));
   }
-  .eyebrow-line {
-    font-size: 9px;
-    letter-spacing: 0.09em;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .welcome {
-    margin: 17px 0 23px;
-  }
-  .welcome h1 {
-    font-size: 40px;
-    margin: 6px 0 10px;
-  }
-  .welcome p {
-    font-size: 12px;
-  }
-  .header-flourish {
-    height: 47px;
-    width: 47px;
-  }
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
   .card {
     padding: 19px;
     border-radius: 21px;
-  }
-  .activity-card,
-  .session-card,
-  .quick-card {
-    grid-column: auto;
-  }
-  .ring-content {
-    grid-template-columns: 47% 53%;
-    gap: 0;
-  }
-  .rings-wrap {
-    width: 100%;
-    max-width: 200px;
-  }
-  .ring-legend {
-    gap: 16px;
-    padding-left: 9px;
-  }
-  .ring-legend > div {
-    gap: 8px;
-    font-size: 11px;
-  }
-  .ring-legend strong {
-    font-size: 16px;
-  }
-  .ring-legend small {
-    font-size: 10px;
-  }
-  .card-footnote {
-    margin-top: 12px;
-    font-size: 9px;
-  }
-  .status-card {
-    min-height: 245px;
-  }
-  .performance-stat {
-    margin-top: 21px;
-  }
-  .performance-stat strong {
-    font-size: 39px;
-  }
-  .performance-duo > div {
-    padding: 12px;
-  }
-  .wave-line {
-    height: 56px;
-    margin: 5px 0 13px;
-  }
-  .session-card {
-    min-height: 158px;
-  }
-  .session-card h2 {
-    font-size: 22px;
-  }
-  .session-card p {
-    font-size: 11px;
-    line-height: 1.5;
-  }
-  .primary-circle {
-    padding: 13px 15px;
-    font-size: 12px;
-  }
-  .quick-card {
-    min-height: 0;
-  }
-  .mini-stats {
-    margin-top: 12px;
-  }
-  .below-grid {
-    margin-top: 32px;
   }
   .section-heading h2 {
     font-size: 21px;
@@ -2185,19 +1738,6 @@ button:disabled {
   }
 }
 @media (max-width: 375px) {
-  .welcome h1 {
-    font-size: 35px;
-  }
-  .ring-legend > div {
-    gap: 5px;
-    font-size: 10px;
-  }
-  .ring-legend strong {
-    font-size: 13px;
-  }
-  .ring-legend small {
-    font-size: 9px;
-  }
   .top-actions .activity-pill {
     display: none;
   }
@@ -2238,7 +1778,6 @@ button:disabled {
   flex-shrink: 0;
   margin-top: 1px;
 }
-
 /* RB 0.4: access screen, one-tap theme, dialogs. Everything below uses the theme tokens. */
 @keyframes rb-rise {
   from {
@@ -2482,7 +2021,7 @@ html[data-theme='dark'] .auth-blob-3 {
 }
 .auth-form .form-label {
   margin-bottom: 12px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -2799,31 +2338,22 @@ html[data-theme='dark'] .danger-btn {
     height: 19px;
   }
 }
-
 /* Lime used as TEXT must stay readable in light theme (buttons keep --acid as background). */
 .overline,
-.welcome h1 span,
 .lime-text,
 .text-link,
-.metric-badge,
-.status-tag,
 .today-chip,
-.training-kicker,
 .routine-tag,
-.cycle-day span,
 .suggestion-num,
 .suggestion button,
 .activity-pill,
 .aside-link.selected,
 .bottom-nav button.active,
 .exercise-tile em,
-.performance-stat span,
 .exercise-choice > span:first-child,
 .history-icon,
-.cycle-icon,
 .routine-glyph,
 .stat-tile > span,
-.mini-icon.lime,
 .exercise-icon,
 .sidebar-icon,
 .modal-illustration,
@@ -2837,7 +2367,6 @@ html[data-theme='light'] .toast {
   color: var(--text);
   border-color: color-mix(in srgb, var(--acid-ink) 45%, transparent);
 }
-
 /* ---- Access: secondary links ---- */
 .auth-links {
   flex-direction: column;
@@ -2865,7 +2394,6 @@ html[data-theme='light'] .toast {
   margin-top: 14px;
   padding: 0;
 }
-
 /* ---- Routine editor sheet ---- */
 .editor-sheet {
   padding: 0;
@@ -3034,7 +2562,7 @@ html[data-theme='light'] .toast {
 .ex-name small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 2px;
 }
 .ex-actions {
@@ -3077,7 +2605,7 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   min-width: 0;
 }
 .stepper-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -3134,7 +2662,6 @@ html[data-theme='dark'] .ex-actions .ex-remove {
     padding: 0;
   }
 }
-
 /* ---- Exercise picker (inside the editor sheet) ---- */
 .picker {
   display: flex;
@@ -3153,7 +2680,7 @@ html[data-theme='dark'] .ex-actions .ex-remove {
 .picker-head small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 2px;
 }
 .picker-done {
@@ -3193,7 +2720,7 @@ html[data-theme='dark'] .ex-actions .ex-remove {
 .picker-row small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 2px;
 }
 .picker-row-added strong {
@@ -3229,7 +2756,6 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   font-size: 13px;
   text-align: center;
 }
-
 /* ---- Exercise media (frames from Free Exercise DB) ---- */
 .ex-thumb {
   flex-shrink: 0;
@@ -3284,7 +2810,7 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   border-radius: 9px;
   background: #0b0f17cc;
   color: #f3f6fa;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3356,7 +2882,7 @@ html[data-theme='dark'] .ex-actions .ex-remove {
 .media-credit {
   display: block;
   margin-top: 14px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--subtle);
   text-align: center;
 }
@@ -3384,10 +2910,9 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   margin-top: -8px;
 }
 .filter-secondary button {
-  font-size: 10.5px;
+  font-size: 12px;
   padding: 7px 10px;
 }
-
 /* ---- Privacy page and legal links ---- */
 .auth-legal {
   font-size: 12px;
@@ -3476,7 +3001,6 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   color: var(--acid-ink);
   font-weight: 700;
 }
-
 .legal .overline {
   display: block;
 }

@@ -375,8 +375,6 @@ export default function RBApp() {
   // ---- App -----------------------------------------------------------------------------------
   return (
     <div className="app-root">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
       <Sidebar tab={tab} onSelect={setTab} />
       <div className="content-shell">
         <Topbar
@@ -384,6 +382,7 @@ export default function RBApp() {
           syncStatus={sync.status}
           syncError={sync.error}
           inSession={data.active !== null}
+          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}`}
           onSelect={setTab}
         />
         <main className="main-content">
@@ -404,9 +403,9 @@ export default function RBApp() {
             <TodayView
               data={data}
               metrics={metrics}
+              trend={trend}
               nextRoutine={nextRoutine}
               totalSessions={totalSessions}
-              totalSets={totalSets}
               now={now}
               onContinue={() => setTab('train')}
               onStart={startWorkout}

@@ -4,11 +4,12 @@ import '@fontsource/barlow/latin-400.css';
 import '@fontsource/barlow/latin-500.css';
 import '@fontsource/barlow/latin-600.css';
 import '@fontsource/barlow/latin-700.css';
+import '@fontsource/barlow/latin-800.css';
 import '@fontsource/barlow-condensed/latin-600.css';
 import '@fontsource/barlow-condensed/latin-700.css';
 import '@fontsource/barlow-condensed/latin-800.css';
 import './globals.css';
-import './stars.css';
+import './glass.css';
 
 export const metadata: Metadata = {
   title: 'RB — Tu entrenamiento, en progreso',
@@ -23,7 +24,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0d' },
     { media: '(prefers-color-scheme: light)', color: '#e8e8e8' },
   ],
 };
@@ -35,7 +36,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script id="rb-theme-boot" dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Franja oscura bajo la barra de estado de la PWA en iOS (texto blanco): visible también al esconder la barra superior. */}
+        <div className="statusbar-scrim" aria-hidden="true" />
+        {children}
+      </body>
     </html>
   );
 }
