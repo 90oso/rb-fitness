@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.8.1] — 2026-11-06
+
+### Cambiado
+
+- **Móvil, sin superposiciones**: la barra inferior y la superior son más opacas, y un degradado desvanece el contenido antes de llegar a la barra inferior, así que ya no se ve el texto pasando por debajo de la cápsula.
+- **Móvil, menos denso y más liviano**: se quitan elementos repetidos o decorativos (la etiqueta «Listo» de la barra superior, el renglón de ejercicios del hero de Hoy, los rótulos pequeños sobre cada título, el icono de cada rutina y de cada estadística, el «Ver cómo se hace» repetido en cada ejercicio y el párrafo de «Diseña tu propio ciclo»). Títulos y cifras bajan un paso de tamaño y de grosor, los márgenes laterales pasan a 20 px, las tarjetas tienen más aire interno, los botones y la barra inferior son más compactos y la cifra gigante de fondo en Hoy es más discreta. Las rutinas muestran 2 ejercicios y «+N más».
+
 ## [0.8.0] — 2026-11-06
 
 ### Cambiado
@@ -10,8 +17,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Vers
 - **Hoy rediseñado, con la próxima sesión primero**: saludo, tarjeta de la próxima sesión con un único botón de acción, dos fichas de la semana (anillo de sesiones y volumen con su tendencia real de las últimas semanas) y el ciclo en carrusel. El número del día aparece enorme y en contorno detrás del cristal. En escritorio la próxima sesión y las fichas de la semana van en dos columnas.
 - La barra superior **se esconde al bajar y reaparece al subir** (solo en móvil), y vuelve a mostrarse al cambiar de pestaña, abrir una ventana o enfocarla con el teclado. La franja bajo la barra de estado del iPhone queda siempre oscura (`.statusbar-scrim`).
 - Gráfica de volumen y avisos usan los colores del tema (barra roja en claro, amarilla en oscuro).
-- Estado de sincronización con etiqueta propia.
-- **Móvil, menos denso y sin superposiciones**: la barra inferior y la superior son más opacas, y un degradado desvanece el contenido antes de llegar a la barra inferior (ya no se ve el texto pasando por debajo). Se quitan elementos repetidos o decorativos: la etiqueta «Listo» de la barra superior, el renglón de ejercicios del hero de Hoy, los rótulos pequeños sobre cada título, el icono de cada rutina, el icono de cada estadística, el texto «Ver cómo se hace» repetido en cada ejercicio y el párrafo de «Diseña tu propio ciclo». Las rutinas muestran 2 ejercicios y «+N más»; Hoy separa más sus secciones. Además, la escala en móvil es más liviana: títulos y cifras un paso más pequeños y con menos grosor, márgenes laterales de 20 px, tarjetas con más aire interno, botones y barra inferior más compactos, y la cifra gigante de fondo en Hoy más discreta.
+- Estado de sincronización con etiqueta propia; en el móvil la etiqueta de la barra pasa a «Listo».
 
 ### Corregido
 
