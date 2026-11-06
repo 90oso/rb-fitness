@@ -164,7 +164,7 @@ export default function ProfileView({
                 <RotateCcw size={16} /> CICLO
               </span>
             </div>
-            <h3>Siguiente día del ciclo</h3>
+            <h2>Siguiente día del ciclo</h2>
             <select
               className="cycle-selector"
               value={data.cycleIndex}
@@ -180,7 +180,7 @@ export default function ProfileView({
           </section>
 
           <section className="card settings-card">
-            <h3>Cuenta</h3>
+            <h2>Cuenta</h2>
             {email && <p className="account-email">{email}</p>}
             <div className="settings-buttons">
               <button className="secondary-btn" onClick={onSignOut}>
@@ -198,7 +198,7 @@ export default function ProfileView({
           </section>
 
           <section className="card settings-card danger-card">
-            <h3>Borrar mis datos</h3>
+            <h2>Borrar mis datos</h2>
             <p>Reinicia tu historial o elimina la cuenta por completo. No se puede deshacer.</p>
             <div className="danger-actions">
               <button className="danger-link" onClick={onReset}>
