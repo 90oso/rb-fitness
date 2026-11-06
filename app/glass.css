@@ -60,7 +60,11 @@ html[data-theme='dark'] {
   --chip-hover: rgba(255, 255, 255, 0.16);
   --nav-active-bg: rgba(255, 255, 255, 0.18);
   --nav-active-border: rgba(255, 255, 255, 0.3);
-  --topbar-bg: rgba(10, 10, 13, 0.78);
+  --topbar-bg: rgba(10, 10, 13, 0.92);
+  --nav-bg:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05)), rgba(12, 12, 16, 0.82);
+  --scrim: rgba(10, 10, 13, 0.5);
+  --scrim-tint: rgba(10, 10, 13, 0.55);
   --cta-shadow: 0 10px 22px -10px rgba(255, 212, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --mark-stroke: rgba(255, 255, 255, 0.14);
   --grain: var(--grain-white);
@@ -112,7 +116,10 @@ html[data-theme='light'] {
   --chip-hover: rgba(18, 18, 18, 0.1);
   --nav-active-bg: rgba(255, 212, 0, 0.34);
   --nav-active-border: rgba(155, 0, 0, 0.3);
-  --topbar-bg: rgba(232, 232, 232, 0.82);
+  --topbar-bg: rgba(232, 232, 232, 0.94);
+  --nav-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78));
+  --scrim: rgba(232, 232, 232, 0.55);
+  --scrim-tint: rgba(232, 232, 232, 0.6);
   --cta-shadow: 0 10px 20px -12px rgba(120, 90, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --mark-stroke: rgba(18, 18, 18, 0.14);
   --grain: var(--grain-black);
@@ -632,7 +639,30 @@ select {
   display: none;
 }
 /* ---- Navegación inferior en cápsula (móvil): lo único totalmente redondo ---- */
+.nav-scrim {
+  display: none;
+}
 @media (max-width: 800px) {
+  /* Franja bajo la cápsula: el contenido se desenfoca y se desvanece antes de llegar a ella */
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 39;
+    height: calc(122px + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
+    background: linear-gradient(to top, var(--scrim-tint), transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    -webkit-mask-image: linear-gradient(
+      to top,
+      #000 calc(78px + env(safe-area-inset-bottom, 0px)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(to top, #000 calc(78px + env(safe-area-inset-bottom, 0px)), transparent 100%);
+  }
   .bottom-nav {
     left: 14px;
     right: 14px;
@@ -643,7 +673,7 @@ select {
     justify-content: stretch;
     border: 1px solid var(--glass-border);
     border-radius: 32px;
-    background: var(--glass-bg);
+    background: var(--nav-bg);
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-shadow);
@@ -1181,6 +1211,80 @@ html[data-theme='light'] .danger-card {
     font-size: 28px;
   }
 }
+/* ---- Móvil: el contenido se desvanece antes de llegar a la barra inferior ---- */
+@media (max-width: 800px) {
+  .app-root::after {
+    content: '';
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 39;
+    height: calc(116px + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
+    background: linear-gradient(to top, var(--scrim), transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(to top, #000 35%, transparent);
+    mask-image: linear-gradient(to top, #000 35%, transparent);
+  }
+}
+
+/* ---- Móvil: menos densidad (lo esencial primero, sin repetir lo que ya dice otro elemento) ---- */
+@media (max-width: 800px) {
+  /* El estado «Listo» no aporta en el móvil; la nube ya avisa si algo no se guardó */
+  .top-actions .activity-pill {
+    display: none;
+  }
+  .top-actions {
+    gap: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .hoy {
+    gap: 24px;
+  }
+  .hoy-hero {
+    gap: 12px;
+  }
+  .hoy-preview {
+    display: none;
+  }
+  .page-head {
+    margin: 6px 0 24px;
+  }
+  .page-head .overline {
+    display: none;
+  }
+  .cycle-toolbar {
+    margin-bottom: 20px;
+  }
+  .cycle-toolbar p {
+    display: none;
+  }
+  .routine-glyph {
+    display: none;
+  }
+  .routine-top {
+    margin-bottom: 14px;
+  }
+  .routine-tile {
+    min-height: 0;
+  }
+  .stat-tile {
+    min-height: 0;
+  }
+  .stat-tile > span {
+    display: none;
+  }
+  .exercise-tile {
+    min-height: 0;
+  }
+  .exercise-tile em {
+    display: none;
+  }
+}
+
 /* ---- Movimiento y transparencia reducidos, y navegadores sin desenfoque ---- */
 @media (prefers-reduced-motion: reduce) {
   .topbar,
@@ -1194,6 +1298,8 @@ html[data-theme='light'] .danger-card {
     --glass-strong: rgba(20, 20, 26, 0.98);
     --panel: rgba(24, 24, 30, 0.96);
     --topbar-bg: rgba(10, 10, 13, 0.98);
+    --nav-bg: rgba(20, 20, 26, 0.98);
+    --scrim: rgba(10, 10, 13, 0.9);
   }
   :root,
   html[data-theme='light'] {
@@ -1201,6 +1307,8 @@ html[data-theme='light'] .danger-card {
     --glass-strong: rgba(255, 255, 255, 0.99);
     --panel: rgba(255, 255, 255, 0.96);
     --topbar-bg: rgba(232, 232, 232, 0.98);
+    --nav-bg: rgba(255, 255, 255, 0.98);
+    --scrim: rgba(232, 232, 232, 0.9);
   }
   body::after {
     display: none;
@@ -1209,11 +1317,13 @@ html[data-theme='light'] .danger-card {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html[data-theme='dark'] {
     --glass-bg: rgba(20, 20, 26, 0.9);
+    --nav-bg: rgba(20, 20, 26, 0.94);
     --topbar-bg: rgba(10, 10, 13, 0.96);
   }
   :root,
   html[data-theme='light'] {
     --glass-bg: rgba(255, 255, 255, 0.92);
+    --nav-bg: rgba(255, 255, 255, 0.95);
     --topbar-bg: rgba(232, 232, 232, 0.96);
   }
 }

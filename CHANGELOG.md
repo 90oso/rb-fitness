@@ -10,7 +10,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Vers
 - **Hoy rediseñado, con la próxima sesión primero**: saludo, tarjeta de la próxima sesión con un único botón de acción, dos fichas de la semana (anillo de sesiones y volumen con su tendencia real de las últimas semanas) y el ciclo en carrusel. El número del día aparece enorme y en contorno detrás del cristal. En escritorio la próxima sesión y las fichas de la semana van en dos columnas.
 - La barra superior **se esconde al bajar y reaparece al subir** (solo en móvil), y vuelve a mostrarse al cambiar de pestaña, abrir una ventana o enfocarla con el teclado. La franja bajo la barra de estado del iPhone queda siempre oscura (`.statusbar-scrim`).
 - Gráfica de volumen y avisos usan los colores del tema (barra roja en claro, amarilla en oscuro).
-- Estado de sincronización con etiqueta propia; en el móvil la etiqueta de la barra pasa a «Listo».
+- Estado de sincronización con etiqueta propia.
+- **Móvil, menos denso y sin superposiciones**: la barra inferior y la superior son más opacas, y un degradado desvanece el contenido antes de llegar a la barra inferior (ya no se ve el texto pasando por debajo). Se quitan elementos repetidos o decorativos: la etiqueta «Listo» de la barra superior, el renglón de ejercicios del hero de Hoy, los rótulos pequeños sobre cada título, el icono de cada rutina, el icono de cada estadística, el texto «Ver cómo se hace» repetido en cada ejercicio y el párrafo de «Diseña tu propio ciclo». Las rutinas muestran 2 ejercicios y «+N más»; Hoy separa más sus secciones.
 
 ### Corregido
 
