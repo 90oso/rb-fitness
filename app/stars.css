@@ -1,0 +1,621 @@
+/*
+ * RB Fitness — capa visual "Stars" (solo presentación; no cambia lógica, ids ni nombres de clase).
+ *
+ * Referencia: Stars Action Gym — rojo oscuro, negro, gris claro y blanco, con el amarillo de las rayas
+ * del local como color de acción; titulares gruesos, condensados y en mayúsculas (Barlow Condensed);
+ * cintas inclinadas, esquinas cortadas y números de sección grandes.
+ * Los nombres de token (--acid, --aqua) vienen del diseño anterior: aquí --acid es el amarillo de
+ * acción y --aqua el rojo de acento. Para volver al estilo anterior basta con no importar este archivo.
+ */
+
+html[data-theme='dark'] {
+  --bg: #0a0a0a;
+  --panel: #141414;
+  --panel-deep: #0e0e0e;
+  --panel-high: #1f1f1f;
+  --text: #f5f5f5;
+  --muted: #a8a8a8;
+  --subtle: #8a8a8a;
+  --stroke: #2b2b2b;
+  --field: #0f0f0f;
+  --ring-track: rgba(255, 255, 255, 0.09);
+  --chart-grid: #2d2d2d;
+  --acid: #ffd400;
+  --acid-ink: #ffd400;
+  --aqua: #ff3d33;
+  --acidtext: #111111;
+  --acid-rgb: 255 212 0;
+  --aqua-rgb: 255 61 51;
+  --ambient-1: #b00000;
+  --ambient-2: #ffd400;
+  --red: #d10000;
+  --red-deep: #9b0000;
+  --focus: #ffd400;
+  --stripe-dark: #000000;
+  --series-1: #ffd400;
+  --series-2: #ff3d33;
+  --series-3: #f5f5f5;
+  --wave-a: #ffd400;
+  --wave-b: #ff3d33;
+}
+:root,
+html[data-theme='light'] {
+  --bg: #e8e8e8;
+  --panel: #ffffff;
+  --panel-deep: #f4f4f4;
+  --panel-high: #e3e3e3;
+  --text: #121212;
+  --muted: #595959;
+  --subtle: #6e6e6e;
+  --stroke: #d2d2d2;
+  --field: #f3f3f3;
+  --ring-track: #dadada;
+  --chart-grid: #dddddd;
+  --acid: #ffd400;
+  --acid-ink: #9b0000;
+  --aqua: #b00000;
+  --acidtext: #111111;
+  --acid-rgb: 255 212 0;
+  --aqua-rgb: 155 0 0;
+  --ambient-1: #9b0000;
+  --ambient-2: #ffd400;
+  --red: #b30000;
+  --red-deep: #9b0000;
+  --focus: #9b0000;
+  --stripe-dark: #111111;
+  --series-1: #ffd400;
+  --series-2: #b00000;
+  --series-3: #121212;
+  --wave-a: #ffd400;
+  --wave-b: #b00000;
+}
+
+/* ---- Angular radii (generated from globals.css: 10-13px→4, 14-19→6, 20-27→8, 28+→10) ---- */
+.aside-link,
+.sidebar-icon,
+.status-tag,
+.performance-duo > div,
+.cycle-icon,
+.secondary-btn,
+.lime-btn,
+.small-primary,
+.suggestion,
+.exercise-choice,
+.previous-result,
+.number-control button,
+.rest-timer,
+.finish-btn,
+.history-icon,
+.pr-tile,
+.exercise-icon,
+.form-label input,
+.form-label select,
+.cycle-selector,
+.toast,
+.modal-close,
+.safe-tip,
+.progression-hint,
+.segmented::before,
+.segmented button,
+.field-eye,
+.danger-btn,
+.ex-actions button,
+.stepper-row,
+.picker-add {
+  border-radius: 4px;
+}
+.brand-icon,
+.sidebar-bottom,
+.header-flourish,
+.cycle-card,
+.first-tip,
+.routine-glyph,
+.icon-action,
+.number-control > div,
+.save-set,
+.empty > span,
+.search-field,
+.exercise-tile,
+.modal-illustration,
+.segmented,
+.auth-form .form-label input,
+.gate-alert,
+.gate-submit,
+.confirm-icon,
+.editor-empty,
+.editor-empty > span,
+.ex-card,
+.motion-stage,
+.video-stage {
+  border-radius: 6px;
+}
+.activity-pill,
+.card,
+.routine-tag,
+.filter-scroll button,
+.modal {
+  border-radius: 8px;
+}
+.primary-circle,
+.auth-card {
+  border-radius: 10px;
+}
+
+/* ---- Tipografía: Barlow para texto, Barlow Condensed en mayúsculas para titulares y etiquetas ---- */
+body {
+  font-weight: 500;
+}
+h1,
+h2,
+h3,
+.brand-title,
+.brand-icon,
+.auth-brand,
+.auth-title,
+.overline,
+.section-label,
+.eyebrow-line,
+.aside-label,
+.brand-caption,
+.status-tag,
+.metric-badge,
+.today-chip,
+.routine-tag,
+.activity-pill,
+.cycle-day,
+.secondary-btn,
+.lime-btn,
+.small-primary,
+.primary-circle,
+.finish-btn,
+.save-set,
+.danger-btn,
+.danger-link,
+.text-link,
+.aside-link,
+.bottom-nav button span,
+.segmented button,
+.training-kicker,
+.motion-badge,
+.set-index,
+.app-footer {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+h1,
+h2,
+h3,
+.brand-title,
+.brand-icon,
+.auth-brand,
+.auth-title,
+.ring-center strong,
+.ring-legend strong,
+.performance-stat strong,
+.performance-duo strong,
+.mini-stats strong,
+.stat-tile strong,
+.pr-tile strong,
+.history-vol,
+.number-control input,
+.stepper-value {
+  letter-spacing: 0.02em;
+  font-weight: 800;
+}
+h1,
+h2,
+h3 {
+  line-height: 0.98;
+}
+.overline,
+.section-label,
+.eyebrow-line,
+.aside-label,
+.brand-caption,
+.status-tag,
+.metric-badge,
+.today-chip,
+.routine-tag,
+.activity-pill,
+.cycle-day,
+.training-kicker,
+.app-footer {
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  font-size: 12px;
+}
+.brand-caption {
+  font-size: 11px;
+}
+.aside-link {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+}
+.secondary-btn,
+.lime-btn,
+.small-primary,
+.primary-circle,
+.finish-btn,
+.save-set,
+.danger-btn {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+.text-link,
+.danger-link {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+.welcome h1 {
+  font-size: clamp(60px, 9vw, 104px);
+  line-height: 0.88;
+  letter-spacing: 0.01em;
+  margin: 10px 0 16px;
+}
+.page-head h1 {
+  font-size: clamp(48px, 7vw, 80px);
+  line-height: 0.92;
+}
+.session-header h1 {
+  font-size: clamp(38px, 5vw, 58px);
+}
+.session-card h2,
+.section-heading h2,
+.routine-tile h2,
+.log-card h2 {
+  font-size: 32px;
+}
+.chart-card h2,
+.muscle-card h2 {
+  font-size: 27px;
+}
+.settings-card h3 {
+  font-size: 23px;
+}
+.modal h2 {
+  font-size: 38px;
+}
+.modal h3 {
+  font-size: 22px;
+}
+.confirm-dialog h2,
+.editor-head h2 {
+  font-size: 30px;
+}
+.stat-tile strong {
+  font-size: 46px;
+}
+.performance-stat strong {
+  font-size: clamp(54px, 6vw, 72px);
+}
+.ring-center strong {
+  font-size: 42px;
+}
+.mini-stats strong {
+  font-size: 32px;
+}
+.performance-duo strong,
+.pr-tile strong {
+  font-size: 30px;
+}
+.history-vol {
+  font-size: 21px;
+}
+.ring-legend strong {
+  font-size: 20px;
+}
+.number-control input {
+  font-size: 30px;
+}
+.stepper-value {
+  font-size: 19px;
+}
+.brand-title {
+  font-size: 30px;
+}
+.brand-icon {
+  font-size: 28px;
+  border-radius: 6px;
+}
+.brand-dot {
+  background: var(--stripe-dark);
+}
+.auth-brand {
+  font-size: 60px;
+}
+.auth-title {
+  font-size: clamp(44px, 12vw, 60px);
+  line-height: 0.92;
+}
+
+/* ---- Formas: esquinas cortadas en la acción principal, tarjetas con filo rojo ---- */
+.lime-btn,
+.small-primary,
+.primary-circle {
+  border: 0;
+  background: var(--acid);
+  color: var(--acidtext);
+  box-shadow: none;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  border-radius: 0;
+  transition:
+    transform 0.12s,
+    filter 0.12s;
+}
+.lime-btn:hover,
+.small-primary:hover,
+.primary-circle:hover {
+  filter: brightness(1.06);
+}
+.lime-btn:active,
+.small-primary:active,
+.primary-circle:active {
+  transform: translateY(1px);
+}
+.lime-btn:focus-visible,
+.small-primary:focus-visible,
+.primary-circle:focus-visible {
+  clip-path: none;
+}
+.secondary-btn,
+.finish-btn {
+  background: transparent;
+  border: 1.5px solid var(--text);
+  color: var(--text);
+}
+.secondary-btn:hover,
+.finish-btn:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+.card {
+  box-shadow: none;
+  border-top: 3px solid var(--red);
+}
+input,
+select {
+  border-width: 1.5px;
+}
+.status-tag,
+.metric-badge,
+.today-chip,
+.routine-tag,
+.activity-pill {
+  transform: skewX(-10deg);
+  border-radius: 2px;
+  background: rgb(var(--acid-rgb) / 0.14);
+  border: 0;
+  border-left: 3px solid var(--acid);
+  padding: 5px 11px;
+}
+.routine-index {
+  font: 800 52px/1 var(--font-display);
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--subtle);
+  letter-spacing: 0.02em;
+}
+
+/* ---- Cintas: franja de rayas bajo la barra superior y cinta inclinada en los títulos ---- */
+.topbar {
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 6px;
+  background: repeating-linear-gradient(-45deg, var(--acid) 0 10px, var(--stripe-dark) 10px 20px);
+  pointer-events: none;
+}
+.page-head::after,
+.welcome::after {
+  content: '';
+  display: block;
+  width: 96px;
+  height: 8px;
+  margin-top: 14px;
+  background: linear-gradient(90deg, var(--acid) 0 62%, var(--red) 62%);
+  transform: skewX(-28deg);
+}
+.welcome {
+  flex-wrap: wrap;
+}
+.welcome::after {
+  flex-basis: 100%;
+  order: 3;
+  margin-top: 4px;
+}
+.header-flourish {
+  border: 0;
+  border-radius: 0;
+  background: var(--acid);
+  color: var(--acidtext);
+  transform: skewX(-12deg);
+  clip-path: none;
+}
+.header-flourish svg {
+  transform: skewX(12deg);
+}
+
+/* ---- Navegación: indicador inclinado, etiquetas en condensada ---- */
+.aside-link {
+  border-radius: 4px;
+}
+.aside-link.selected {
+  background: rgb(var(--acid-rgb) / 0.12);
+  box-shadow: inset 4px 0 0 var(--acid);
+}
+.aside-active-dot {
+  border-radius: 0;
+  transform: skewX(-24deg);
+  width: 10px;
+  height: 4px;
+  box-shadow: none;
+}
+@media (max-width: 800px) {
+  .bottom-nav {
+    box-shadow: none;
+    border-top: 3px solid var(--red);
+  }
+  .bottom-nav button span {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  .bottom-nav button.active:before {
+    width: 38px;
+    height: 4px;
+    border-radius: 0;
+    top: -12px;
+    transform: skewX(-28deg);
+    box-shadow: none;
+  }
+}
+
+/* ---- Acceso: cintas inclinadas en lugar de manchas de color ---- */
+.auth-blob {
+  border-radius: 0;
+  filter: none;
+  opacity: 1;
+  animation: stars-slide 20s ease-in-out infinite alternate;
+}
+.auth-blob-1 {
+  width: 160%;
+  height: 17vmax;
+  top: 9%;
+  left: -30%;
+  right: auto;
+  background: var(--acid);
+  --tilt: -13deg;
+  transform: rotate(-13deg);
+}
+.auth-blob-2 {
+  width: 160%;
+  height: 10vmax;
+  bottom: 12%;
+  left: -30%;
+  background: var(--red-deep);
+  --tilt: -13deg;
+  transform: rotate(-13deg);
+  animation-duration: 26s;
+  animation-delay: -8s;
+}
+.auth-blob-3 {
+  width: 160%;
+  height: 2.6vmax;
+  top: auto;
+  bottom: 31%;
+  right: auto;
+  left: -30%;
+  background: var(--stripe-dark);
+  opacity: 1;
+  --tilt: -13deg;
+  transform: rotate(-13deg);
+  animation-duration: 32s;
+  animation-delay: -14s;
+}
+html[data-theme='dark'] .auth-blob {
+  opacity: 0.85;
+}
+html[data-theme='dark'] .auth-blob-3 {
+  background: var(--text);
+  opacity: 0.9;
+}
+.auth-card {
+  border-radius: 10px;
+  border-top: 4px solid var(--red);
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.28);
+}
+@keyframes stars-slide {
+  from {
+    transform: translateX(-4%) rotate(var(--tilt, -13deg));
+  }
+  to {
+    transform: translateX(4%) rotate(var(--tilt, -13deg));
+  }
+}
+.ambient {
+  opacity: 0.1;
+}
+html[data-theme='dark'] .ambient {
+  opacity: 0.16;
+}
+
+/* ---- Progreso de desplazamiento (solo navegadores que lo soportan) ---- */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .app-root::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: 80;
+      background: linear-gradient(90deg, var(--acid), var(--red));
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      animation: stars-scroll linear both;
+      animation-timeline: scroll(root block);
+      pointer-events: none;
+    }
+    @keyframes stars-scroll {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-blob {
+    animation: none;
+  }
+}
+
+/* Nombres de ejercicio, rutina e historial en condensada para que se lean como carteles */
+.exercise-tile strong,
+.cycle-toolbar strong,
+.cycle-manage-label strong,
+.history-main strong,
+.ex-name,
+.exercise-choice strong,
+.current-exercise strong,
+.log-exercise strong,
+.suggestion strong {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.05;
+}
+
+/* Acciones destructivas legibles en tema claro (el rosa anterior casi no se veía sobre blanco) */
+html[data-theme='light'] .danger-link,
+html[data-theme='light'] .gate-error {
+  color: var(--red);
+}
+html[data-theme='light'] .danger-card {
+  border-color: rgb(var(--aqua-rgb) / 0.35);
+}
+
+/* El campo del acceso ya marca su foco con borde propio: sin doble anillo */
+.auth-form .form-label input:focus-visible {
+  outline: none;
+}
+.auth-form .form-label input:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgb(var(--acid-rgb) / 0.28);
+}

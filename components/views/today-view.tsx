@@ -81,15 +81,20 @@ export default function TodayView({
                   label: 'Sesiones',
                   current: metrics.sessions,
                   goal: metrics.sessionsGoal,
-                  color: '#C3F400',
+                  color: 'var(--series-1)',
                 },
-                { label: 'Series', current: metrics.sets, goal: metrics.setsGoal, color: '#00E5ED' },
-                { label: 'Minutos', current: metrics.minutes, goal: metrics.minutesGoal, color: '#FFA9BA' },
+                { label: 'Series', current: metrics.sets, goal: metrics.setsGoal, color: 'var(--series-2)' },
+                {
+                  label: 'Minutos',
+                  current: metrics.minutes,
+                  goal: metrics.minutesGoal,
+                  color: 'var(--series-3)',
+                },
               ]}
             />
             <div className="ring-legend">
               <div>
-                <i style={{ background: '#C3F400' }} />
+                <i style={{ background: 'var(--series-1)' }} />
                 <span>Sesiones</span>
                 <strong>
                   {metrics.sessions}
@@ -97,7 +102,7 @@ export default function TodayView({
                 </strong>
               </div>
               <div>
-                <i style={{ background: '#00E5ED' }} />
+                <i style={{ background: 'var(--series-2)' }} />
                 <span>Series</span>
                 <strong>
                   {metrics.sets}
@@ -105,7 +110,7 @@ export default function TodayView({
                 </strong>
               </div>
               <div>
-                <i style={{ background: '#FFA9BA' }} />
+                <i style={{ background: 'var(--series-3)' }} />
                 <span>Minutos</span>
                 <strong>
                   {metrics.minutes}
@@ -138,8 +143,8 @@ export default function TodayView({
           >
             <defs>
               <linearGradient id="glow-wave">
-                <stop stopColor="#C3F400" />
-                <stop offset="1" stopColor="#00E5ED" />
+                <stop stopColor="var(--wave-a)" />
+                <stop offset="1" stopColor="var(--wave-b)" />
               </linearGradient>
             </defs>
             <path
