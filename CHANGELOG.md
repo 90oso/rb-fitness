@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.8.1] — 2026-11-06
+
+### Cambiado
+
+- **Móvil, sin superposiciones**: la barra inferior y la superior son más opacas, y un degradado desvanece el contenido antes de llegar a la barra inferior, así que ya no se ve el texto pasando por debajo de la cápsula.
+- **Móvil, menos denso y más liviano**: se quitan elementos repetidos o decorativos (la etiqueta «Listo» de la barra superior, el renglón de ejercicios del hero de Hoy, los rótulos pequeños sobre cada título, el icono de cada rutina y de cada estadística, el «Ver cómo se hace» repetido en cada ejercicio y el párrafo de «Diseña tu propio ciclo»). Títulos y cifras bajan un paso de tamaño y de grosor, los márgenes laterales pasan a 20 px, las tarjetas tienen más aire interno, los botones y la barra inferior son más compactos y la cifra gigante de fondo en Hoy es más discreta. Las rutinas muestran 2 ejercicios y «+N más».
+
 ## [0.8.0] — 2026-11-06
 
 ### Cambiado

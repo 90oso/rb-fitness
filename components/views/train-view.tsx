@@ -175,10 +175,10 @@ export default function TrainView({
                 {routine.subtitle} · {routine.exercises.length} ejercicios
               </p>
               <div className="routine-previews">
-                {routine.exercises.slice(0, 3).map((rx) => (
+                {routine.exercises.slice(0, 2).map((rx) => (
                   <span key={rx.exerciseId}>{getExercise(rx.exerciseId)?.name}</span>
                 ))}
-                {routine.exercises.length > 3 && <span>+ {routine.exercises.length - 3} más</span>}
+                {routine.exercises.length > 2 && <span>+ {routine.exercises.length - 2} más</span>}
               </div>
               <div className="routine-actions">
                 <button className="secondary-btn" onClick={() => onEditRoutine(routine.id)}>

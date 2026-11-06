@@ -144,17 +144,21 @@ export function Topbar({
 
 export function BottomNav({ tab, onSelect }: { tab: Tab; onSelect: (tab: Tab) => void }) {
   return (
-    <nav className="bottom-nav">
-      {NAV.map(({ id, label, icon: Icon }) => (
-        <button key={id} className={tab === id ? 'active' : ''} onClick={() => onSelect(id)}>
-          <Icon size={21} strokeWidth={tab === id ? 2.6 : 2} />
-          <span>{label}</span>
+    <>
+      {/* Desvanece el contenido que pasa por detrás de la cápsula (desenfoque progresivo) */}
+      <div className="nav-scrim" aria-hidden="true" />
+      <nav className="bottom-nav">
+        {NAV.map(({ id, label, icon: Icon }) => (
+          <button key={id} className={tab === id ? 'active' : ''} onClick={() => onSelect(id)}>
+            <Icon size={21} strokeWidth={tab === id ? 2.6 : 2} />
+            <span>{label}</span>
+          </button>
+        ))}
+        <button className={tab === 'profile' ? 'active' : ''} onClick={() => onSelect('profile')}>
+          <UserRound size={21} />
+          <span>Perfil</span>
         </button>
-      ))}
-      <button className={tab === 'profile' ? 'active' : ''} onClick={() => onSelect('profile')}>
-        <UserRound size={21} />
-        <span>Perfil</span>
-      </button>
-    </nav>
+      </nav>
+    </>
   );
 }
