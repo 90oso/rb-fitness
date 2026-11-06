@@ -82,6 +82,7 @@ html[data-theme='dark'] {
   --field: #111821;
   --ring-track: rgba(255, 255, 255, 0.08);
   --chart-grid: #2c3442;
+  --statusbar-bg: #0b0f17;
   --acid: #c3f400;
   --acid-ink: #c3f400;
   --aqua: #00e5ed;
@@ -112,6 +113,7 @@ html[data-theme='light'] {
   --field: #f4f7f9;
   --ring-track: #e0e6e8;
   --chart-grid: #e5eaed;
+  --statusbar-bg: #0b0f17;
   --acid: #acd800;
   --acid-ink: #5d7a00;
   --aqua: #00a7b0;
@@ -135,6 +137,9 @@ html,
 body {
   min-height: 100%;
   margin: 0;
+}
+body {
+  overscroll-behavior-y: contain;
 }
 body {
   font-family: var(--font-body);
@@ -180,7 +185,7 @@ button:disabled {
   display: flex;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: clip; /* not hidden: hidden makes this a scroll container and breaks sticky */
 }
 .ambient {
   position: fixed;
@@ -338,14 +343,27 @@ button:disabled {
   flex: 1;
 }
 .topbar {
-  height: 88px;
+  --topbar-h: 88px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 clamp(22px, 5vw, 80px);
+  padding: env(safe-area-inset-top, 0px) clamp(22px, 5vw, 80px) 0;
   border-bottom: 1px solid var(--stroke);
-  background: color-mix(in srgb, var(--bg), transparent 14%);
+  background: color-mix(in srgb, var(--bg), transparent 4%);
   backdrop-filter: blur(18px);
+}
+/* PWA with a translucent status bar (iOS): paint the notch area dark so the white clock and battery stay legible. */
+.topbar::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--statusbar-bg);
+  pointer-events: none;
 }
 .desktop-crumb {
   display: flex;
@@ -1816,7 +1834,7 @@ button:disabled {
     padding: 32px 26px 70px;
   }
   .topbar {
-    padding: 0 26px;
+    padding: env(safe-area-inset-top, 0px) 26px 0;
   }
   .ring-content {
     gap: 8px;
@@ -1842,8 +1860,8 @@ button:disabled {
     display: none;
   }
   .topbar {
-    height: 70px;
-    padding: 0 22px;
+    --topbar-h: 70px;
+    padding: env(safe-area-inset-top, 0px) 22px 0;
   }
   .desktop-crumb {
     display: none;
@@ -1876,7 +1894,7 @@ button:disabled {
   }
   .main-content {
     max-width: 620px;
-    padding: 24px 19px 100px;
+    padding: 24px 19px calc(104px + env(safe-area-inset-bottom, 0px));
     min-height: calc(100dvh - 150px);
   }
   .dashboard-grid {
@@ -1890,7 +1908,7 @@ button:disabled {
     right: 0;
     z-index: 40;
     border-top: 1px solid var(--stroke);
-    background: color-mix(in srgb, var(--bg), transparent 9%);
+    background: color-mix(in srgb, var(--bg), transparent 2%);
     backdrop-filter: blur(20px);
     padding: 9px 4px calc(9px + env(safe-area-inset-bottom));
     justify-content: space-around;
@@ -1936,8 +1954,8 @@ button:disabled {
 }
 @media (max-width: 600px) {
   .topbar {
-    height: 66px;
-    padding: 0 18px;
+    --topbar-h: 66px;
+    padding: env(safe-area-inset-top, 0px) 18px 0;
   }
   .activity-pill {
     font-size: 9px;
@@ -1952,7 +1970,7 @@ button:disabled {
     width: 34px;
   }
   .main-content {
-    padding: 23px 16px 105px;
+    padding: 23px 16px calc(108px + env(safe-area-inset-bottom, 0px));
   }
   .eyebrow-line {
     font-size: 9px;

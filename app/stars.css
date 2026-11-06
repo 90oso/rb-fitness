@@ -32,6 +32,7 @@ html[data-theme='dark'] {
   --red-deep: #9b0000;
   --focus: #ffd400;
   --stripe-dark: #000000;
+  --statusbar-bg: #000000;
   --series-1: #ffd400;
   --series-2: #ff3d33;
   --series-3: #f5f5f5;
@@ -63,6 +64,7 @@ html[data-theme='light'] {
   --red-deep: #9b0000;
   --focus: #9b0000;
   --stripe-dark: #111111;
+  --statusbar-bg: #0a0a0a;
   --series-1: #ffd400;
   --series-2: #b00000;
   --series-3: #121212;
@@ -406,9 +408,6 @@ select {
 }
 
 /* ---- Cintas: franja de rayas bajo la barra superior y cinta inclinada en los títulos ---- */
-.topbar {
-  position: relative;
-}
 .topbar::after {
   content: '';
   position: absolute;
@@ -559,7 +558,7 @@ html[data-theme='dark'] .ambient {
     .app-root::before {
       content: '';
       position: fixed;
-      top: 0;
+      top: env(safe-area-inset-top, 0px);
       left: 0;
       right: 0;
       height: 3px;
