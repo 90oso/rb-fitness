@@ -3,11 +3,12 @@ import { useState, type FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowRight, Cloud, Eye, EyeOff, Mail } from 'lucide-react';
 import { AuthBrand, AuthFrame } from '@/components/ui/auth-frame';
+import Link from 'next/link';
 import { describeAuthError } from '@/lib/auth-errors';
+import { readRememberedEmail, rememberEmail } from '@/lib/remembered-email';
 
 type Mode = 'login' | 'signup' | 'reset' | 'update';
 const MIN_PASSWORD = 8;
-const LAST_EMAIL_KEY = 'rb-last-email';
 
 const TITLE: Record<Mode, string> = {
   login: 'Hola de nuevo.',
@@ -24,21 +25,6 @@ const ACTION: Record<Mode, string> = {
 
 const redirectHome = () => `${window.location.origin}/`;
 
-function readLastEmail(): string {
-  try {
-    return window.localStorage.getItem(LAST_EMAIL_KEY) ?? '';
-  } catch {
-    return '';
-  }
-}
-function rememberEmail(email: string) {
-  try {
-    window.localStorage.setItem(LAST_EMAIL_KEY, email);
-  } catch {
-    // storage blocked: nothing to remember
-  }
-}
-
 /**
  * Access screen. One primary action per mode (Entrar), account creation as a secondary link,
  * the last email used on this device prefilled, and the "new password" step from a recovery link.
@@ -48,20 +34,23 @@ export default function AuthScreen({
   configured,
   recovery = false,
   onRecoveryDone,
+  initialNotice = '',
 }: {
   client: SupabaseClient | null;
   configured: boolean | null;
   recovery?: boolean;
   onRecoveryDone?: () => void;
+  /** One-off message shown above the form, e.g. after deleting the account. */
+  initialNotice?: string;
 }) {
   const [mode, setMode] = useState<Mode>('login');
-  const [email, setEmail] = useState(() => (typeof window === 'undefined' ? '' : readLastEmail()));
+  const [email, setEmail] = useState(() => (typeof window === 'undefined' ? '' : readRememberedEmail()));
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [notice, setNotice] = useState(initialNotice);
 
   const current: Mode = recovery ? 'update' : mode;
   const remembered = email !== '' && mode === 'login';
@@ -282,6 +271,9 @@ export default function AuthScreen({
                 Volver
               </button>
             )}
+            <Link href="/privacidad" className="auth-legal">
+              Privacidad
+            </Link>
           </div>
         </>
       )}

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
 export interface ConfirmOptions {
@@ -9,6 +9,8 @@ export interface ConfirmOptions {
   cancelLabel?: string;
   /** Red confirm button for destructive actions. */
   danger?: boolean;
+  /** Extra safeguard for irreversible actions: the confirm button stays disabled until this word is typed. */
+  requireText?: string;
 }
 
 /** RB-styled replacement for window.confirm(); focus starts on Cancel so Enter never destroys by accident. */
@@ -20,6 +22,8 @@ export default function ConfirmDialog({
   onClose: (confirmed: boolean) => void;
 }) {
   const cancelRef = useRef<HTMLButtonElement | null>(null);
+  const [typed, setTyped] = useState('');
+  const unlocked = !options.requireText || typed.trim().toLowerCase() === options.requireText.toLowerCase();
   useEffect(() => {
     cancelRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
@@ -51,11 +55,28 @@ export default function ConfirmDialog({
             {options.message}
           </p>
         )}
+        {options.requireText && (
+          <label className="form-label confirm-type">
+            Para continuar, escribe «{options.requireText}»
+            <input
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              aria-label={`Escribe ${options.requireText} para confirmar`}
+            />
+          </label>
+        )}
         <div className="confirm-actions">
           <button ref={cancelRef} className="secondary-btn" onClick={() => onClose(false)}>
             {options.cancelLabel ?? 'Cancelar'}
           </button>
-          <button className={options.danger ? 'danger-btn' : 'lime-btn'} onClick={() => onClose(true)}>
+          <button
+            className={options.danger ? 'danger-btn' : 'lime-btn'}
+            disabled={!unlocked}
+            onClick={() => onClose(true)}
+          >
             {options.confirmLabel ?? 'Confirmar'}
           </button>
         </div>

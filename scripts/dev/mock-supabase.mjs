@@ -146,6 +146,14 @@ const server = createServer(async (req, res) => {
       rows.set(user.id, { payload: new_payload, revision: row.revision + 1 });
       return send(res, 200, String(row.revision + 1));
     }
+    if (url.pathname === '/rest/v1/rpc/rb_delete_account' && req.method === 'POST') {
+      const user = bearer(req);
+      if (!user) return send(res, 401, { message: 'JWT required' });
+      rows.delete(user.id);
+      users.delete(user.email);
+      for (const [token, id] of tokens) if (id === user.id) tokens.delete(token);
+      return send(res, 204);
+    }
     // ---- test helpers -------------------------------------------------------------------
     if (url.pathname === '/__mock/recovery-link' && req.method === 'GET') {
       // Builds the hash a real recovery email would carry (implicit flow) for the given email.

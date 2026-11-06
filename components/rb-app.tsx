@@ -17,6 +17,8 @@ import { useCloudSync } from '@/hooks/use-cloud-sync';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useToast } from '@/hooks/use-toast';
 import { getExercise, initialData } from '@/lib/catalog';
+import { deleteCloudAccount } from '@/lib/cloud';
+import { forgetRememberedEmail } from '@/lib/remembered-email';
 import { addCycleDay, defaultCycleDay, duplicateCycleDay, moveCycleDay, removeCycleDay } from '@/lib/cycles';
 import { D, makeRx } from '@/lib/format';
 import {
@@ -50,6 +52,7 @@ export default function RBApp() {
   const [editingRoutine, setEditingRoutine] = useState<string | null>(null);
   const [showCycleManager, setShowCycleManager] = useState(false);
   const [cycleError, setCycleError] = useState('');
+  const [farewell, setFarewell] = useState('');
 
   // One clock: every second while a session or a rest timer runs, once a minute otherwise (date and greeting).
   const restRemainingMs = restEnd !== null && restEnd > now ? restEnd - now : null;
@@ -299,7 +302,35 @@ export default function RBApp() {
       toast('Hay cambios sin confirmar. Vuelve a intentar cuando se guarden.');
       return;
     }
+    setFarewell('');
     await auth.signOut();
+    setTab('today');
+    setRestEnd(null);
+  }
+  async function deleteAccount() {
+    if (!auth.client) return;
+    if (sync.isBusy()) {
+      toast('Hay cambios sin confirmar. Vuelve a intentar cuando se guarden.');
+      return;
+    }
+    const ok = await confirm({
+      title: 'Eliminar mi cuenta',
+      message:
+        'Se borran para siempre tu cuenta, tu historial y tus rutinas. No se puede deshacer. Si quieres conservar algo, descarga antes una copia de tus datos.',
+      confirmLabel: 'Eliminar cuenta',
+      danger: true,
+      requireText: 'ELIMINAR',
+    });
+    if (!ok) return;
+    try {
+      await deleteCloudAccount(auth.client);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'No se pudo eliminar la cuenta.');
+      return;
+    }
+    forgetRememberedEmail();
+    setFarewell('Tu cuenta y tus datos se eliminaron.');
+    await auth.signOut('local');
     setTab('today');
     setRestEnd(null);
   }
@@ -315,6 +346,7 @@ export default function RBApp() {
         configured={auth.configured}
         recovery={auth.recovery}
         onRecoveryDone={auth.finishRecovery}
+        initialNotice={farewell}
       />
     );
   }
@@ -453,6 +485,7 @@ export default function RBApp() {
               onExport={() => downloadBackup(data)}
               onSignOut={() => void signOut()}
               onReset={() => void resetAll()}
+              onDeleteAccount={() => void deleteAccount()}
             />
           )}
         </main>
