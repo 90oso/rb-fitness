@@ -7,6 +7,9 @@ export type ResolvedTheme = 'dark' | 'light';
 
 export const THEME_KEY = 'rb-theme';
 
+/** Browser/status-bar color per theme (<meta name="theme-color">), so the installed app matches the chosen theme. */
+export const THEME_COLORS: Record<ResolvedTheme, string> = { light: '#e8e8e8', dark: '#0a0a0a' };
+
 /** Runs in <head> before hydration. Keep it dependency-free and tiny. */
 export const themeBootScript = `(function(){try{var p=localStorage.getItem('${THEME_KEY}');var t=p==='light'||p==='dark'?p:p==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
@@ -35,8 +38,17 @@ export function resolveTheme(preference: ThemePreference): ResolvedTheme {
   return preference;
 }
 
+export function syncThemeColor(theme: ResolvedTheme) {
+  if (typeof document === 'undefined') return;
+  document
+    .querySelectorAll('meta[name="theme-color"]')
+    .forEach((meta) => meta.setAttribute('content', THEME_COLORS[theme]));
+}
+
 export function applyTheme(theme: ResolvedTheme) {
-  if (typeof document !== 'undefined') document.documentElement.dataset.theme = theme;
+  if (typeof document === 'undefined') return;
+  document.documentElement.dataset.theme = theme;
+  syncThemeColor(theme);
 }
 
 export function setThemePreference(preference: ThemePreference) {
