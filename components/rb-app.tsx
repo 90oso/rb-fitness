@@ -15,6 +15,7 @@ import TrainView from './views/train-view';
 import { useAuth } from '@/hooks/use-auth';
 import { useCloudSync } from '@/hooks/use-cloud-sync';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useRestTimer } from '@/hooks/use-rest-timer';
 import { useToast } from '@/hooks/use-toast';
 import { getExercise, initialData } from '@/lib/catalog';
 import { deleteCloudAccount } from '@/lib/cloud';
@@ -30,6 +31,7 @@ import {
   volumeByWeek,
   weekMetrics,
 } from '@/lib/metrics';
+import { adjustRest } from '@/lib/session';
 import { downloadBackup } from '@/lib/storage';
 import type { AppData, Profile, Routine, Workout } from '@/lib/types';
 
@@ -44,7 +46,6 @@ export default function RBApp() {
 
   const [tab, setTab] = useState<Tab>('today');
   const [now, setNow] = useState(() => Date.now());
-  const [restEnd, setRestEnd] = useState<number | null>(null);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [weight, setWeight] = useState(0);
   const [reps, setReps] = useState(10);
@@ -54,9 +55,9 @@ export default function RBApp() {
   const [cycleError, setCycleError] = useState('');
   const [farewell, setFarewell] = useState('');
 
-  // One clock: every second while a session or a rest timer runs, once a minute otherwise (date and greeting).
-  const restRemainingMs = restEnd !== null && restEnd > now ? restEnd - now : null;
-  const ticking = data.active !== null || restRemainingMs !== null;
+  const rest = useRestTimer(data.active?.id ?? null, now, () => {});
+  // One clock: every second while a session runs, once a minute otherwise (date and greeting).
+  const ticking = data.active !== null;
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), ticking ? 1000 : 60000);
     return () => window.clearInterval(timer);
@@ -150,9 +151,10 @@ export default function RBApp() {
       active: { id: uid(), routineId, startedAt: new Date().toISOString(), sets: [] },
     }));
     setTab('train');
-    setRestEnd(null);
+    rest.dismiss();
   }
   function selectExercise(exerciseId: string) {
+    if (rest.phase === 'done') rest.dismiss();
     setSelectedExercise(exerciseId);
     const previous = recentSetForExercise(data.workouts, exerciseId);
     const inCurrent = data.active?.sets.filter((set) => set.exerciseId === exerciseId).at(-1);
@@ -185,8 +187,25 @@ export default function RBApp() {
       ...current,
       active: current.active ? { ...current.active, sets: [...current.active.sets, entry] } : null,
     }));
-    setRestEnd(Date.now() + (currentRx?.restSeconds || 90) * 1000);
+    rest.start(selectedExercise, currentRx?.restSeconds ?? 90);
     toast('Serie registrada. Buen trabajo.');
+  }
+  /** −15 s / +15 s: mueve el conteo en curso y deja ese descanso para las siguientes series de la sesión. */
+  function adjustRestTime(deltaSeconds: number) {
+    const exerciseId = rest.exerciseId;
+    rest.adjust(deltaSeconds);
+    if (!exerciseId) return;
+    setData((current) =>
+      current.active?.exercises
+        ? {
+            ...current,
+            active: {
+              ...current.active,
+              exercises: adjustRest(current.active.exercises, exerciseId, deltaSeconds),
+            },
+          }
+        : current
+    );
   }
   function deleteSet(setId: string) {
     setData((current) => ({
@@ -224,7 +243,7 @@ export default function RBApp() {
           1) %
         Math.max(1, current.routines.length),
     }));
-    setRestEnd(null);
+    rest.dismiss();
     setTab('progress');
     toast('¡Sesión guardada en tu historial!');
   }
@@ -237,7 +256,7 @@ export default function RBApp() {
     });
     if (!ok) return;
     setData((current) => ({ ...current, active: null }));
-    setRestEnd(null);
+    rest.dismiss();
     setTab('today');
   }
   function markRest() {
@@ -305,7 +324,7 @@ export default function RBApp() {
     setFarewell('');
     await auth.signOut();
     setTab('today');
-    setRestEnd(null);
+    rest.dismiss();
   }
   async function deleteAccount() {
     if (!auth.client) return;
@@ -332,7 +351,7 @@ export default function RBApp() {
     setFarewell('Tu cuenta y tus datos se eliminaron.');
     await auth.signOut('local');
     setTab('today');
-    setRestEnd(null);
+    rest.dismiss();
   }
 
   // ---- Screens before the app --------------------------------------------------------------
@@ -429,14 +448,16 @@ export default function RBApp() {
                 weight={weight}
                 reps={reps}
                 unit={unit}
-                restRemainingMs={restRemainingMs}
+                rest={rest}
                 showUnit={showUnit}
                 onSelectExercise={selectExercise}
                 onWeightChange={setWeight}
                 onRepsChange={setReps}
                 onSaveSet={saveSet}
                 onDeleteSet={deleteSet}
-                onSkipRest={() => setRestEnd(null)}
+                onRestAdjust={adjustRestTime}
+                onRestSkip={rest.skip}
+                onRestDismiss={rest.dismiss}
                 onFinish={finishWorkout}
                 onDiscard={() => void discardWorkout()}
                 onOpenGuide={setDetailId}

@@ -197,7 +197,6 @@ body::after {
 .suggestion,
 .exercise-choice,
 .previous-result,
-.rest-timer,
 .pr-tile,
 .switch-row,
 .safe-tip,
@@ -288,7 +287,6 @@ body::after {
 .search-field,
 .stepper-row,
 .previous-result,
-.rest-timer,
 .progression-hint,
 .safe-tip,
 .editor-empty,
@@ -1212,6 +1210,133 @@ html[data-theme='light'] .danger-card {
     font-size: 28px;
   }
 }
+/* ---- Barra de descanso: fija sobre la navegación en el teléfono vertical, pegajosa arriba en el resto ---- */
+.rest-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 8px 6px 14px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--glass-border);
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  color: var(--text);
+  font-size: 14px;
+  position: sticky;
+  top: calc(var(--topbar-h, 70px) + 8px);
+  z-index: 5;
+  margin-bottom: 14px;
+}
+.log-column {
+  min-width: 0;
+}
+.rest-bar > svg {
+  flex: none;
+  color: var(--acid);
+}
+.rest-bar-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+.rest-bar-text strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.rest-bar-sep {
+  color: var(--muted);
+}
+.rest-bar-actions {
+  display: flex;
+  gap: 4px;
+}
+.rest-bar-actions button,
+.rest-bar-close {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: var(--r-chip);
+  border: 1px solid var(--stroke);
+  background: var(--field);
+  color: var(--text);
+  font-family: var(--font-cond);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.rest-bar-skip {
+  color: var(--acid);
+}
+.rest-bar-close {
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.rest-bar-done {
+  background: rgb(var(--acid-rgb) / 0.18);
+  border-color: rgb(var(--acid-rgb) / 0.55);
+  animation: rest-pulse 1s ease-in-out 3;
+}
+.rest-bar-done > svg {
+  animation: rest-ring 0.6s ease-in-out 3;
+}
+@keyframes rest-pulse {
+  50% {
+    background: rgb(var(--acid-rgb) / 0.42);
+  }
+}
+@keyframes rest-ring {
+  25% {
+    transform: rotate(-14deg);
+  }
+  75% {
+    transform: rotate(14deg);
+  }
+}
+html[data-theme='light'] .rest-bar > svg,
+html[data-theme='light'] .rest-bar-skip {
+  color: var(--accent);
+}
+/* Teléfono en vertical: flota justo encima de la cápsula de navegación */
+@media (max-width: 800px) and (min-height: 501px) {
+  .app-root {
+    --nav-clear: 78px;
+  }
+  .rest-bar {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: calc(var(--nav-clear) + 10px + env(safe-area-inset-bottom, 0px));
+    z-index: 41;
+    margin: 0;
+  }
+  .app-root:has(.rest-bar) .main-content {
+    padding-bottom: calc(176px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-root:has(.rest-bar)::after {
+    height: calc(172px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-root:has(.rest-bar) .toast {
+    bottom: calc(var(--nav-clear) + 72px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (max-width: 600px) and (min-height: 501px) {
+  .app-root {
+    --nav-clear: 70px;
+  }
+}
+
 /* ---- Móvil: el contenido se desvanece antes de llegar a la barra inferior ---- */
 @media (max-width: 800px), (max-height: 500px) {
   .app-root::after {
@@ -1567,6 +1692,10 @@ html[data-theme='light'] .danger-card {
   .topbar,
   .hoy-ring-fill {
     transition: none;
+  }
+  .rest-bar-done,
+  .rest-bar-done > svg {
+    animation: none;
   }
 }
 @media (prefers-reduced-transparency: reduce) {

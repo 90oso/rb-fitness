@@ -937,29 +937,6 @@ button:disabled {
   color: var(--subtle);
   padding: 4px;
 }
-.rest-timer {
-  background: rgb(var(--aqua-rgb) / 0.06);
-  border: 1px solid rgb(var(--aqua-rgb) / 0.17);
-  border-radius: 12px;
-  padding: 13px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  color: var(--aqua);
-  font-size: 12px;
-  margin-bottom: 15px;
-}
-.rest-timer strong {
-  font-size: 21px;
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-}
-.rest-timer button {
-  background: transparent;
-  border: 0;
-  color: var(--text);
-  font-size: 12px;
-}
 .finish-btn {
   background: var(--panel-high);
   border: 1px solid var(--stroke);
