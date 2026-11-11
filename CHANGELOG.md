@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.10.0] — 2026-11-11
+
+### Cambiado
+
+- **Selector de ejercicios**: fotos grandes y sin recortar (las del catálogo son apaisadas; antes se veía un cuadradito que no dejaba reconocer la máquina), la fila entera marca o desmarca, la foto abre «Cómo se hace» sin perder lo elegido, lista agrupada por músculo con buscador y filtros fijos arriba, y el botón «Añadir N ejercicios» fijo abajo. Los que ya están en la rutina aparecen marcados y atenuados. El mismo selector sirve para «Sustituir» y «Añadir» en sesión.
+- **Editor de rutina**: cada ejercicio es una fila compacta con su foto y el resumen «3 × 8–12 · 90 s»; tocarla la expande (una a la vez) con los controles de series, descanso y repeticiones, «Ver cómo se hace» y «Quitar». Reordenar arrastrando el asa (manteniendo pulsado en el teléfono; con teclado en escritorio) o con «Subir» / «Bajar» dentro de la fila abierta.
+- En el teléfono el buscador del selector ya no abre el teclado solo al entrar (tapaba las fotos).
+- Dependencia nueva: `@dnd-kit` (arrastrar y soltar accesible, con avisos en español para lectores de pantalla).
+
 ## [0.9.0] — 2026-11-11
 
 ### Añadido
