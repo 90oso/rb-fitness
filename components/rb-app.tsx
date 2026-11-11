@@ -33,9 +33,9 @@ import {
   volumeByWeek,
   weekMetrics,
 } from '@/lib/metrics';
-import { adjustRest } from '@/lib/session';
+import { adjustRest, exerciseProgress, nextPendingExercise, sessionExercises } from '@/lib/session';
 import { downloadBackup } from '@/lib/storage';
-import type { AppData, Profile, Routine, Workout } from '@/lib/types';
+import type { AppData, Profile, Routine, SetEntry, Workout } from '@/lib/types';
 
 const KG_PER_LB = 1 / 2.2046226218;
 
@@ -90,7 +90,13 @@ export default function RBApp() {
   );
   const totalSessions = data.workouts.length;
   const totalSets = allSets(data.workouts).length;
-  const currentRx = activeRoutine?.exercises.find((rx) => rx.exerciseId === selectedExercise);
+  // La sesión entrena sobre su copia de ejercicios; la rutina solo cambia al finalizar si el usuario lo pide.
+  const exercises = data.active ? sessionExercises(data.active, activeRoutine) : [];
+  const allComplete =
+    data.active !== null &&
+    exercises.length > 0 &&
+    exercises.every((rx) => exerciseProgress(data.active!.sets, rx).complete);
+  const currentRx = exercises.find((rx) => rx.exerciseId === selectedExercise);
   const currentExercise = getExercise(selectedExercise);
   const previousSet = recentSetForExercise(data.workouts, selectedExercise);
   const progression = currentRx
@@ -147,24 +153,46 @@ export default function RBApp() {
     }
     const first = routine.exercises[0]?.exerciseId || '';
     setSelectedExercise(first);
-    const last = recentSetForExercise(data.workouts, first);
-    setWeight(last ? Number(fromKg(last.weight).toFixed(1)) : 0);
-    setReps(last?.reps || 10);
+    const fill = prefillFor(first, []);
+    setWeight(fill.weight);
+    setReps(fill.reps);
     setData((current) => ({
       ...current,
-      active: { id: uid(), routineId, startedAt: new Date().toISOString(), sets: [] },
+      active: {
+        id: uid(),
+        routineId,
+        startedAt: new Date().toISOString(),
+        sets: [],
+        exercises: structuredClone(routine.exercises),
+      },
     }));
     setTab('train');
     rest.dismiss();
   }
-  function selectExercise(exerciseId: string) {
+  /** Peso y reps con los que arranca un ejercicio: lo último de esta sesión, si no lo de la última vez. */
+  function prefillFor(exerciseId: string, sets: SetEntry[] = data.active?.sets ?? []) {
+    const previous = recentSetForExercise(data.workouts, exerciseId);
+    const inCurrent = sets.filter((set) => set.exerciseId === exerciseId).at(-1);
+    const source = inCurrent ?? previous;
+    return {
+      weight: source ? Number(fromKg(source.weight).toFixed(1)) : 0,
+      reps: inCurrent?.reps || previous?.reps || 10,
+    };
+  }
+  function selectExercise(exerciseId: string, sets?: SetEntry[]) {
     if (rest.phase === 'done') rest.dismiss();
     setSelectedExercise(exerciseId);
-    const previous = recentSetForExercise(data.workouts, exerciseId);
-    const inCurrent = data.active?.sets.filter((set) => set.exerciseId === exerciseId).at(-1);
-    const source = inCurrent ?? previous;
-    setWeight(source ? Number(fromKg(source.weight).toFixed(1)) : 0);
-    setReps(inCurrent?.reps || previous?.reps || 10);
+    const fill = prefillFor(exerciseId, sets);
+    setWeight(fill.weight);
+    setReps(fill.reps);
+  }
+  // Sin selección válida (tras recargar, o si el ejercicio se quitó): el primer pendiente, o el primero.
+  if (data.active && exercises.length > 0 && !currentRx) {
+    const fallback = nextPendingExercise(exercises, data.active.sets, '') ?? exercises[0].exerciseId;
+    const fill = prefillFor(fallback);
+    setSelectedExercise(fallback);
+    setWeight(fill.weight);
+    setReps(fill.reps);
   }
   function saveSet() {
     alert.unlock(); // un toque del usuario: iOS permite reproducir el sonido más tarde
@@ -188,12 +216,27 @@ export default function RBApp() {
       weight: toKg(weight),
       performedAt: new Date().toISOString(),
     };
+    const sets = [...data.active.sets, entry];
     setData((current) => ({
       ...current,
       active: current.active ? { ...current.active, sets: [...current.active.sets, entry] } : null,
     }));
     rest.start(selectedExercise, currentRx?.restSeconds ?? 90);
-    toast('Serie registrada. Buen trabajo.');
+    const justCompleted =
+      currentRx &&
+      exerciseProgress(sets, currentRx).complete &&
+      !exerciseProgress(data.active.sets, currentRx).complete;
+    if (!justCompleted) {
+      toast('Serie registrada. Buen trabajo.');
+      return;
+    }
+    const next = nextPendingExercise(exercises, sets, selectedExercise);
+    if (next) {
+      selectExercise(next, sets);
+      toast(`${currentExercise.name} completado · Siguiente: ${getExercise(next)?.name ?? ''}`);
+    } else {
+      toast('Todos los ejercicios completados. Finaliza cuando quieras.');
+    }
   }
   /** −15 s / +15 s: mueve el conteo en curso y deja ese descanso para las siguientes series de la sesión. */
   function adjustRestTime(deltaSeconds: number) {
@@ -444,6 +487,8 @@ export default function RBApp() {
               <ActiveSessionView
                 active={data.active}
                 routine={activeRoutine}
+                exercises={exercises}
+                allComplete={allComplete}
                 now={now}
                 selectedExercise={selectedExercise}
                 currentExercise={currentExercise}

@@ -480,7 +480,8 @@ h3 {
 }
 /* ---- Botones, etiquetas y campos ---- */
 .lime-btn,
-.small-primary {
+.small-primary,
+.finish-btn.primary {
   border: 0;
   background: linear-gradient(180deg, #ffe45c, #ffd400);
   color: var(--acidtext);
@@ -1210,6 +1211,23 @@ html[data-theme='light'] .danger-card {
     font-size: 28px;
   }
 }
+/* Sesión: ejercicio completado en la lista */
+.exercise-choice.done {
+  border-color: rgb(var(--acid-rgb) / 0.35);
+}
+.exercise-choice.done strong {
+  color: var(--acid);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+html[data-theme='light'] .exercise-choice.done strong {
+  color: var(--accent);
+}
+.exercise-choice.done.active {
+  border-color: rgb(var(--acid-rgb) / 0.6);
+}
+
 /* Perfil → En sesión: dos interruptores seguidos, sin el margen grande del editor */
 .settings-card .switch-row {
   margin: 0 0 10px;

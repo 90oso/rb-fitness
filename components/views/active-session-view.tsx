@@ -17,11 +17,14 @@ import { ExerciseThumb } from '@/components/ui/exercise-media';
 import type { RestPhase } from '@/hooks/use-rest-timer';
 import { getExercise } from '@/lib/catalog';
 import type { progressionAdvice } from '@/lib/metrics';
+import { exerciseProgress } from '@/lib/session';
 import type { ActiveWorkout, Exercise, Routine, RoutineExercise, SetEntry } from '@/lib/types';
 
 export default function ActiveSessionView({
   active,
   routine,
+  exercises,
+  allComplete,
   now,
   selectedExercise,
   currentExercise,
@@ -47,6 +50,8 @@ export default function ActiveSessionView({
 }: {
   active: ActiveWorkout;
   routine: Routine | undefined;
+  exercises: RoutineExercise[];
+  allComplete: boolean;
   now: number;
   selectedExercise: string;
   currentExercise: Exercise | undefined;
@@ -104,19 +109,25 @@ export default function ActiveSessionView({
             <span className="routine-tag">{routine?.tag}</span>
           </div>
           <div className="exercise-choices">
-            {routine?.exercises.map((rx, index) => (
-              <button
-                key={rx.exerciseId}
-                onClick={() => onSelectExercise(rx.exerciseId)}
-                className={`exercise-choice ${selectedExercise === rx.exerciseId ? 'active' : ''}`}
-              >
-                <span>{index + 1}</span>
-                <span>{getExercise(rx.exerciseId)?.name}</span>
-                <strong>
-                  {active.sets.filter((set) => set.exerciseId === rx.exerciseId).length}/{rx.targetSets}
-                </strong>
-              </button>
-            ))}
+            {exercises.map((rx, index) => {
+              const progress = exerciseProgress(active.sets, rx);
+              const name = getExercise(rx.exerciseId)?.name;
+              return (
+                <button
+                  key={rx.exerciseId}
+                  onClick={() => onSelectExercise(rx.exerciseId)}
+                  className={`exercise-choice ${selectedExercise === rx.exerciseId ? 'active' : ''} ${progress.complete ? 'done' : ''}`}
+                  aria-label={progress.complete ? `${name}, completado` : undefined}
+                >
+                  <span>{index + 1}</span>
+                  <span>{name}</span>
+                  <strong>
+                    {progress.done}/{progress.target}
+                    {progress.complete && <Check size={14} strokeWidth={3} aria-hidden="true" />}
+                  </strong>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -262,7 +273,7 @@ export default function ActiveSessionView({
               )}
             </div>
 
-            <button className="finish-btn" onClick={onFinish}>
+            <button className={`finish-btn ${allComplete ? 'primary' : ''}`} onClick={onFinish}>
               <CheckCircle2 size={19} /> Finalizar entrenamiento
             </button>
           </section>
