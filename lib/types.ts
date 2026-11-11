@@ -68,6 +68,8 @@ export interface ActiveWorkout {
   routineId: string;
   startedAt: string;
   sets: SetEntry[];
+  /** Copia de los ejercicios de la rutina al iniciar; la sesión edita esta copia, nunca la rutina. */
+  exercises?: RoutineExercise[]; // ausente en sesiones iniciadas antes de 0.9.0 → se usa la rutina
 }
 export interface Profile {
   name: string;
@@ -76,6 +78,10 @@ export interface Profile {
   daysPerWeek: number;
   bodyweightKg: number | null;
   weightUnit: 'kg' | 'lb';
+  /** Sonido al terminar el descanso. Ausente = activado. */
+  restSound?: boolean;
+  /** Mantener la pantalla encendida durante la sesión. Ausente = activado. */
+  keepAwake?: boolean;
 }
 export interface AppData {
   version: 1;

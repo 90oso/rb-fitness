@@ -90,6 +90,22 @@ assert.throws(() =>
     })
   )
 );
+// Sesión activa con su copia de ejercicios y ajustes de sesión en el perfil (0.9.0).
+const activeRx = { exerciseId: 'chest-press', targetSets: 3, minReps: 8, maxReps: 12, restSeconds: 105 };
+const activeBase = { id: 'a1', routineId: 'push', startedAt: now.toISOString(), sets: [] };
+const withActive = (active, profile = data.profile) =>
+  safeParse(JSON.stringify({ ...data, active, profile }), true);
+assert.deepEqual(withActive({ ...activeBase, exercises: [activeRx] }).active.exercises, [activeRx]);
+assert.equal(
+  withActive({ ...activeBase, exercises: [{ ...activeRx, restSeconds: -1 }] }).active.exercises,
+  undefined
+);
+assert.equal(withActive(activeBase).active.exercises, undefined);
+const prefs = withActive(null, { ...data.profile, restSound: false, keepAwake: false }).profile;
+assert.equal(prefs.restSound, false);
+assert.equal(prefs.keepAwake, false);
+assert.equal(withActive(null, { ...data.profile, restSound: 'no' }).profile.restSound, undefined);
+assert.equal(withActive(null).profile.keepAwake, undefined);
 const more = structuredClone(workout);
 more.sets = [set('chest-press', 40, 12), set('chest-press', 40, 12), set('chest-press', 40, 12)];
 const advice = progressionAdvice([more], 'chest-press', 3, 12);
