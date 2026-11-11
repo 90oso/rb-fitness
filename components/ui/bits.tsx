@@ -1,4 +1,5 @@
 'use client';
+import { TrendingUp } from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export type IconComponent = ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
@@ -45,5 +46,16 @@ export function Stat({
       <strong>{value}</strong>
       <em>{desc}</em>
     </div>
+  );
+}
+
+/** «↑ Subir de peso en N ejercicios», o nada cuando no toca. */
+export function RaiseLine({ count, className = '' }: { count: number; className?: string }) {
+  if (count === 0) return null;
+  return (
+    <p className={`raise-line ${className}`.trim()}>
+      <TrendingUp size={14} aria-hidden="true" /> Subir de peso en {count}{' '}
+      {count === 1 ? 'ejercicio' : 'ejercicios'}
+    </p>
   );
 }

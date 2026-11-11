@@ -17,6 +17,8 @@ import {
 import { PageHead } from '@/components/ui/bits';
 import { getExercise } from '@/lib/catalog';
 import type { suggestions } from '@/lib/metrics';
+import { RaiseLine } from '@/components/ui/bits';
+import { raiseCount } from '@/lib/session';
 import type { AppData, Routine } from '@/lib/types';
 
 export default function TrainView({
@@ -174,6 +176,7 @@ export default function TrainView({
               <p>
                 {routine.subtitle} · {routine.exercises.length} ejercicios
               </p>
+              <RaiseLine count={raiseCount(data.workouts, routine.exercises)} />
               <div className="routine-previews">
                 {routine.exercises.slice(0, 2).map((rx) => (
                   <span key={rx.exerciseId}>{getExercise(rx.exerciseId)?.name}</span>

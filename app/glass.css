@@ -1228,6 +1228,50 @@ html[data-theme='light'] .exercise-choice.done strong {
   border-color: rgb(var(--acid-rgb) / 0.6);
 }
 
+/* Subir de peso: etiqueta en la lista de la sesión, tarjeta destacada y línea en Entrenar / Hoy */
+.raise-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: var(--r-tag);
+  background: rgb(var(--acid-rgb) / 0.16);
+  color: var(--acid);
+  font-family: var(--font-cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.progression-hint.raise {
+  border-color: rgb(var(--acid-rgb) / 0.5);
+  background: rgb(var(--acid-rgb) / 0.1);
+}
+.progression-hint.raise strong {
+  font-weight: 700;
+}
+.raise-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--acid);
+  font-size: 13px;
+  font-weight: 600;
+}
+.routine-tile > .raise-line {
+  margin: -6px 0 12px;
+}
+.hoy-meta.raise-line {
+  color: var(--acid);
+  font-weight: 600;
+}
+html[data-theme='light'] .raise-chip,
+html[data-theme='light'] .raise-line,
+html[data-theme='light'] .hoy-meta.raise-line {
+  color: var(--accent);
+}
+
 /* Sesión: acciones del ejercicio actual y botón de añadir */
 .log-actions {
   display: flex;

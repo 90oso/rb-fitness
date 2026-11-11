@@ -26,6 +26,7 @@ export default function ActiveSessionView({
   routine,
   exercises,
   allComplete,
+  raiseFor,
   now,
   selectedExercise,
   currentExercise,
@@ -56,6 +57,8 @@ export default function ActiveSessionView({
   routine: Routine | undefined;
   exercises: RoutineExercise[];
   allComplete: boolean;
+  /** Ejercicios con propuesta de subir de peso: id → kg propuestos. */
+  raiseFor: Record<string, number>;
   now: number;
   selectedExercise: string;
   currentExercise: Exercise | undefined;
@@ -127,7 +130,12 @@ export default function ActiveSessionView({
                   aria-label={progress.complete ? `${name}, completado` : undefined}
                 >
                   <span>{index + 1}</span>
-                  <span>{name}</span>
+                  <span>
+                    {name}
+                    {!progress.complete && raiseFor[rx.exerciseId] !== undefined && (
+                      <span className="raise-chip">↑ {showUnit(raiseFor[rx.exerciseId])}</span>
+                    )}
+                  </span>
                   <strong>
                     {progress.done}/{progress.target}
                     {progress.complete && <Check size={14} strokeWidth={3} aria-hidden="true" />}
@@ -211,12 +219,18 @@ export default function ActiveSessionView({
             )}
 
             {progression && (
-              <div className="progression-hint">
-                <Sparkles size={17} />
+              <div className={`progression-hint ${progression.kind === 'increase' ? 'raise' : ''}`}>
+                {progression.kind === 'increase' ? <TrendingUp size={17} /> : <Sparkles size={17} />}
                 <span>
-                  {progression.kind === 'increase'
-                    ? `Completaste tus series objetivo. Si la técnica fue buena y la máquina lo permite, considera probar ${showUnit(progression.proposedWeightKg)}.`
-                    : `Objetivo para hoy: consolida tus series hasta completar ${currentRx?.targetSets} × ${currentRx?.maxReps} con buena técnica.`}
+                  {progression.kind === 'increase' ? (
+                    <>
+                      <strong>Toca subir: {showUnit(progression.proposedWeightKg)}.</strong> Completaste{' '}
+                      {currentRx?.targetSets} × {currentRx?.maxReps} con {showUnit(progression.lastWeightKg)}{' '}
+                      la última vez.
+                    </>
+                  ) : (
+                    `Objetivo para hoy: consolida tus series hasta completar ${currentRx?.targetSets} × ${currentRx?.maxReps} con buena técnica.`
+                  )}
                 </span>
               </div>
             )}

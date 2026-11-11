@@ -116,6 +116,12 @@ export default function RBApp() {
     exercises.every((rx) => exerciseProgress(data.active!.sets, rx).complete);
   const currentRx = exercises.find((rx) => rx.exerciseId === selectedExercise);
   const currentExercise = getExercise(selectedExercise);
+  // Ejercicios de la sesión donde toca subir de peso (id → kg propuestos), para la lista y la precarga.
+  const raiseFor: Record<string, number> = {};
+  for (const rx of exercises) {
+    const advice = progressionAdvice(data.workouts, rx.exerciseId, rx.targetSets, rx.maxReps);
+    if (advice?.kind === 'increase') raiseFor[rx.exerciseId] = advice.proposedWeightKg;
+  }
   const previousSet = recentSetForExercise(data.workouts, selectedExercise);
   const progression = currentRx
     ? progressionAdvice(data.workouts, selectedExercise, currentRx.targetSets, currentRx.maxReps)
@@ -171,7 +177,7 @@ export default function RBApp() {
     }
     const first = routine.exercises[0]?.exerciseId || '';
     setSelectedExercise(first);
-    const fill = prefillFor(first, []);
+    const fill = prefillFor(first, [], routine.exercises);
     setWeight(fill.weight);
     setReps(fill.reps);
     setData((current) => ({
@@ -187,13 +193,24 @@ export default function RBApp() {
     setTab('train');
     rest.dismiss();
   }
-  /** Peso y reps con los que arranca un ejercicio: lo último de esta sesión, si no lo de la última vez. */
-  function prefillFor(exerciseId: string, sets: SetEntry[] = data.active?.sets ?? []) {
+  /**
+   * Peso y reps con los que arranca un ejercicio: lo último de esta sesión; si no, la propuesta de subir
+   * de peso cuando la hay; si no, lo de la última vez.
+   */
+  function prefillFor(
+    exerciseId: string,
+    sets: SetEntry[] = data.active?.sets ?? [],
+    list: RoutineExercise[] = exercises
+  ) {
     const previous = recentSetForExercise(data.workouts, exerciseId);
     const inCurrent = sets.filter((set) => set.exerciseId === exerciseId).at(-1);
-    const source = inCurrent ?? previous;
+    const rx = list.find((item) => item.exerciseId === exerciseId);
+    const advice =
+      rx && !inCurrent ? progressionAdvice(data.workouts, exerciseId, rx.targetSets, rx.maxReps) : null;
+    const proposedKg = advice?.kind === 'increase' ? advice.proposedWeightKg : null;
+    const weightKg = inCurrent?.weight ?? proposedKg ?? previous?.weight ?? null;
     return {
-      weight: source ? Number(fromKg(source.weight).toFixed(1)) : 0,
+      weight: weightKg === null ? 0 : Number(fromKg(weightKg).toFixed(1)),
       reps: inCurrent?.reps || previous?.reps || 10,
     };
   }
@@ -567,6 +584,7 @@ export default function RBApp() {
                 routine={activeRoutine}
                 exercises={exercises}
                 allComplete={allComplete}
+                raiseFor={raiseFor}
                 now={now}
                 selectedExercise={selectedExercise}
                 currentExercise={currentExercise}
