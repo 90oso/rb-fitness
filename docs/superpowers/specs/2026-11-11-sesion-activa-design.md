@@ -166,7 +166,7 @@ para que el orquestador crezca lo menos posible.
 
 ## 5. Pruebas
 
-- `scripts/check-session.mjs` (mismo estilo que `check-cycles.mjs`, en `npm run verify` como `test:session`):
+- `scripts/check-session.cjs` (mismo estilo que `check-metrics.cjs`, en `npm run verify` como `test:session`):
   - `nextPendingExercise`: siguiente en orden, vuelta al principio, ninguno pendiente, ejercicio actual ausente.
   - `isComplete`/`exerciseProgress` con series extra.
   - `sessionExercises` con y sin copia.
