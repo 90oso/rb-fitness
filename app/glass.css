@@ -1228,6 +1228,40 @@ html[data-theme='light'] .exercise-choice.done strong {
   border-color: rgb(var(--acid-rgb) / 0.6);
 }
 
+/* Sesión: acciones del ejercicio actual y botón de añadir */
+.log-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 22px;
+  margin-top: 4px;
+}
+.log-actions .text-link {
+  font-size: 12px;
+}
+.log-remove {
+  color: var(--red);
+}
+.exercise-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  width: 100%;
+  margin-top: 12px;
+  border: 1px dashed var(--stroke);
+  border-radius: var(--r-field);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.exercise-add:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
 /* Perfil → En sesión: dos interruptores seguidos, sin el margen grande del editor */
 .settings-card .switch-row {
   margin: 0 0 10px;

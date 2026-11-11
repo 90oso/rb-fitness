@@ -7,6 +7,7 @@ import {
   Dumbbell,
   Minus,
   Plus,
+  Repeat,
   Sparkles,
   Trash2,
   TrendingUp,
@@ -47,6 +48,9 @@ export default function ActiveSessionView({
   onFinish,
   onDiscard,
   onOpenGuide,
+  onReplaceExercise,
+  onRemoveExercise,
+  onAddExercise,
 }: {
   active: ActiveWorkout;
   routine: Routine | undefined;
@@ -74,6 +78,9 @@ export default function ActiveSessionView({
   onFinish: () => void;
   onDiscard: () => void;
   onOpenGuide: (exerciseId: string) => void;
+  onReplaceExercise: (exerciseId: string) => void;
+  onRemoveExercise: (exerciseId: string) => void;
+  onAddExercise: () => void;
 }) {
   const setsForCurrent = active.sets.filter((set) => set.exerciseId === selectedExercise);
   const weightStep = unit === 'kg' ? 2.5 : 5;
@@ -129,6 +136,9 @@ export default function ActiveSessionView({
               );
             })}
           </div>
+          <button type="button" className="exercise-add" onClick={onAddExercise}>
+            <Plus size={17} aria-hidden="true" /> Añadir ejercicio
+          </button>
         </section>
 
         {/* La barra va fuera de la tarjeta: el desenfoque de la tarjeta la convertiría en «fija» dentro de ella. */}
@@ -159,13 +169,31 @@ export default function ActiveSessionView({
                   × {currentRx?.minReps}–{currentRx?.maxReps}
                 </p>
                 {currentExercise && (
-                  <button
-                    type="button"
-                    className="text-link log-guide"
-                    onClick={() => onOpenGuide(currentExercise.id)}
-                  >
-                    Ver cómo se hace <BookOpen size={14} />
-                  </button>
+                  <div className="log-actions">
+                    <button
+                      type="button"
+                      className="text-link log-guide"
+                      onClick={() => onOpenGuide(currentExercise.id)}
+                    >
+                      Ver cómo se hace <BookOpen size={14} />
+                    </button>
+                    {setsForCurrent.length === 0 && (
+                      <button
+                        type="button"
+                        className="text-link"
+                        onClick={() => onReplaceExercise(currentExercise.id)}
+                      >
+                        <Repeat size={14} /> Sustituir
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="text-link log-remove"
+                      onClick={() => onRemoveExercise(currentExercise.id)}
+                    >
+                      <Trash2 size={14} /> Quitar
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

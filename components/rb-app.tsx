@@ -4,6 +4,7 @@ import { CloudOff } from 'lucide-react';
 import AuthScreen from './auth-screen';
 import { AuthLoading } from './ui/auth-frame';
 import ExerciseDetailModal from './modals/exercise-detail-modal';
+import ExercisePickerModal from './modals/exercise-picker-modal';
 import RoutineEditorModal from './modals/routine-editor-modal';
 import { BottomNav, Sidebar, Topbar, type Tab } from './shell/app-shell';
 import ActiveSessionView from './views/active-session-view';
@@ -33,16 +34,30 @@ import {
   volumeByWeek,
   weekMetrics,
 } from '@/lib/metrics';
-import { adjustRest, exerciseProgress, nextPendingExercise, sessionExercises } from '@/lib/session';
+import {
+  adjustRest,
+  exerciseProgress,
+  nextPendingExercise,
+  sessionDiffersFromRoutine,
+  sessionExercises,
+} from '@/lib/session';
 import { downloadBackup } from '@/lib/storage';
-import type { AppData, Profile, Routine, SetEntry, Workout } from '@/lib/types';
+import type {
+  ActiveWorkout,
+  AppData,
+  Profile,
+  Routine,
+  RoutineExercise,
+  SetEntry,
+  Workout,
+} from '@/lib/types';
 
 const KG_PER_LB = 1 / 2.2046226218;
 
 export default function RBApp() {
   const auth = useAuth();
   const sync = useCloudSync(auth.client, auth.userId);
-  const { confirm, dialog } = useConfirm();
+  const { confirm, choose, dialog } = useConfirm();
   const { toast, toastNode } = useToast();
   const { data, setData, getData, hydrated } = sync;
 
@@ -53,6 +68,9 @@ export default function RBApp() {
   const [reps, setReps] = useState(10);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [editingRoutine, setEditingRoutine] = useState<string | null>(null);
+  const [picker, setPicker] = useState<null | { mode: 'replace'; exerciseId: string } | { mode: 'add' }>(
+    null
+  );
   const [showCycleManager, setShowCycleManager] = useState(false);
   const [cycleError, setCycleError] = useState('');
   const [farewell, setFarewell] = useState('');
@@ -255,6 +273,56 @@ export default function RBApp() {
         : current
     );
   }
+  function patchSession(update: (exercises: RoutineExercise[], sets: SetEntry[]) => Partial<ActiveWorkout>) {
+    setData((current) => {
+      if (!current.active) return current;
+      const list = sessionExercises(
+        current.active,
+        current.routines.find((r) => r.id === current.active?.routineId)
+      );
+      return {
+        ...current,
+        active: { ...current.active, exercises: list, ...update(list, current.active.sets) },
+      };
+    });
+  }
+  /** Sustituye un ejercicio que aún no tiene series; el nuevo hereda series y reps objetivo del hueco. */
+  function replaceExercise(oldId: string, newId: string) {
+    patchSession((list) => ({
+      exercises: list.map((rx) => (rx.exerciseId === oldId ? { ...rx, exerciseId: newId } : rx)),
+    }));
+    if (selectedExercise === oldId) selectExercise(newId);
+    toast(
+      `${getExercise(newId)?.name ?? 'El nuevo ejercicio'} ocupa el lugar de ${getExercise(oldId)?.name ?? 'el anterior'}.`
+    );
+  }
+  async function removeExercise(exerciseId: string) {
+    if (!data.active) return;
+    if (exercises.length === 1) {
+      toast('Deja al menos un ejercicio en la sesión.');
+      return;
+    }
+    const logged = data.active.sets.filter((set) => set.exerciseId === exerciseId).length;
+    if (logged > 0) {
+      const ok = await confirm({
+        title: '¿Quitar este ejercicio?',
+        message: `Se borrarán ${logged} ${logged === 1 ? 'serie registrada' : 'series registradas'} de este ejercicio.`,
+        confirmLabel: 'Quitar',
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    const remaining = exercises.filter((rx) => rx.exerciseId !== exerciseId);
+    const sets = data.active.sets.filter((set) => set.exerciseId !== exerciseId);
+    patchSession(() => ({ exercises: remaining, sets }));
+    if (selectedExercise === exerciseId) {
+      selectExercise(nextPendingExercise(remaining, sets, exerciseId) ?? remaining[0].exerciseId, sets);
+    }
+    toast('Ejercicio quitado de esta sesión.');
+  }
+  function addExercise(exerciseId: string) {
+    patchSession((list) => ({ exercises: [...list, makeRx(exerciseId)] }));
+  }
   function deleteSet(setId: string) {
     setData((current) => ({
       ...current,
@@ -264,13 +332,23 @@ export default function RBApp() {
     }));
     toast('Serie eliminada.');
   }
-  function finishWorkout() {
+  async function finishWorkout() {
     if (!data.active) return;
     if (!data.active.sets.length) {
       toast('Registra al menos una serie para completar.');
       return;
     }
     const routine = routines.find((r) => r.id === data.active?.routineId);
+    if (routine && sessionDiffersFromRoutine(exercises, routine.exercises)) {
+      const choice = await choose({
+        title: 'Cambiaste esta sesión',
+        message: `¿Actualizar la rutina «${routine.name}» con los ejercicios y descansos de hoy?`,
+        confirmLabel: 'Actualizar rutina',
+        cancelLabel: 'Mantener rutina',
+      });
+      if (choice === null) return;
+      if (choice === 'confirm') editRoutine(routine.id, (r) => ({ ...r, exercises }));
+    }
     const finished: Workout = {
       id: data.active.id,
       routineId: data.active.routineId,
@@ -449,7 +527,7 @@ export default function RBApp() {
           syncStatus={sync.status}
           syncError={sync.error}
           inSession={data.active !== null}
-          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}`}
+          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}|${picker?.mode ?? ''}`}
           onSelect={setTab}
         />
         <main className="main-content">
@@ -508,9 +586,12 @@ export default function RBApp() {
                 onRestAdjust={adjustRestTime}
                 onRestSkip={rest.skip}
                 onRestDismiss={rest.dismiss}
-                onFinish={finishWorkout}
+                onFinish={() => void finishWorkout()}
                 onDiscard={() => void discardWorkout()}
                 onOpenGuide={setDetailId}
+                onReplaceExercise={(id) => setPicker({ mode: 'replace', exerciseId: id })}
+                onRemoveExercise={(id) => void removeExercise(id)}
+                onAddExercise={() => setPicker({ mode: 'add' })}
               />
             ) : (
               <TrainView
@@ -568,6 +649,17 @@ export default function RBApp() {
 
       {toastNode}
       {detailId && <ExerciseDetailModal exerciseId={detailId} onClose={() => setDetailId(null)} />}
+      {picker && (
+        <ExercisePickerModal
+          title={picker.mode === 'replace' ? 'Sustituir ejercicio' : 'Añadir ejercicios'}
+          excluded={exercises.map((rx) => rx.exerciseId)}
+          single={picker.mode === 'replace'}
+          onAdd={(id) =>
+            picker.mode === 'replace' ? replaceExercise(picker.exerciseId, id) : addExercise(id)
+          }
+          onClose={() => setPicker(null)}
+        />
+      )}
       {editingRoutine &&
         (() => {
           const routine = routines.find((r) => r.id === editingRoutine);

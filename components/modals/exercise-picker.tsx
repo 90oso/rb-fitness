@@ -4,13 +4,20 @@ import { ArrowLeft, Check, Plus, Search } from 'lucide-react';
 import { ExerciseThumb } from '@/components/ui/exercise-media';
 import { catalog, majorMuscles } from '@/lib/catalog';
 
-/** Searchable list to add exercises to a routine. Stays open so several can be added in a row. */
+/**
+ * Searchable list to add exercises to a routine. Stays open so several can be added in a row;
+ * in `single` mode the caller closes it after the first pick (used to replace one exercise).
+ */
 export default function ExercisePicker({
   excluded,
+  title = 'Añadir ejercicios',
+  single = false,
   onAdd,
   onClose,
 }: {
   excluded: string[];
+  title?: string;
+  single?: boolean;
   onAdd: (exerciseId: string) => void;
   onClose: () => void;
 }) {
@@ -31,14 +38,20 @@ export default function ExercisePicker({
           <ArrowLeft size={20} />
         </button>
         <div>
-          <strong>Añadir ejercicios</strong>
+          <strong>{title}</strong>
           <small>
-            {added.length ? `${added.length} añadido${added.length === 1 ? '' : 's'}` : 'Toca + para añadir'}
+            {single
+              ? 'Toca + para elegir'
+              : added.length
+                ? `${added.length} añadido${added.length === 1 ? '' : 's'}`
+                : 'Toca + para añadir'}
           </small>
         </div>
-        <button type="button" className="lime-btn picker-done" onClick={onClose}>
-          Listo <Check size={16} />
-        </button>
+        {!single && (
+          <button type="button" className="lime-btn picker-done" onClick={onClose}>
+            Listo <Check size={16} />
+          </button>
+        )}
       </div>
       <label className="search-field picker-search">
         <Search size={18} />
