@@ -1,19 +1,23 @@
 'use client';
 import ExercisePicker from './exercise-picker';
 
-/** El selector del catálogo como hoja modal (misma hoja que el editor). En `single` cierra al elegir uno. */
+/** El selector del catálogo como hoja modal (misma hoja que el editor). Se usa desde la sesión activa. */
 export default function ExercisePickerModal({
   title,
+  subtitle,
   excluded,
   single = false,
-  onAdd,
+  onConfirm,
   onClose,
+  onOpenDetail,
 }: {
   title: string;
+  subtitle?: string;
   excluded: string[];
   single?: boolean;
-  onAdd: (exerciseId: string) => void;
+  onConfirm: (exerciseIds: string[]) => void;
   onClose: () => void;
+  onOpenDetail: (exerciseId: string) => void;
 }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -26,13 +30,15 @@ export default function ExercisePickerModal({
       >
         <ExercisePicker
           title={title}
+          subtitle={subtitle}
           excluded={excluded}
           single={single}
-          onAdd={(id) => {
-            onAdd(id);
-            if (single) onClose();
+          onConfirm={(ids) => {
+            onConfirm(ids);
+            onClose();
           }}
           onClose={onClose}
+          onOpenDetail={onOpenDetail}
         />
       </div>
     </div>

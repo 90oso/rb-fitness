@@ -669,16 +669,17 @@ export default function RBApp() {
       <BottomNav tab={tab} onSelect={setTab} />
 
       {toastNode}
-      {detailId && <ExerciseDetailModal exerciseId={detailId} onClose={() => setDetailId(null)} />}
       {picker && (
         <ExercisePickerModal
           title={picker.mode === 'replace' ? 'Sustituir ejercicio' : 'Añadir ejercicios'}
+          subtitle={activeRoutine?.name}
           excluded={exercises.map((rx) => rx.exerciseId)}
           single={picker.mode === 'replace'}
-          onAdd={(id) =>
-            picker.mode === 'replace' ? replaceExercise(picker.exerciseId, id) : addExercise(id)
+          onConfirm={(ids) =>
+            picker.mode === 'replace' ? replaceExercise(picker.exerciseId, ids[0]) : ids.forEach(addExercise)
           }
           onClose={() => setPicker(null)}
+          onOpenDetail={setDetailId}
         />
       )}
       {editingRoutine &&
@@ -689,9 +690,12 @@ export default function RBApp() {
               routine={routine}
               onSave={(saved) => editRoutine(routine.id, () => saved)}
               onClose={() => setEditingRoutine(null)}
+              onOpenDetail={setDetailId}
             />
           ) : null;
         })()}
+      {/* La ficha va al final: debe quedar por encima del editor y del selector, que la abren. */}
+      {detailId && <ExerciseDetailModal exerciseId={detailId} onClose={() => setDetailId(null)} />}
       {dialog}
     </div>
   );

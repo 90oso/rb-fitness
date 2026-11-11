@@ -193,7 +193,7 @@ body::after {
 }
 .cycle-card,
 .exercise-tile,
-.ex-card,
+.ex-row,
 .suggestion,
 .exercise-choice,
 .previous-result,
@@ -224,9 +224,8 @@ body::after {
 .modal-close,
 .theme-toggle,
 .avatar,
-.ex-actions button,
 .field-eye,
-.picker-add {
+.ex-handle {
   border-radius: var(--r-card);
 }
 .form-label input,
@@ -279,7 +278,7 @@ body::after {
 /* Filas y tarjetas de listas: relleno translúcido sin desenfoque (listas largas, más fluidas) */
 .cycle-card,
 .exercise-tile,
-.ex-card,
+.ex-row,
 .suggestion,
 .exercise-choice,
 .pr-tile,
@@ -296,7 +295,7 @@ body::after {
   border-color: var(--stroke);
   box-shadow: var(--flat-shadow);
 }
-.ex-card {
+.ex-row {
   background: var(--panel-high);
 }
 .card {
@@ -1112,7 +1111,7 @@ html[data-theme='light'] .danger-card {
   .theme-toggle,
   .modal-close,
   .icon-action,
-  .ex-actions button,
+  .ex-handle,
   .number-control button {
     width: 44px;
     height: 44px;
@@ -1158,16 +1157,6 @@ html[data-theme='light'] .danger-card {
     padding-inline: 8px;
     margin-block: -12px;
     margin-inline: -8px;
-  }
-  /* Con botones de 44 px, el nombre del ejercicio pasa a ocupar su fila y las acciones bajan a la derecha */
-  .ex-card-top {
-    flex-wrap: wrap;
-  }
-  .ex-name {
-    flex: 1 1 130px;
-  }
-  .ex-actions {
-    margin-left: auto;
   }
   .account-links .text-link {
     min-height: 44px;
@@ -1312,6 +1301,239 @@ html[data-theme='light'] .hoy-meta.raise-line {
 }
 .settings-card .switch-row:last-child {
   margin-bottom: 0;
+}
+
+/* ---- Editor de rutina: filas compactas que se expanden; asa para arrastrar ---- */
+.ex-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ex-row {
+  border: 1px solid var(--stroke);
+  border-radius: var(--r-card);
+  position: relative;
+}
+.ex-row.open {
+  border-color: rgb(var(--acid-rgb) / 0.45);
+  background: rgb(var(--acid-rgb) / 0.05);
+}
+.ex-row.dragging {
+  z-index: 3;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.6);
+  border-color: rgb(var(--acid-rgb) / 0.6);
+}
+.ex-row-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px 8px 10px;
+}
+.ex-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  min-height: 56px;
+}
+.ex-row-main .ex-ordinal {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-tag);
+  font-family: var(--font-cond);
+  font-size: 12px;
+}
+.ex-row .ex-name strong {
+  font-size: 15px;
+  line-height: 1.25;
+}
+.ex-summary {
+  display: block;
+  margin-top: 3px;
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.ex-handle {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+}
+.ex-handle:active {
+  cursor: grabbing;
+}
+.ex-row-body {
+  padding: 2px 10px 12px;
+}
+.ex-row .ex-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+.ex-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 22px;
+  margin-top: 14px;
+  padding-right: 4px;
+}
+.ex-row-actions .text-link {
+  font-size: 12px;
+}
+.ex-row-actions .ex-remove {
+  color: var(--red);
+}
+.ex-photo {
+  border-radius: 10px;
+}
+
+/* ---- Selector de ejercicios: la fila marca, la foto abre la ficha, agrupado por músculo ---- */
+.picker-head > div {
+  flex: 1;
+  min-width: 0;
+}
+.picker-head strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+}
+.picker-head small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 2px;
+}
+.picker-group {
+  margin-bottom: 6px;
+}
+.picker-group-title {
+  margin: 8px 0 8px;
+  font-family: var(--font-cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.picker-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--r-card);
+  background: var(--panel);
+  box-shadow: var(--flat-shadow);
+}
+.picker-row-selected {
+  border-color: rgb(var(--acid-rgb) / 0.55);
+  background: rgb(var(--acid-rgb) / 0.08);
+}
+.picker-row-added {
+  opacity: 0.6;
+}
+.picker-photo {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+}
+.picker-play {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+.picker-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  min-height: 64px;
+}
+.picker-toggle:disabled {
+  cursor: default;
+}
+.picker-name {
+  flex: 1;
+  min-width: 0;
+}
+.picker-name strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.picker-name small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 3px;
+}
+.picker-check {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-chip);
+  border: 2px solid var(--stroke);
+  display: grid;
+  place-items: center;
+  color: var(--acidtext);
+}
+.picker-row-selected .picker-check {
+  background: var(--acid);
+  border-color: var(--acid);
+}
+.picker-foot {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--stroke);
+  background: var(--panel);
+}
+.picker-foot > * {
+  flex: 1;
+  min-height: 48px;
+}
+.picker-foot .picker-confirm {
+  flex: 1.4;
+}
+.picker-empty {
+  padding: 24px 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
 }
 
 /* ---- Barra de descanso: fija sobre la navegación en el teléfono vertical, pegajosa arriba en el resto ---- */
