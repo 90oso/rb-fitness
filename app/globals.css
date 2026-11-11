@@ -1505,7 +1505,8 @@ button:disabled {
     padding: 15px 26px;
   }
 }
-@media (max-width: 800px) {
+/* Teléfono: estrecho o bajo (horizontal). Misma regla que PHONE_QUERY en lib/layout.ts. */
+@media (max-width: 800px), (max-height: 500px) {
   .sidebar {
     display: none;
   }
@@ -1599,7 +1600,7 @@ button:disabled {
     max-width: none;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .topbar {
     --topbar-h: 66px;
     padding: env(safe-area-inset-top, 0px) 18px 0;
@@ -2646,7 +2647,7 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   min-width: 0;
   white-space: nowrap;
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .ex-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

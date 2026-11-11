@@ -642,7 +642,8 @@ select {
 .nav-scrim {
   display: none;
 }
-@media (max-width: 800px) {
+/* Teléfono: estrecho o bajo (horizontal). Misma regla que PHONE_QUERY en lib/layout.ts. */
+@media (max-width: 800px), (max-height: 500px) {
   /* Franja bajo la cápsula: el contenido se desenfoca y se desvanece antes de llegar a ella */
   .nav-scrim {
     display: block;
@@ -722,12 +723,12 @@ select {
     --gutter: 26px;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .main-content {
     --gutter: 19px;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .main-content {
     --gutter: 16px;
   }
@@ -1033,7 +1034,7 @@ html[data-theme='light'] .hoy-spark polyline,
 .hoy-tip {
   margin-top: 0;
 }
-@media (min-width: 801px) {
+@media (min-width: 801px) and (min-height: 501px) {
   .hoy {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -1108,7 +1109,7 @@ html[data-theme='light'] .danger-card {
   box-shadow: 0 0 0 3px rgb(var(--acid-rgb) / 0.28);
 }
 /* ---- Revisión de GUI: áreas táctiles de 44 px y lectura cómoda en el móvil ---- */
-@media (pointer: coarse), (max-width: 800px) {
+@media (pointer: coarse), (max-width: 800px), (max-height: 500px) {
   .theme-toggle,
   .modal-close,
   .icon-action,
@@ -1212,7 +1213,7 @@ html[data-theme='light'] .danger-card {
   }
 }
 /* ---- Móvil: el contenido se desvanece antes de llegar a la barra inferior ---- */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .app-root::after {
     content: '';
     position: fixed;
@@ -1231,7 +1232,7 @@ html[data-theme='light'] .danger-card {
 }
 
 /* ---- Móvil: menos densidad (lo esencial primero, sin repetir lo que ya dice otro elemento) ---- */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   /* El estado «Listo» no aporta en el móvil; la nube ya avisa si algo no se guardó */
   .top-actions .activity-pill {
     display: none;
@@ -1240,7 +1241,7 @@ html[data-theme='light'] .danger-card {
     gap: 10px;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .hoy {
     gap: 24px;
   }
@@ -1286,7 +1287,7 @@ html[data-theme='light'] .danger-card {
 }
 
 /* ---- Móvil: más liviano (letras y piezas más chicas, menos peso, más aire entre bloques) ---- */
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .main-content {
     --gutter: 20px;
     padding-inline: var(--gutter);
@@ -1516,6 +1517,48 @@ html[data-theme='light'] .danger-card {
 @media (max-width: 359px) {
   .main-content {
     --gutter: 16px;
+  }
+}
+
+/* ---- Teléfono en horizontal: mismas piezas que en vertical, dos columnas solo donde caben ---- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .main-content {
+    max-width: 1000px;
+    padding-top: 18px;
+  }
+  .bottom-nav {
+    left: 50%;
+    right: auto;
+    width: min(560px, calc(100% - 32px));
+    transform: translateX(-50%);
+  }
+  .active-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .hoy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 16px 18px;
+    align-items: start;
+  }
+  .hoy-greet,
+  .hoy-cycle,
+  .hoy-tip {
+    grid-column: 1 / -1;
+  }
+  .hoy-tiles {
+    grid-template-columns: 1fr;
+  }
+  .hoy-mark {
+    top: 40px;
+    right: 24px;
+    font-size: 220px;
+  }
+  .routine-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
