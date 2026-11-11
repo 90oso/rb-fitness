@@ -1,4 +1,4 @@
-import type { ActiveWorkout, AppData, Routine, SetEntry, Workout } from './types';
+import type { ActiveWorkout, AppData, Routine, RoutineExercise, SetEntry, Workout } from './types';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -34,14 +34,16 @@ function validRoutine(value: unknown): value is Routine {
     return false;
   if (value.isRest !== undefined && typeof value.isRest !== 'boolean') return false;
   if (value.isFlexible !== undefined && typeof value.isFlexible !== 'boolean') return false;
-  return value.exercises.every(
-    (rx: unknown) =>
-      isRecord(rx) &&
-      isText(rx.exerciseId) &&
-      isInteger(rx.targetSets, 1, 20) &&
-      isInteger(rx.minReps, 1, 100) &&
-      isInteger(rx.maxReps, rx.minReps as number, 100) &&
-      isInteger(rx.restSeconds, 0, 1800)
+  return value.exercises.every(validRx);
+}
+function validRx(rx: unknown): rx is RoutineExercise {
+  return (
+    isRecord(rx) &&
+    isText(rx.exerciseId) &&
+    isInteger(rx.targetSets, 1, 20) &&
+    isInteger(rx.minReps, 1, 100) &&
+    isInteger(rx.maxReps, rx.minReps as number, 100) &&
+    isInteger(rx.restSeconds, 0, 1800)
   );
 }
 function validWorkout(value: unknown): value is Workout {
@@ -68,6 +70,13 @@ function validActive(value: unknown): value is ActiveWorkout {
     value.sets.length <= 300 &&
     value.sets.every(validSet)
   );
+}
+/** La copia de ejercicios de la sesión solo se conserva si es válida; si no, la sesión sigue con la rutina. */
+function cleanActive(active: ActiveWorkout): ActiveWorkout {
+  const { exercises, ...rest } = active;
+  return Array.isArray(exercises) && exercises.length <= 100 && exercises.every(validRx)
+    ? { ...rest, exercises }
+    : rest;
 }
 
 /** Validate every nested data shape before using untrusted backup JSON. */
@@ -121,6 +130,8 @@ export function safeParse(raw: string, includeActive = false): AppData {
       daysPerWeek: p.daysPerWeek as number,
       bodyweightKg: p.bodyweightKg as number | null,
       weightUnit: p.weightUnit as 'kg' | 'lb',
+      ...(typeof p.restSound === 'boolean' ? { restSound: p.restSound } : {}),
+      ...(typeof p.keepAwake === 'boolean' ? { keepAwake: p.keepAwake } : {}),
     },
     routines,
     workouts: value.workouts as Workout[],
@@ -128,7 +139,7 @@ export function safeParse(raw: string, includeActive = false): AppData {
       includeActive &&
       validActive(value.active) &&
       routines.some((r) => r.id === (value.active as ActiveWorkout).routineId)
-        ? (value.active as ActiveWorkout)
+        ? cleanActive(value.active as ActiveWorkout)
         : null, // cloud resumes active sessions; backups do not
     cycleIndex: isInteger(value.cycleIndex, 0, 100000) ? value.cycleIndex % routines.length : 0,
     theme: value.theme === 'light' ? 'light' : 'dark',

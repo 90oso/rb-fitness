@@ -4,6 +4,7 @@ import { CloudOff } from 'lucide-react';
 import AuthScreen from './auth-screen';
 import { AuthLoading } from './ui/auth-frame';
 import ExerciseDetailModal from './modals/exercise-detail-modal';
+import ExercisePickerModal from './modals/exercise-picker-modal';
 import RoutineEditorModal from './modals/routine-editor-modal';
 import { BottomNav, Sidebar, Topbar, type Tab } from './shell/app-shell';
 import ActiveSessionView from './views/active-session-view';
@@ -15,6 +16,9 @@ import TrainView from './views/train-view';
 import { useAuth } from '@/hooks/use-auth';
 import { useCloudSync } from '@/hooks/use-cloud-sync';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useRestAlert } from '@/hooks/use-rest-alert';
+import { useRestTimer } from '@/hooks/use-rest-timer';
+import { useWakeLock } from '@/hooks/use-wake-lock';
 import { useToast } from '@/hooks/use-toast';
 import { getExercise, initialData } from '@/lib/catalog';
 import { deleteCloudAccount } from '@/lib/cloud';
@@ -30,33 +34,52 @@ import {
   volumeByWeek,
   weekMetrics,
 } from '@/lib/metrics';
+import {
+  adjustRest,
+  exerciseProgress,
+  nextPendingExercise,
+  sessionDiffersFromRoutine,
+  sessionExercises,
+} from '@/lib/session';
 import { downloadBackup } from '@/lib/storage';
-import type { AppData, Profile, Routine, Workout } from '@/lib/types';
+import type {
+  ActiveWorkout,
+  AppData,
+  Profile,
+  Routine,
+  RoutineExercise,
+  SetEntry,
+  Workout,
+} from '@/lib/types';
 
 const KG_PER_LB = 1 / 2.2046226218;
 
 export default function RBApp() {
   const auth = useAuth();
   const sync = useCloudSync(auth.client, auth.userId);
-  const { confirm, dialog } = useConfirm();
+  const { confirm, choose, dialog } = useConfirm();
   const { toast, toastNode } = useToast();
   const { data, setData, getData, hydrated } = sync;
 
   const [tab, setTab] = useState<Tab>('today');
   const [now, setNow] = useState(() => Date.now());
-  const [restEnd, setRestEnd] = useState<number | null>(null);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [weight, setWeight] = useState(0);
   const [reps, setReps] = useState(10);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [editingRoutine, setEditingRoutine] = useState<string | null>(null);
+  const [picker, setPicker] = useState<null | { mode: 'replace'; exerciseId: string } | { mode: 'add' }>(
+    null
+  );
   const [showCycleManager, setShowCycleManager] = useState(false);
   const [cycleError, setCycleError] = useState('');
   const [farewell, setFarewell] = useState('');
 
-  // One clock: every second while a session or a rest timer runs, once a minute otherwise (date and greeting).
-  const restRemainingMs = restEnd !== null && restEnd > now ? restEnd - now : null;
-  const ticking = data.active !== null || restRemainingMs !== null;
+  const alert = useRestAlert(data.profile.restSound ?? true);
+  const rest = useRestTimer(data.active?.id ?? null, now, alert.fire);
+  useWakeLock(data.active !== null && tab === 'train' && (data.profile.keepAwake ?? true));
+  // One clock: every second while a session runs, once a minute otherwise (date and greeting).
+  const ticking = data.active !== null;
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), ticking ? 1000 : 60000);
     return () => window.clearInterval(timer);
@@ -85,8 +108,20 @@ export default function RBApp() {
   );
   const totalSessions = data.workouts.length;
   const totalSets = allSets(data.workouts).length;
-  const currentRx = activeRoutine?.exercises.find((rx) => rx.exerciseId === selectedExercise);
+  // La sesión entrena sobre su copia de ejercicios; la rutina solo cambia al finalizar si el usuario lo pide.
+  const exercises = data.active ? sessionExercises(data.active, activeRoutine) : [];
+  const allComplete =
+    data.active !== null &&
+    exercises.length > 0 &&
+    exercises.every((rx) => exerciseProgress(data.active!.sets, rx).complete);
+  const currentRx = exercises.find((rx) => rx.exerciseId === selectedExercise);
   const currentExercise = getExercise(selectedExercise);
+  // Ejercicios de la sesión donde toca subir de peso (id → kg propuestos), para la lista y la precarga.
+  const raiseFor: Record<string, number> = {};
+  for (const rx of exercises) {
+    const advice = progressionAdvice(data.workouts, rx.exerciseId, rx.targetSets, rx.maxReps);
+    if (advice?.kind === 'increase') raiseFor[rx.exerciseId] = advice.proposedWeightKg;
+  }
   const previousSet = recentSetForExercise(data.workouts, selectedExercise);
   const progression = currentRx
     ? progressionAdvice(data.workouts, selectedExercise, currentRx.targetSets, currentRx.maxReps)
@@ -142,25 +177,61 @@ export default function RBApp() {
     }
     const first = routine.exercises[0]?.exerciseId || '';
     setSelectedExercise(first);
-    const last = recentSetForExercise(data.workouts, first);
-    setWeight(last ? Number(fromKg(last.weight).toFixed(1)) : 0);
-    setReps(last?.reps || 10);
+    const fill = prefillFor(first, [], routine.exercises);
+    setWeight(fill.weight);
+    setReps(fill.reps);
     setData((current) => ({
       ...current,
-      active: { id: uid(), routineId, startedAt: new Date().toISOString(), sets: [] },
+      active: {
+        id: uid(),
+        routineId,
+        startedAt: new Date().toISOString(),
+        sets: [],
+        exercises: structuredClone(routine.exercises),
+      },
     }));
     setTab('train');
-    setRestEnd(null);
+    rest.dismiss();
   }
-  function selectExercise(exerciseId: string) {
-    setSelectedExercise(exerciseId);
+  /**
+   * Peso y reps con los que arranca un ejercicio: lo último de esta sesión; si no, la propuesta de subir
+   * de peso cuando la hay; si no, lo de la última vez.
+   */
+  function prefillFor(
+    exerciseId: string,
+    sets: SetEntry[] = data.active?.sets ?? [],
+    list: RoutineExercise[] = exercises
+  ) {
     const previous = recentSetForExercise(data.workouts, exerciseId);
-    const inCurrent = data.active?.sets.filter((set) => set.exerciseId === exerciseId).at(-1);
-    const source = inCurrent ?? previous;
-    setWeight(source ? Number(fromKg(source.weight).toFixed(1)) : 0);
-    setReps(inCurrent?.reps || previous?.reps || 10);
+    const inCurrent = sets.filter((set) => set.exerciseId === exerciseId).at(-1);
+    const rx = list.find((item) => item.exerciseId === exerciseId);
+    const advice =
+      rx && !inCurrent ? progressionAdvice(data.workouts, exerciseId, rx.targetSets, rx.maxReps) : null;
+    const proposedKg = advice?.kind === 'increase' ? advice.proposedWeightKg : null;
+    const weightKg = inCurrent?.weight ?? proposedKg ?? previous?.weight ?? null;
+    return {
+      weight: weightKg === null ? 0 : Number(fromKg(weightKg).toFixed(1)),
+      reps: inCurrent?.reps || previous?.reps || 10,
+    };
+  }
+  /** `keepRest`: al avanzar solo tras guardar serie, el descanso recién iniciado debe seguir corriendo. */
+  function selectExercise(exerciseId: string, sets?: SetEntry[], keepRest = false) {
+    if (!keepRest && rest.phase === 'done') rest.dismiss();
+    setSelectedExercise(exerciseId);
+    const fill = prefillFor(exerciseId, sets);
+    setWeight(fill.weight);
+    setReps(fill.reps);
+  }
+  // Sin selección válida (tras recargar, o si el ejercicio se quitó): el primer pendiente, o el primero.
+  if (data.active && exercises.length > 0 && !currentRx) {
+    const fallback = nextPendingExercise(exercises, data.active.sets, '') ?? exercises[0].exerciseId;
+    const fill = prefillFor(fallback);
+    setSelectedExercise(fallback);
+    setWeight(fill.weight);
+    setReps(fill.reps);
   }
   function saveSet() {
+    alert.unlock(); // un toque del usuario: iOS permite reproducir el sonido más tarde
     if (
       !data.active ||
       !currentExercise ||
@@ -181,12 +252,96 @@ export default function RBApp() {
       weight: toKg(weight),
       performedAt: new Date().toISOString(),
     };
+    const sets = [...data.active.sets, entry];
     setData((current) => ({
       ...current,
       active: current.active ? { ...current.active, sets: [...current.active.sets, entry] } : null,
     }));
-    setRestEnd(Date.now() + (currentRx?.restSeconds || 90) * 1000);
-    toast('Serie registrada. Buen trabajo.');
+    const restSeconds = currentRx?.restSeconds ?? 90;
+    if (restSeconds > 0) rest.start(selectedExercise, restSeconds);
+    else if (rest.phase === 'done') rest.dismiss(); // sin descanso: no hay cuenta atrás ni campana
+    const justCompleted =
+      currentRx &&
+      exerciseProgress(sets, currentRx).complete &&
+      !exerciseProgress(data.active.sets, currentRx).complete;
+    if (!justCompleted) {
+      toast('Serie registrada. Buen trabajo.');
+      return;
+    }
+    const next = nextPendingExercise(exercises, sets, selectedExercise);
+    if (next) {
+      selectExercise(next, sets, true);
+      toast(`${currentExercise.name} completado · Siguiente: ${getExercise(next)?.name ?? ''}`);
+    } else {
+      toast('Todos los ejercicios completados. Finaliza cuando quieras.');
+    }
+  }
+  /** −15 s / +15 s: mueve el conteo en curso y deja ese descanso para las siguientes series de la sesión. */
+  function adjustRestTime(deltaSeconds: number) {
+    const exerciseId = rest.exerciseId;
+    rest.adjust(deltaSeconds);
+    if (!exerciseId) return;
+    setData((current) =>
+      current.active?.exercises
+        ? {
+            ...current,
+            active: {
+              ...current.active,
+              exercises: adjustRest(current.active.exercises, exerciseId, deltaSeconds),
+            },
+          }
+        : current
+    );
+  }
+  function patchSession(update: (exercises: RoutineExercise[], sets: SetEntry[]) => Partial<ActiveWorkout>) {
+    setData((current) => {
+      if (!current.active) return current;
+      const list = sessionExercises(
+        current.active,
+        current.routines.find((r) => r.id === current.active?.routineId)
+      );
+      return {
+        ...current,
+        active: { ...current.active, exercises: list, ...update(list, current.active.sets) },
+      };
+    });
+  }
+  /** Sustituye un ejercicio que aún no tiene series; el nuevo hereda series y reps objetivo del hueco. */
+  function replaceExercise(oldId: string, newId: string) {
+    patchSession((list) => ({
+      exercises: list.map((rx) => (rx.exerciseId === oldId ? { ...rx, exerciseId: newId } : rx)),
+    }));
+    if (selectedExercise === oldId) selectExercise(newId);
+    toast(
+      `${getExercise(newId)?.name ?? 'El nuevo ejercicio'} ocupa el lugar de ${getExercise(oldId)?.name ?? 'el anterior'}.`
+    );
+  }
+  async function removeExercise(exerciseId: string) {
+    if (!data.active) return;
+    if (exercises.length === 1) {
+      toast('Deja al menos un ejercicio en la sesión.');
+      return;
+    }
+    const logged = data.active.sets.filter((set) => set.exerciseId === exerciseId).length;
+    if (logged > 0) {
+      const ok = await confirm({
+        title: '¿Quitar este ejercicio?',
+        message: `Se borrarán ${logged} ${logged === 1 ? 'serie registrada' : 'series registradas'} de este ejercicio.`,
+        confirmLabel: 'Quitar',
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    const remaining = exercises.filter((rx) => rx.exerciseId !== exerciseId);
+    const sets = data.active.sets.filter((set) => set.exerciseId !== exerciseId);
+    patchSession(() => ({ exercises: remaining, sets }));
+    if (selectedExercise === exerciseId) {
+      selectExercise(nextPendingExercise(remaining, sets, exerciseId) ?? remaining[0].exerciseId, sets);
+    }
+    toast('Ejercicio quitado de esta sesión.');
+  }
+  function addExercise(exerciseId: string) {
+    patchSession((list) => ({ exercises: [...list, makeRx(exerciseId)] }));
   }
   function deleteSet(setId: string) {
     setData((current) => ({
@@ -197,13 +352,23 @@ export default function RBApp() {
     }));
     toast('Serie eliminada.');
   }
-  function finishWorkout() {
+  async function finishWorkout() {
     if (!data.active) return;
     if (!data.active.sets.length) {
       toast('Registra al menos una serie para completar.');
       return;
     }
     const routine = routines.find((r) => r.id === data.active?.routineId);
+    if (routine && sessionDiffersFromRoutine(exercises, routine.exercises)) {
+      const choice = await choose({
+        title: 'Cambiaste esta sesión',
+        message: `¿Actualizar la rutina «${routine.name}» con los ejercicios y descansos de hoy?`,
+        confirmLabel: 'Actualizar rutina',
+        cancelLabel: 'Mantener rutina',
+      });
+      if (choice === null) return;
+      if (choice === 'confirm') editRoutine(routine.id, (r) => ({ ...r, exercises }));
+    }
     const finished: Workout = {
       id: data.active.id,
       routineId: data.active.routineId,
@@ -224,7 +389,7 @@ export default function RBApp() {
           1) %
         Math.max(1, current.routines.length),
     }));
-    setRestEnd(null);
+    rest.dismiss();
     setTab('progress');
     toast('¡Sesión guardada en tu historial!');
   }
@@ -237,7 +402,7 @@ export default function RBApp() {
     });
     if (!ok) return;
     setData((current) => ({ ...current, active: null }));
-    setRestEnd(null);
+    rest.dismiss();
     setTab('today');
   }
   function markRest() {
@@ -305,7 +470,7 @@ export default function RBApp() {
     setFarewell('');
     await auth.signOut();
     setTab('today');
-    setRestEnd(null);
+    rest.dismiss();
   }
   async function deleteAccount() {
     if (!auth.client) return;
@@ -332,7 +497,7 @@ export default function RBApp() {
     setFarewell('Tu cuenta y tus datos se eliminaron.');
     await auth.signOut('local');
     setTab('today');
-    setRestEnd(null);
+    rest.dismiss();
   }
 
   // ---- Screens before the app --------------------------------------------------------------
@@ -382,7 +547,7 @@ export default function RBApp() {
           syncStatus={sync.status}
           syncError={sync.error}
           inSession={data.active !== null}
-          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}`}
+          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}|${picker?.mode ?? ''}`}
           onSelect={setTab}
         />
         <main className="main-content">
@@ -420,6 +585,9 @@ export default function RBApp() {
               <ActiveSessionView
                 active={data.active}
                 routine={activeRoutine}
+                exercises={exercises}
+                allComplete={allComplete}
+                raiseFor={raiseFor}
                 now={now}
                 selectedExercise={selectedExercise}
                 currentExercise={currentExercise}
@@ -429,17 +597,22 @@ export default function RBApp() {
                 weight={weight}
                 reps={reps}
                 unit={unit}
-                restRemainingMs={restRemainingMs}
+                rest={rest}
                 showUnit={showUnit}
                 onSelectExercise={selectExercise}
                 onWeightChange={setWeight}
                 onRepsChange={setReps}
                 onSaveSet={saveSet}
                 onDeleteSet={deleteSet}
-                onSkipRest={() => setRestEnd(null)}
-                onFinish={finishWorkout}
+                onRestAdjust={adjustRestTime}
+                onRestSkip={rest.skip}
+                onRestDismiss={rest.dismiss}
+                onFinish={() => void finishWorkout()}
                 onDiscard={() => void discardWorkout()}
                 onOpenGuide={setDetailId}
+                onReplaceExercise={(id) => setPicker({ mode: 'replace', exerciseId: id })}
+                onRemoveExercise={(id) => void removeExercise(id)}
+                onAddExercise={() => setPicker({ mode: 'add' })}
               />
             ) : (
               <TrainView
@@ -497,6 +670,17 @@ export default function RBApp() {
 
       {toastNode}
       {detailId && <ExerciseDetailModal exerciseId={detailId} onClose={() => setDetailId(null)} />}
+      {picker && (
+        <ExercisePickerModal
+          title={picker.mode === 'replace' ? 'Sustituir ejercicio' : 'Añadir ejercicios'}
+          excluded={exercises.map((rx) => rx.exerciseId)}
+          single={picker.mode === 'replace'}
+          onAdd={(id) =>
+            picker.mode === 'replace' ? replaceExercise(picker.exerciseId, id) : addExercise(id)
+          }
+          onClose={() => setPicker(null)}
+        />
+      )}
       {editingRoutine &&
         (() => {
           const routine = routines.find((r) => r.id === editingRoutine);

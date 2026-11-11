@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { PHONE_QUERY } from '@/lib/layout';
 
 /** Cuánto hay que bajar (acumulado, en un mismo sentido) antes de esconder la barra. */
 const HIDE_AFTER = 12;
@@ -9,7 +10,6 @@ const REVEAL_AFTER = 6;
 const TOP_ZONE = 64;
 /** En páginas casi sin recorrido no tiene sentido esconderla. */
 const MIN_SCROLLABLE = 160;
-const MOBILE = '(max-width: 800px)';
 
 /**
  * Esconde la barra superior al bajar y la devuelve en cuanto se sube un poco (solo en móvil).
@@ -39,7 +39,7 @@ export function useHideOnScroll(resetKey: string) {
   }, [resetKey]);
 
   useEffect(() => {
-    const media = window.matchMedia(MOBILE);
+    const media = window.matchMedia(PHONE_QUERY);
 
     const update = () => {
       frame.current = 0;

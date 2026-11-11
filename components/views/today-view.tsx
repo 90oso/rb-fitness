@@ -1,9 +1,11 @@
 'use client';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import ProgressRing from '@/components/progress-ring';
+import { RaiseLine } from '@/components/ui/bits';
 import { getExercise } from '@/lib/catalog';
 import { D, greeting, shortDate } from '@/lib/format';
 import type { volumeByWeek, weekMetrics } from '@/lib/metrics';
+import { raiseCount } from '@/lib/session';
 import type { AppData, Routine } from '@/lib/types';
 
 const dayNumber = (index: number) => String(index + 1).padStart(2, '0');
@@ -101,6 +103,7 @@ export default function TodayView({
             ? 'Recupera energía para el próximo entrenamiento'
             : `${nextRoutine.exercises.length} ejercicios · ${data.profile.gym}`}
         </p>
+        <RaiseLine count={raiseCount(data.workouts, nextRoutine.exercises)} className="hoy-meta" />
         {preview && <p className="hoy-preview">{preview}</p>}
         <button className="lime-btn hoy-cta" onClick={primaryAction}>
           {ctaLabel}

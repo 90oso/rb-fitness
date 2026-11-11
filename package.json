@@ -1,6 +1,6 @@
 {
   "name": "rb-fitness",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test:metrics": "node scripts/check-metrics.cjs",
     "test:cycles": "node --no-warnings --experimental-strip-types scripts/check-cycles.mjs",
-    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test:metrics && npm run test:cycles"
+    "test:session": "node scripts/check-session.cjs",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test:metrics && npm run test:cycles && npm run test:session"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

@@ -13,13 +13,16 @@ export interface ConfirmOptions {
   requireText?: string;
 }
 
+/** Cómo se cerró el diálogo: el botón de confirmar, el de cancelar, o la X / Escape / el fondo. */
+export type ConfirmResult = 'confirm' | 'cancel' | 'dismiss';
+
 /** RB-styled replacement for window.confirm(); focus starts on Cancel so Enter never destroys by accident. */
 export default function ConfirmDialog({
   options,
   onClose,
 }: {
   options: ConfirmOptions;
-  onClose: (confirmed: boolean) => void;
+  onClose: (result: ConfirmResult) => void;
 }) {
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const [typed, setTyped] = useState('');
@@ -27,14 +30,14 @@ export default function ConfirmDialog({
   useEffect(() => {
     cancelRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose(false);
+      if (event.key === 'Escape') onClose('dismiss');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
   return (
-    <div className="modal-backdrop" onClick={() => onClose(false)}>
+    <div className="modal-backdrop" onClick={() => onClose('dismiss')}>
       <div
         className="modal confirm-dialog"
         role="alertdialog"
@@ -43,7 +46,7 @@ export default function ConfirmDialog({
         aria-describedby={options.message ? 'confirm-message' : undefined}
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="modal-close" aria-label="Cerrar" onClick={() => onClose(false)}>
+        <button className="modal-close" aria-label="Cerrar" onClick={() => onClose('dismiss')}>
           <X size={21} />
         </button>
         <span className={`confirm-icon ${options.danger ? 'confirm-icon-danger' : ''}`}>
@@ -69,13 +72,13 @@ export default function ConfirmDialog({
           </label>
         )}
         <div className="confirm-actions">
-          <button ref={cancelRef} className="secondary-btn" onClick={() => onClose(false)}>
+          <button ref={cancelRef} className="secondary-btn" onClick={() => onClose('cancel')}>
             {options.cancelLabel ?? 'Cancelar'}
           </button>
           <button
             className={options.danger ? 'danger-btn' : 'lime-btn'}
             disabled={!unlocked}
-            onClick={() => onClose(true)}
+            onClick={() => onClose('confirm')}
           >
             {options.confirmLabel ?? 'Confirmar'}
           </button>

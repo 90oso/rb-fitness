@@ -2,6 +2,29 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.9.0] — 2026-11-11
+
+### Añadido
+
+- **Descanso fijo y ajustable**: la cuenta atrás ya no se pierde al hacer scroll. En el teléfono en vertical flota sobre la navegación; en horizontal y escritorio se queda arriba del registro. Botones **−15 s**, **+15 s** y **Omitir**; el ajuste queda como descanso de ese ejercicio en la sesión. Sobrevive una recarga.
+- **Aviso al terminar el descanso**: campana corta que se mezcla con tu música bajándola un momento (Safari 17+; en iPhone, si el interruptor está en silencio, puede no sonar: pruébalo), vibración donde el sistema la permite (Android; en iPhone solo un toque háptico sin garantía) y la barra pasa a amarillo con «Descanso terminado · Serie N». Si la app estaba en segundo plano, el aviso llega al volver.
+- **Pantalla encendida en sesión**: mientras entrenas la pantalla no se apaga (solo en la pestaña Entrenar). Perfil → «En sesión»: interruptores para el sonido y para la pantalla.
+- **3/3 → siguiente**: al completar las series objetivo el ejercicio queda con ✓ y la app pasa sola al siguiente pendiente («Press de pecho completado · Siguiente: Press inclinado»). Con todos completos, «Finalizar entrenamiento» pasa a ser el botón principal. Tras recargar vuelve a haber un ejercicio seleccionado.
+- **Cambiar ejercicios durante la sesión**: **Sustituir** (si aún no tiene series; el nuevo hereda series y reps objetivo), **Quitar** (con confirmación si borra series) y **Añadir ejercicio** desde el catálogo. La rutina no cambia hasta finalizar: entonces «Cambiaste esta sesión» → **Mantener rutina** / **Actualizar rutina**; cerrar el diálogo no finaliza.
+- **Aviso de subir de peso**: cuando la última vez completaste todas las series al máximo de reps, el ejercicio lleva la etiqueta «↑ 20.5 kg» en la sesión, el peso viene precargado con la propuesta y la tarjeta de registro lo destaca. En Entrenar y en Hoy: «Subir de peso en N ejercicios».
+- Pruebas de las reglas de la sesión (`npm run test:session`): siguiente pendiente, descanso acotado, comparación sesión-vs-rutina, propuesta de peso, restauración del descanso.
+
+### Cambiado
+
+- **Teléfono en horizontal** con formato de teléfono: ya no aparece la barra lateral de escritorio; sigue la cápsula inferior (centrada) y la barra superior que se esconde. Hoy, Entrenar y la sesión usan dos columnas solo donde caben. Regla única en `lib/layout.ts` (ancho ≤ 800 px o alto ≤ 500 px).
+- El diálogo de confirmación distingue cancelar de cerrar (`choose()`), para preguntas donde ambas opciones hacen algo.
+
+### Límites conocidos
+
+- Con el iPhone bloqueado la app se detiene y el aviso de descanso llega al desbloquear; por eso la pantalla se mantiene encendida en sesión. Avisar con el teléfono bloqueado requiere notificaciones push (pendiente).
+- Sonido de fin de descanso: campana sintetizada para RB (`public/sounds/descanso.mp3`), dominio público.
+- Un dispositivo que siga en 0.8.x borra los dos interruptores de «En sesión» la primera vez que guarda; vuelven a su valor por defecto (activados) hasta que ambos dispositivos estén en 0.9.0.
+
 ## [0.8.1] — 2026-11-06
 
 ### Cambiado

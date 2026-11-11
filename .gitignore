@@ -6,3 +6,6 @@ node_modules
 *.tsbuildinfo
 .DS_Store
 AGENTS.md
+
+# Espacio de trabajo local de los planes (no se versiona)
+.superpowers/

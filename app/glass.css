@@ -197,7 +197,6 @@ body::after {
 .suggestion,
 .exercise-choice,
 .previous-result,
-.rest-timer,
 .pr-tile,
 .switch-row,
 .safe-tip,
@@ -288,7 +287,6 @@ body::after {
 .search-field,
 .stepper-row,
 .previous-result,
-.rest-timer,
 .progression-hint,
 .safe-tip,
 .editor-empty,
@@ -482,7 +480,8 @@ h3 {
 }
 /* ---- Botones, etiquetas y campos ---- */
 .lime-btn,
-.small-primary {
+.small-primary,
+.finish-btn.primary {
   border: 0;
   background: linear-gradient(180deg, #ffe45c, #ffd400);
   color: var(--acidtext);
@@ -642,7 +641,8 @@ select {
 .nav-scrim {
   display: none;
 }
-@media (max-width: 800px) {
+/* Teléfono: estrecho o bajo (horizontal). Misma regla que PHONE_QUERY en lib/layout.ts. */
+@media (max-width: 800px), (max-height: 500px) {
   /* Franja bajo la cápsula: el contenido se desenfoca y se desvanece antes de llegar a ella */
   .nav-scrim {
     display: block;
@@ -722,12 +722,12 @@ select {
     --gutter: 26px;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .main-content {
     --gutter: 19px;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .main-content {
     --gutter: 16px;
   }
@@ -1033,7 +1033,7 @@ html[data-theme='light'] .hoy-spark polyline,
 .hoy-tip {
   margin-top: 0;
 }
-@media (min-width: 801px) {
+@media (min-width: 801px) and (min-height: 501px) {
   .hoy {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -1108,7 +1108,7 @@ html[data-theme='light'] .danger-card {
   box-shadow: 0 0 0 3px rgb(var(--acid-rgb) / 0.28);
 }
 /* ---- Revisión de GUI: áreas táctiles de 44 px y lectura cómoda en el móvil ---- */
-@media (pointer: coarse), (max-width: 800px) {
+@media (pointer: coarse), (max-width: 800px), (max-height: 500px) {
   .theme-toggle,
   .modal-close,
   .icon-action,
@@ -1211,8 +1211,247 @@ html[data-theme='light'] .danger-card {
     font-size: 28px;
   }
 }
+/* Sesión: ejercicio completado en la lista */
+.exercise-choice.done {
+  border-color: rgb(var(--acid-rgb) / 0.35);
+}
+.exercise-choice.done strong {
+  color: var(--acid);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+html[data-theme='light'] .exercise-choice.done strong {
+  color: var(--accent);
+}
+.exercise-choice.done.active {
+  border-color: rgb(var(--acid-rgb) / 0.6);
+}
+
+/* Subir de peso: etiqueta en la lista de la sesión, tarjeta destacada y línea en Entrenar / Hoy */
+.raise-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: var(--r-tag);
+  background: rgb(var(--acid-rgb) / 0.16);
+  color: var(--acid);
+  font-family: var(--font-cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.progression-hint.raise {
+  border-color: rgb(var(--acid-rgb) / 0.5);
+  background: rgb(var(--acid-rgb) / 0.1);
+}
+.progression-hint.raise strong {
+  font-weight: 700;
+}
+.raise-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--acid);
+  font-size: 13px;
+  font-weight: 600;
+}
+.routine-tile > .raise-line {
+  margin: -6px 0 12px;
+}
+.hoy-meta.raise-line {
+  color: var(--acid);
+  font-weight: 600;
+}
+html[data-theme='light'] .raise-chip,
+html[data-theme='light'] .raise-line,
+html[data-theme='light'] .hoy-meta.raise-line {
+  color: var(--accent);
+}
+
+/* Sesión: acciones del ejercicio actual y botón de añadir */
+.log-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 22px;
+  margin-top: 4px;
+}
+.log-actions .text-link {
+  font-size: 12px;
+}
+.log-remove {
+  color: var(--red);
+}
+.exercise-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  width: 100%;
+  margin-top: 12px;
+  border: 1px dashed var(--stroke);
+  border-radius: var(--r-field);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.exercise-add:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* Perfil → En sesión: dos interruptores seguidos, sin el margen grande del editor */
+.settings-card .switch-row {
+  margin: 0 0 10px;
+}
+.settings-card .switch-row:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Barra de descanso: fija sobre la navegación en el teléfono vertical, pegajosa arriba en el resto ---- */
+.rest-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 8px 6px 14px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--glass-border);
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  color: var(--text);
+  font-size: 14px;
+  position: sticky;
+  top: calc(var(--topbar-h, 70px) + 8px);
+  z-index: 5;
+  margin-bottom: 14px;
+}
+.log-column {
+  min-width: 0;
+}
+.rest-bar > svg {
+  flex: none;
+  color: var(--acid);
+}
+.rest-bar-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+.rest-bar-text strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.rest-bar-sep {
+  color: var(--muted);
+}
+.rest-bar-actions {
+  display: flex;
+  gap: 4px;
+}
+.rest-bar-actions button,
+.rest-bar-close {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: var(--r-chip);
+  border: 1px solid var(--stroke);
+  background: var(--field);
+  color: var(--text);
+  font-family: var(--font-cond);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.rest-bar-skip {
+  color: var(--acid);
+}
+.rest-bar-close {
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.rest-bar-done {
+  background: rgb(var(--acid-rgb) / 0.18);
+  border-color: rgb(var(--acid-rgb) / 0.55);
+  animation: rest-pulse 1s ease-in-out 3;
+}
+.rest-bar-done > svg {
+  animation: rest-ring 0.6s ease-in-out 3;
+}
+@keyframes rest-pulse {
+  50% {
+    background: rgb(var(--acid-rgb) / 0.42);
+  }
+}
+@keyframes rest-ring {
+  25% {
+    transform: rotate(-14deg);
+  }
+  75% {
+    transform: rotate(14deg);
+  }
+}
+html[data-theme='light'] .rest-bar > svg,
+html[data-theme='light'] .rest-bar-skip {
+  color: var(--accent);
+}
+/* Teléfono en vertical: flota justo encima de la cápsula de navegación */
+@media (max-width: 800px) and (min-height: 501px) {
+  .app-root {
+    --nav-clear: 78px;
+  }
+  .rest-bar {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: calc(var(--nav-clear) + 10px + env(safe-area-inset-bottom, 0px));
+    z-index: 41;
+    margin: 0;
+  }
+  .app-root:has(.rest-bar) .main-content {
+    padding-bottom: calc(176px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-root:has(.rest-bar)::after {
+    height: calc(172px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-root:has(.rest-bar) .toast {
+    bottom: calc(var(--nav-clear) + 72px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (max-width: 600px) and (min-height: 501px) {
+  .app-root {
+    --nav-clear: 70px;
+  }
+}
+/* Horizontal: cuando la barra superior se esconde, la de descanso sube con ella */
+@media (max-height: 500px) {
+  .rest-bar {
+    transition: top 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .topbar[data-hidden='true'] ~ .main-content .rest-bar {
+    top: 8px;
+  }
+}
+
 /* ---- Móvil: el contenido se desvanece antes de llegar a la barra inferior ---- */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .app-root::after {
     content: '';
     position: fixed;
@@ -1231,7 +1470,7 @@ html[data-theme='light'] .danger-card {
 }
 
 /* ---- Móvil: menos densidad (lo esencial primero, sin repetir lo que ya dice otro elemento) ---- */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   /* El estado «Listo» no aporta en el móvil; la nube ya avisa si algo no se guardó */
   .top-actions .activity-pill {
     display: none;
@@ -1240,7 +1479,7 @@ html[data-theme='light'] .danger-card {
     gap: 10px;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .hoy {
     gap: 24px;
   }
@@ -1286,7 +1525,7 @@ html[data-theme='light'] .danger-card {
 }
 
 /* ---- Móvil: más liviano (letras y piezas más chicas, menos peso, más aire entre bloques) ---- */
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) {
   .main-content {
     --gutter: 20px;
     padding-inline: var(--gutter);
@@ -1519,11 +1758,57 @@ html[data-theme='light'] .danger-card {
   }
 }
 
+/* ---- Teléfono en horizontal: mismas piezas que en vertical, dos columnas solo donde caben ---- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .main-content {
+    max-width: 1000px;
+    padding-top: 18px;
+  }
+  .bottom-nav {
+    left: 50%;
+    right: auto;
+    width: min(560px, calc(100% - 32px));
+    transform: translateX(-50%);
+  }
+  .active-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .hoy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 16px 18px;
+    align-items: start;
+  }
+  .hoy-greet,
+  .hoy-cycle,
+  .hoy-tip {
+    grid-column: 1 / -1;
+  }
+  .hoy-tiles {
+    grid-template-columns: 1fr;
+  }
+  .hoy-mark {
+    top: 40px;
+    right: 24px;
+    font-size: 220px;
+  }
+  .routine-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ---- Movimiento y transparencia reducidos, y navegadores sin desenfoque ---- */
 @media (prefers-reduced-motion: reduce) {
   .topbar,
   .hoy-ring-fill {
     transition: none;
+  }
+  .rest-bar-done,
+  .rest-bar-done > svg {
+    animation: none;
   }
 }
 @media (prefers-reduced-transparency: reduce) {
