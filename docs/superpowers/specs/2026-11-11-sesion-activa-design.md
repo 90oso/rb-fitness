@@ -70,8 +70,9 @@ interface Profile {
 - Cuando el conteo pasa por cero (por el reloj, no por «Omitir»), una sola vez por descanso:
   1. Sonido: `public/sounds/descanso.mp3` (campana de dos tonos, ~1 s, hecha para RB) reproducido por un elemento
      `<audio>` creado una vez; se «desbloquea» en el primer toque de «Guardar serie» (play silenciado + pausa),
-     requisito de iOS. Un `<audio>` suena en iPhone aunque el interruptor esté en silencio; Web Audio no, por eso
-     no se usa.
+     requisito de iOS. Se pide una sesión de audio «transient» (Safari 17+) para que la campana se mezcle con la
+     música del usuario bajándola un momento en vez de pararla; con ese tipo, el interruptor de silencio del
+     iPhone puede silenciar la campana (pendiente de probar en un dispositivo real).
   2. Vibración: `navigator.vibrate([180, 90, 180])` donde exista (Android). En iPhone no existe; se intenta el
      toque háptico de `<input type="checkbox" switch>` (iOS 17.4+) mediante un clic programático, sin garantía.
   3. Visual: la barra pasa a amarillo con «Descanso terminado · Serie N» y una pulsación de 3 s (sin animación con

@@ -168,7 +168,7 @@ export default function ProfileView({
             <label className="switch-row">
               <span>
                 <strong>Sonido al terminar el descanso</strong>
-                <small>Una campana corta, aunque el iPhone esté en silencio.</small>
+                <small>Una campana corta que baja tu música un momento.</small>
               </span>
               <input
                 type="checkbox"

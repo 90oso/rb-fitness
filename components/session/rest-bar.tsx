@@ -35,7 +35,7 @@ export default function RestBar({
     );
   }
   return (
-    <div className="rest-bar" role="status" aria-live="polite">
+    <div className="rest-bar" role="timer" aria-label="Descanso en curso">
       <Timer size={19} aria-hidden="true" />
       <span className="rest-bar-text">
         Descanso <strong>{prettyDuration(remainingMs / 1000)}</strong>

@@ -214,8 +214,9 @@ export default function RBApp() {
       reps: inCurrent?.reps || previous?.reps || 10,
     };
   }
-  function selectExercise(exerciseId: string, sets?: SetEntry[]) {
-    if (rest.phase === 'done') rest.dismiss();
+  /** `keepRest`: al avanzar solo tras guardar serie, el descanso recién iniciado debe seguir corriendo. */
+  function selectExercise(exerciseId: string, sets?: SetEntry[], keepRest = false) {
+    if (!keepRest && rest.phase === 'done') rest.dismiss();
     setSelectedExercise(exerciseId);
     const fill = prefillFor(exerciseId, sets);
     setWeight(fill.weight);
@@ -256,7 +257,9 @@ export default function RBApp() {
       ...current,
       active: current.active ? { ...current.active, sets: [...current.active.sets, entry] } : null,
     }));
-    rest.start(selectedExercise, currentRx?.restSeconds ?? 90);
+    const restSeconds = currentRx?.restSeconds ?? 90;
+    if (restSeconds > 0) rest.start(selectedExercise, restSeconds);
+    else if (rest.phase === 'done') rest.dismiss(); // sin descanso: no hay cuenta atrás ni campana
     const justCompleted =
       currentRx &&
       exerciseProgress(sets, currentRx).complete &&
@@ -267,7 +270,7 @@ export default function RBApp() {
     }
     const next = nextPendingExercise(exercises, sets, selectedExercise);
     if (next) {
-      selectExercise(next, sets);
+      selectExercise(next, sets, true);
       toast(`${currentExercise.name} completado · Siguiente: ${getExercise(next)?.name ?? ''}`);
     } else {
       toast('Todos los ejercicios completados. Finaliza cuando quieras.');

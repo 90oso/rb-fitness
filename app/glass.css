@@ -1440,6 +1440,15 @@ html[data-theme='light'] .rest-bar-skip {
     --nav-clear: 70px;
   }
 }
+/* Horizontal: cuando la barra superior se esconde, la de descanso sube con ella */
+@media (max-height: 500px) {
+  .rest-bar {
+    transition: top 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .topbar[data-hidden='true'] ~ .main-content .rest-bar {
+    top: 8px;
+  }
+}
 
 /* ---- Móvil: el contenido se desvanece antes de llegar a la barra inferior ---- */
 @media (max-width: 800px), (max-height: 500px) {

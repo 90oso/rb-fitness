@@ -3,6 +3,16 @@ import { useCallback, useRef } from 'react';
 
 const SOUND_SRC = '/sounds/descanso.mp3';
 
+/** Safari 17+: el aviso se mezcla con la música del usuario (la baja un momento) en vez de pararla. */
+function mixWithOtherAudio() {
+  try {
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = 'transient';
+  } catch {
+    /* sin API de sesión de audio */
+  }
+}
+
 /** Toque háptico en iOS 17.4+: el sistema vibra al cambiar un `<input type="checkbox" switch>`. Sin garantía. */
 function iosHaptic() {
   try {
@@ -37,6 +47,7 @@ export function useRestAlert(soundEnabled: boolean) {
   const unlock = useCallback(() => {
     if (audioRef.current) return;
     try {
+      mixWithOtherAudio();
       const audio = new Audio(SOUND_SRC);
       audio.preload = 'auto';
       audio.muted = true;
@@ -58,6 +69,7 @@ export function useRestAlert(soundEnabled: boolean) {
 
   const fire = useCallback(() => {
     if (soundEnabled && audioRef.current) {
+      mixWithOtherAudio();
       audioRef.current.currentTime = 0;
       void audioRef.current.play().catch(() => {});
     }
