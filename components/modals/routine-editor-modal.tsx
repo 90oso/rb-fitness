@@ -3,12 +3,14 @@ import { useState } from 'react';
 import {
   DndContext,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
+  type Announcements,
   type DragEndEvent,
+  type ScreenReaderInstructions,
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
@@ -19,13 +21,41 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { BookOpen, Check, Dumbbell, GripVertical, Plus, Sparkles, Trash2, X } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  BookOpen,
+  Check,
+  Dumbbell,
+  GripVertical,
+  Plus,
+  Sparkles,
+  Trash2,
+  X,
+} from 'lucide-react';
 import ExercisePicker from './exercise-picker';
 import Stepper from '@/components/ui/stepper';
 import { ExercisePhoto } from '@/components/ui/exercise-media';
 import { getExercise } from '@/lib/catalog';
 import { makeRx } from '@/lib/format';
 import type { Routine, RoutineExercise } from '@/lib/types';
+
+const exerciseName = (id: string | number) => getExercise(String(id))?.name ?? String(id);
+/** Lo que VoiceOver y otros lectores dicen al reordenar con teclado (dnd-kit habla inglés por defecto). */
+const screenReaderInstructions: ScreenReaderInstructions = {
+  draggable:
+    'Para mover un ejercicio, pulsa espacio o intro; muévelo con las flechas arriba y abajo; vuelve a pulsar espacio para soltarlo, o escape para cancelar.',
+};
+const announcements: Announcements = {
+  onDragStart: ({ active }) => `Tomado ${exerciseName(active.id)}.`,
+  onDragOver: ({ active, over }) =>
+    over ? `${exerciseName(active.id)} sobre la posición de ${exerciseName(over.id)}.` : undefined,
+  onDragEnd: ({ active, over }) =>
+    over
+      ? `${exerciseName(active.id)} soltado en la posición de ${exerciseName(over.id)}.`
+      : `${exerciseName(active.id)} soltado.`,
+  onDragCancel: ({ active }) => `Movimiento de ${exerciseName(active.id)} cancelado.`,
+};
 
 /** «3 × 8–12 · 90 s»: lo que se ve en la fila cerrada. */
 const summary = (rx: RoutineExercise) =>
@@ -50,9 +80,11 @@ export default function RoutineEditorModal({
   const [picking, setPicking] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const dirty = JSON.stringify(draft) !== JSON.stringify(routine);
+  // Ratón y táctil por separado: con PointerSensor el táctil arrastraba a los 6 px y el asa no dejaba hacer scroll.
+  // En táctil hace falta mantener pulsado; el asa lleva `touch-action: manipulation` para que el dedo pueda pasar.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -63,6 +95,15 @@ export default function RoutineEditorModal({
     }));
   const remove = (exerciseId: string) =>
     setDraft((d) => ({ ...d, exercises: d.exercises.filter((rx) => rx.exerciseId !== exerciseId) }));
+  /** Subir / Bajar: la alternativa al arrastre (VoiceOver, conmutadores, quien no quiera arrastrar). */
+  const move = (exerciseId: string, direction: -1 | 1) =>
+    setDraft((d) => {
+      const from = d.exercises.findIndex((rx) => rx.exerciseId === exerciseId);
+      const to = from + direction;
+      return from < 0 || to < 0 || to >= d.exercises.length
+        ? d
+        : { ...d, exercises: arrayMove(d.exercises, from, to) };
+    });
   const add = (ids: string[]) => setDraft((d) => ({ ...d, exercises: [...d.exercises, ...ids.map(makeRx)] }));
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -168,6 +209,7 @@ export default function RoutineEditorModal({
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     modifiers={[restrictToVerticalAxis]}
+                    accessibility={{ screenReaderInstructions, announcements }}
                     onDragEnd={onDragEnd}
                   >
                     <SortableContext
@@ -183,6 +225,9 @@ export default function RoutineEditorModal({
                             open={openId === rx.exerciseId}
                             onToggle={() => setOpenId((id) => (id === rx.exerciseId ? null : rx.exerciseId))}
                             onPatch={(changes) => patch(rx.exerciseId, changes)}
+                            onMove={(direction) => move(rx.exerciseId, direction)}
+                            canMoveUp={index > 0}
+                            canMoveDown={index < draft.exercises.length - 1}
                             onRemove={() => remove(rx.exerciseId)}
                             onOpenDetail={() => onOpenDetail(rx.exerciseId)}
                           />
@@ -215,6 +260,9 @@ function ExerciseRow({
   open,
   onToggle,
   onPatch,
+  onMove,
+  canMoveUp,
+  canMoveDown,
   onRemove,
   onOpenDetail,
 }: {
@@ -223,13 +271,16 @@ function ExerciseRow({
   open: boolean;
   onToggle: () => void;
   onPatch: (changes: Partial<RoutineExercise>) => void;
+  onMove: (direction: -1 | 1) => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
   onRemove: () => void;
   onOpenDetail: () => void;
 }) {
   const exercise = getExercise(rx.exerciseId);
   const name = exercise?.name ?? rx.exerciseId;
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
-    useSortable({ id: rx.exerciseId });
+    useSortable({ id: rx.exerciseId, attributes: { roleDescription: 'ejercicio reordenable' } });
   const style = { transform: CSS.Transform.toString(transform), transition };
   const controlsId = `ex-controls-${rx.exerciseId}`;
 
@@ -300,6 +351,26 @@ function ExerciseRow({
             />
           </div>
           <div className="ex-row-actions">
+            <span className="ex-row-move">
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => onMove(-1)}
+                disabled={!canMoveUp}
+                aria-label={`Subir ${name}`}
+              >
+                <ArrowUp size={14} /> Subir
+              </button>
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => onMove(1)}
+                disabled={!canMoveDown}
+                aria-label={`Bajar ${name}`}
+              >
+                <ArrowDown size={14} /> Bajar
+              </button>
+            </span>
             {exercise && (
               <button type="button" className="text-link" onClick={onOpenDetail}>
                 <BookOpen size={14} /> Ver cómo se hace

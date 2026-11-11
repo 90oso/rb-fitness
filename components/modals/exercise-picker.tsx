@@ -31,6 +31,10 @@ export default function ExercisePicker({
   const [search, setSearch] = useState('');
   const [muscle, setMuscle] = useState<string>('Todos');
   const [selected, setSelected] = useState<string[]>([]);
+  // Con dedo, el teclado del teléfono taparía las fotos: solo se enfoca el buscador cuando hay ratón.
+  const [focusSearch] = useState(
+    () => typeof window !== 'undefined' && !window.matchMedia('(pointer: coarse)').matches
+  );
   const needle = search.trim().toLowerCase();
   const results = catalog.filter(
     (exercise) =>
@@ -71,7 +75,7 @@ export default function ExercisePicker({
       <label className="search-field picker-search">
         <Search size={18} />
         <input
-          autoFocus
+          autoFocus={focusSearch}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Buscar por nombre, músculo o máquina"
@@ -120,7 +124,7 @@ export default function ExercisePicker({
                   <button
                     type="button"
                     className="picker-toggle"
-                    aria-pressed={isSelected}
+                    aria-pressed={single ? undefined : isSelected}
                     disabled={inRoutine}
                     onClick={() => toggle(exercise)}
                   >

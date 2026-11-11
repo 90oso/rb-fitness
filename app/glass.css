@@ -1374,7 +1374,7 @@ html[data-theme='light'] .hoy-meta.raise-line {
   background: transparent;
   color: var(--muted);
   cursor: grab;
-  touch-action: none;
+  touch-action: manipulation;
 }
 .ex-handle:active {
   cursor: grabbing;
@@ -1389,10 +1389,23 @@ html[data-theme='light'] .hoy-meta.raise-line {
 }
 .ex-row-actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
-  gap: 22px;
+  gap: 10px 22px;
   margin-top: 14px;
   padding-right: 4px;
+}
+.ex-row-move {
+  display: flex;
+  gap: 18px;
+  margin-right: auto;
+}
+.ex-row-move .text-link {
+  color: var(--text);
+}
+.ex-row-move .text-link:disabled {
+  opacity: 0.35;
 }
 .ex-row-actions .text-link {
   font-size: 12px;
@@ -1400,8 +1413,17 @@ html[data-theme='light'] .hoy-meta.raise-line {
 .ex-row-actions .ex-remove {
   color: var(--red);
 }
+/* Rojo legible sobre el panel oscuro (el rojo de marca queda en 3.4:1) */
+html[data-theme='dark'] .ex-row-actions .ex-remove,
+html[data-theme='dark'] .log-remove {
+  color: #ff9ca6;
+}
 .ex-photo {
   border-radius: 10px;
+}
+/* Las fotos del catálogo son casi todas 3:2; las pocas verticales se ven enteras en vez de cortadas */
+.ex-photo img {
+  object-fit: contain;
 }
 
 /* ---- Selector de ejercicios: la fila marca, la foto abre la ficha, agrupado por músculo ---- */
@@ -1447,8 +1469,10 @@ html[data-theme='light'] .hoy-meta.raise-line {
   border-color: rgb(var(--acid-rgb) / 0.55);
   background: rgb(var(--acid-rgb) / 0.08);
 }
-.picker-row-added {
-  opacity: 0.6;
+.picker-row-added .picker-photo,
+.picker-row-added .picker-check,
+.picker-row-added .picker-name strong {
+  opacity: 0.55;
 }
 .picker-photo {
   position: relative;
@@ -1506,7 +1530,7 @@ html[data-theme='light'] .hoy-meta.raise-line {
   width: 28px;
   height: 28px;
   border-radius: var(--r-chip);
-  border: 2px solid var(--stroke);
+  border: 2px solid var(--muted);
   display: grid;
   place-items: center;
   color: var(--acidtext);
