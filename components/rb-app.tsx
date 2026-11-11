@@ -15,7 +15,9 @@ import TrainView from './views/train-view';
 import { useAuth } from '@/hooks/use-auth';
 import { useCloudSync } from '@/hooks/use-cloud-sync';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useRestAlert } from '@/hooks/use-rest-alert';
 import { useRestTimer } from '@/hooks/use-rest-timer';
+import { useWakeLock } from '@/hooks/use-wake-lock';
 import { useToast } from '@/hooks/use-toast';
 import { getExercise, initialData } from '@/lib/catalog';
 import { deleteCloudAccount } from '@/lib/cloud';
@@ -55,7 +57,9 @@ export default function RBApp() {
   const [cycleError, setCycleError] = useState('');
   const [farewell, setFarewell] = useState('');
 
-  const rest = useRestTimer(data.active?.id ?? null, now, () => {});
+  const alert = useRestAlert(data.profile.restSound ?? true);
+  const rest = useRestTimer(data.active?.id ?? null, now, alert.fire);
+  useWakeLock(data.active !== null && tab === 'train' && (data.profile.keepAwake ?? true));
   // One clock: every second while a session runs, once a minute otherwise (date and greeting).
   const ticking = data.active !== null;
   useEffect(() => {
@@ -163,6 +167,7 @@ export default function RBApp() {
     setReps(inCurrent?.reps || previous?.reps || 10);
   }
   function saveSet() {
+    alert.unlock(); // un toque del usuario: iOS permite reproducir el sonido más tarde
     if (
       !data.active ||
       !currentExercise ||

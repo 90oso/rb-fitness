@@ -8,6 +8,7 @@ import {
   RotateCcw,
   ShieldCheck,
   Sun,
+  Timer,
   Trash2,
   UserRound,
   UserX,
@@ -156,6 +157,38 @@ export default function ProfileView({
                 <Monitor size={18} /> Sistema
               </button>
             </div>
+          </section>
+
+          <section className="card settings-card">
+            <div className="card-top">
+              <span className="section-label">
+                <Timer size={16} /> EN SESIÓN
+              </span>
+            </div>
+            <label className="switch-row">
+              <span>
+                <strong>Sonido al terminar el descanso</strong>
+                <small>Una campana corta, aunque el iPhone esté en silencio.</small>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={profile.restSound ?? true}
+                onChange={(e) => onProfileChange({ restSound: e.target.checked })}
+              />
+            </label>
+            <label className="switch-row">
+              <span>
+                <strong>Mantener la pantalla encendida</strong>
+                <small>Solo mientras entrenas.</small>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={profile.keepAwake ?? true}
+                onChange={(e) => onProfileChange({ keepAwake: e.target.checked })}
+              />
+            </label>
           </section>
 
           <section className="card settings-card">

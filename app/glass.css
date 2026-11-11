@@ -1210,6 +1210,14 @@ html[data-theme='light'] .danger-card {
     font-size: 28px;
   }
 }
+/* Perfil → En sesión: dos interruptores seguidos, sin el margen grande del editor */
+.settings-card .switch-row {
+  margin: 0 0 10px;
+}
+.settings-card .switch-row:last-child {
+  margin-bottom: 0;
+}
+
 /* ---- Barra de descanso: fija sobre la navegación en el teléfono vertical, pegajosa arriba en el resto ---- */
 .rest-bar {
   display: flex;
