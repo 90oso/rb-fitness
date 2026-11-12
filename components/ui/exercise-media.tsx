@@ -19,6 +19,37 @@ export function ExerciseThumb({ exercise, size = 44 }: { exercise: Exercise | un
   );
 }
 
+/** Foto apaisada (las del catálogo son 3:2): se ve la máquina entera, no un recorte cuadrado. */
+export function ExercisePhoto({
+  exercise,
+  width = 96,
+  height = 64,
+}: {
+  exercise: Exercise | undefined;
+  width?: number;
+  height?: number;
+}) {
+  if (!exercise?.media) {
+    return (
+      <span className="ex-thumb ex-thumb-empty ex-photo" style={{ width, height }} aria-hidden="true">
+        <Dumbbell size={Math.round(height * 0.5)} />
+      </span>
+    );
+  }
+  return (
+    <span className="ex-thumb ex-photo" style={{ width, height }}>
+      <img
+        src={exercise.media.frames[0]}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        width={width}
+        height={height}
+      />
+    </span>
+  );
+}
+
 /**
  * Start/end frames alternating every second, which reads like a slow loop of the movement.
  * With prefers-reduced-motion both frames sit side by side instead.

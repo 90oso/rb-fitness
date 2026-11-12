@@ -2504,18 +2504,6 @@ html[data-theme='light'] .toast {
   color: var(--muted);
   font-size: 12px;
 }
-.ex-card {
-  border: 1px solid var(--stroke);
-  border-radius: 16px;
-  background: var(--panel-high);
-  padding: 14px;
-  margin-bottom: 10px;
-}
-.ex-card-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 .ex-ordinal {
   width: 28px;
   height: 28px;
@@ -2542,33 +2530,6 @@ html[data-theme='light'] .toast {
   color: var(--muted);
   font-size: 12px;
   margin-top: 2px;
-}
-.ex-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.ex-actions button {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--stroke);
-  background: var(--panel);
-  color: var(--muted);
-  display: grid;
-  place-items: center;
-}
-.ex-actions button:hover:not(:disabled) {
-  color: var(--text);
-}
-.ex-actions button:disabled {
-  opacity: 0.3;
-}
-.ex-actions .ex-remove {
-  color: #d6303f;
-}
-html[data-theme='dark'] .ex-actions .ex-remove {
-  color: #ff9ca6;
 }
 .ex-controls {
   display: grid;
@@ -2647,24 +2608,6 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   flex: 1;
   min-height: 0;
 }
-.picker-head > div {
-  flex: 1;
-  min-width: 0;
-}
-.picker-head strong {
-  display: block;
-  font-size: 15px;
-}
-.picker-head small {
-  display: block;
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 2px;
-}
-.picker-done {
-  min-height: 40px;
-  padding: 8px 14px;
-}
 .picker-search {
   margin: 14px 20px 10px;
   max-width: none;
@@ -2673,66 +2616,11 @@ html[data-theme='dark'] .ex-actions .ex-remove {
   padding: 0 20px 10px;
 }
 .picker-list {
-  list-style: none;
   margin: 0;
   padding: 0 20px 24px;
   overflow: auto;
   flex: 1;
   overscroll-behavior: contain;
-}
-.picker-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-top: 1px solid var(--stroke);
-}
-.picker-row > div {
-  flex: 1;
-  min-width: 0;
-}
-.picker-row strong {
-  display: block;
-  font-size: 13px;
-}
-.picker-row small {
-  display: block;
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 2px;
-}
-.picker-row-added strong {
-  color: var(--muted);
-}
-.picker-add {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid var(--acid);
-  background: var(--acid);
-  color: var(--acidtext);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  transition:
-    transform 0.15s,
-    background 0.15s;
-}
-.picker-add:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-.picker-add:disabled {
-  background: var(--panel-high);
-  border-color: var(--stroke);
-  color: var(--acid-ink);
-  opacity: 1;
-  cursor: default;
-}
-.picker-empty {
-  padding: 24px 0;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
 }
 /* ---- Exercise media (frames from Free Exercise DB) ---- */
 .ex-thumb {
