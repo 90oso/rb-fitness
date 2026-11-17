@@ -13,6 +13,7 @@ import {
   UserRound,
   UserX,
 } from 'lucide-react';
+import { EXPERIENCES, KITS, LIMITATIONS, MINUTES } from '@/components/setup/steps';
 import { PageHead } from '@/components/ui/bits';
 import type { SyncStatus } from '@/hooks/use-cloud-sync';
 import { useTheme } from '@/hooks/use-theme';
@@ -100,6 +101,81 @@ export default function ProfileView({
               ))}
             </select>
           </label>
+          <label className="form-label">
+            Experiencia
+            <select
+              value={profile.experience ?? ''}
+              onChange={(e) =>
+                onProfileChange({ experience: (e.target.value || undefined) as Profile['experience'] })
+              }
+            >
+              <option value="">Sin indicar</option>
+              {EXPERIENCES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} · {option.hint}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-label">
+            Minutos por sesión
+            <select
+              value={profile.sessionMinutes ?? ''}
+              onChange={(e) =>
+                onProfileChange({
+                  sessionMinutes: (e.target.value
+                    ? Number(e.target.value)
+                    : undefined) as Profile['sessionMinutes'],
+                })
+              }
+            >
+              <option value="">Sin indicar</option>
+              {MINUTES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-label">
+            Equipo
+            <select
+              value={profile.kit ?? ''}
+              onChange={(e) => onProfileChange({ kit: (e.target.value || undefined) as Profile['kit'] })}
+            >
+              <option value="">Sin indicar</option>
+              {KITS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset className="form-label profile-limits">
+            <legend>Zonas que cuidar (opcional)</legend>
+            <div className="profile-chips">
+              {LIMITATIONS.map((option) => {
+                const on = profile.limitations?.includes(option.value) ?? false;
+                return (
+                  <button
+                    type="button"
+                    key={option.value}
+                    className={`profile-chip ${on ? 'chosen' : ''}`}
+                    aria-pressed={on}
+                    onClick={() => {
+                      const current = profile.limitations ?? [];
+                      const next = on
+                        ? current.filter((l) => l !== option.value)
+                        : [...current, option.value];
+                      onProfileChange({ limitations: next.length ? next : undefined });
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
           <label className="form-label">
             Peso corporal (kg, opcional)
             <input

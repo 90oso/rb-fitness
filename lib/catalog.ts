@@ -1333,6 +1333,11 @@ export const defaultRoutines: Routine[] = [
   },
 ];
 
+/** El ciclo de ejemplo con ids nuevos: así «Añadir al final» nunca repite ids aunque la cuenta ya lo tuviera. */
+export function exampleCycle(uid: () => string): Routine[] {
+  return defaultRoutines.map((routine) => ({ ...structuredClone(routine), id: uid() }));
+}
+
 export const initialData: AppData = {
   version: 1,
   profile: {
@@ -1343,10 +1348,12 @@ export const initialData: AppData = {
     bodyweightKg: null,
     weightUnit: 'kg',
   },
-  routines: defaultRoutines,
+  // Las cuentas nuevas empiezan sin ciclo: el arranque guiado lo crea (o aplica `defaultRoutines` como ejemplo).
+  routines: [],
   workouts: [],
   active: null,
   cycleIndex: 0,
+  setup: 'pending',
   theme: 'dark',
   lastRestDate: null,
 };

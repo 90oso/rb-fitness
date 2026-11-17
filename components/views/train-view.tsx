@@ -12,12 +12,14 @@ import {
   Settings2,
   Sparkles,
   Trash2,
+  Wand2,
   Waves,
 } from 'lucide-react';
 import { PageHead } from '@/components/ui/bits';
 import { getExercise } from '@/lib/catalog';
 import type { suggestions } from '@/lib/metrics';
 import { RaiseLine } from '@/components/ui/bits';
+import { EmptyCycle } from '@/components/ui/empty-cycle';
 import { raiseCount } from '@/lib/session';
 import type { AppData, Routine } from '@/lib/types';
 
@@ -25,6 +27,7 @@ export default function TrainView({
   data,
   nextRoutine,
   suggestionList,
+  onSetup,
   showCycleManager,
   cycleError,
   onToggleCycleManager,
@@ -38,8 +41,9 @@ export default function TrainView({
   onApplyFlexible,
 }: {
   data: AppData;
-  nextRoutine: Routine;
+  nextRoutine: Routine | null;
   suggestionList: ReturnType<typeof suggestions>;
+  onSetup: () => void;
   showCycleManager: boolean;
   cycleError: string;
   onToggleCycleManager: () => void;
@@ -61,7 +65,7 @@ export default function TrainView({
         sub="Sigue tu ciclo o elige una rutina. Puedes modificar cada ejercicio y sus objetivos."
       />
 
-      {nextRoutine.isRest && (
+      {nextRoutine?.isRest && (
         <div className="card rest-banner">
           <Waves size={25} />
           <div>
@@ -84,6 +88,9 @@ export default function TrainView({
         <div>
           <button className="secondary-btn" onClick={onToggleCycleManager}>
             <Settings2 size={16} /> Organizar ciclo
+          </button>
+          <button className="secondary-btn" onClick={onSetup}>
+            <Wand2 size={16} /> Armar un ciclo nuevo
           </button>
           <button className="lime-btn" onClick={() => onAddDay(false)}>
             <Plus size={16} /> Nuevo día
@@ -141,7 +148,7 @@ export default function TrainView({
                 <button
                   aria-label="Eliminar día"
                   onClick={() => onRemoveDay(routine.id)}
-                  disabled={routines.length <= 1 || data.active?.routineId === routine.id}
+                  disabled={data.active?.routineId === routine.id}
                 >
                   <Trash2 size={17} />
                 </button>
@@ -159,6 +166,8 @@ export default function TrainView({
           <p className="muted">Reordenar o eliminar días no borra el historial de sesiones anteriores.</p>
         </section>
       )}
+
+      {routines.length === 0 && <EmptyCycle onSetup={onSetup} onNewDay={() => onAddDay(false)} />}
 
       <div className="routine-grid">
         {routines
@@ -195,7 +204,7 @@ export default function TrainView({
           ))}
       </div>
 
-      {!nextRoutine.isRest && nextRoutine.isFlexible && (
+      {nextRoutine && !nextRoutine.isRest && nextRoutine.isFlexible && (
         <div className="card suggestion-block">
           <div className="section-heading">
             <div>

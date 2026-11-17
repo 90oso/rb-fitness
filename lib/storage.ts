@@ -1,4 +1,21 @@
-import type { ActiveWorkout, AppData, Routine, RoutineExercise, SetEntry, Workout } from './types';
+import type {
+  ActiveWorkout,
+  AppData,
+  Experience,
+  GymKit,
+  Limitation,
+  Routine,
+  RoutineExercise,
+  SessionMinutes,
+  SetEntry,
+  Workout,
+} from './types';
+
+const EXPERIENCES: readonly Experience[] = ['beginner', 'intermediate', 'advanced'];
+const SESSION_MINUTES: readonly SessionMinutes[] = [30, 45, 60, 75];
+const KITS: readonly GymKit[] = ['machines', 'full', 'dumbbells'];
+const LIMITATIONS: readonly Limitation[] = ['knees', 'shoulders', 'lowerBack', 'wrists'];
+const isOneOf = <T>(value: unknown, allowed: readonly T[]): value is T => allowed.includes(value as T);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -92,7 +109,6 @@ export function safeParse(raw: string, includeActive = false): AppData {
     throw new Error('El archivo no corresponde al formato RB v1.');
   }
   if (
-    value.routines.length < 1 ||
     value.routines.length > 100 ||
     value.workouts.length > 30000 ||
     value.workouts.reduce(
@@ -116,6 +132,9 @@ export function safeParse(raw: string, includeActive = false): AppData {
     throw new Error('Los datos del perfil no son válidos.');
   }
   const routines = value.routines as Routine[];
+  const limitations = Array.isArray(p.limitations)
+    ? (p.limitations.filter((l: unknown) => isOneOf(l, LIMITATIONS)) as Limitation[])
+    : [];
   const workoutIds = new Set<string>();
   for (const w of value.workouts as Workout[]) {
     if (workoutIds.has(w.id)) throw new Error('El respaldo contiene sesiones duplicadas.');
@@ -132,6 +151,10 @@ export function safeParse(raw: string, includeActive = false): AppData {
       weightUnit: p.weightUnit as 'kg' | 'lb',
       ...(typeof p.restSound === 'boolean' ? { restSound: p.restSound } : {}),
       ...(typeof p.keepAwake === 'boolean' ? { keepAwake: p.keepAwake } : {}),
+      ...(isOneOf(p.experience, EXPERIENCES) ? { experience: p.experience } : {}),
+      ...(isOneOf(p.sessionMinutes, SESSION_MINUTES) ? { sessionMinutes: p.sessionMinutes } : {}),
+      ...(isOneOf(p.kit, KITS) ? { kit: p.kit } : {}),
+      ...(limitations.length ? { limitations } : {}),
     },
     routines,
     workouts: value.workouts as Workout[],
@@ -141,7 +164,9 @@ export function safeParse(raw: string, includeActive = false): AppData {
       routines.some((r) => r.id === (value.active as ActiveWorkout).routineId)
         ? cleanActive(value.active as ActiveWorkout)
         : null, // cloud resumes active sessions; backups do not
-    cycleIndex: isInteger(value.cycleIndex, 0, 100000) ? value.cycleIndex % routines.length : 0,
+    cycleIndex:
+      routines.length && isInteger(value.cycleIndex, 0, 100000) ? value.cycleIndex % routines.length : 0,
+    ...(value.setup === 'pending' || value.setup === 'done' ? { setup: value.setup } : {}),
     theme: value.theme === 'light' ? 'light' : 'dark',
     lastRestDate: isDate(value.lastRestDate) ? value.lastRestDate : null,
   };

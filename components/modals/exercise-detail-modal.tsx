@@ -1,5 +1,6 @@
 'use client';
 import { useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, ExternalLink, Info, PlayCircle, X } from 'lucide-react';
 import { ExerciseMotion, ExerciseVideo } from '@/components/ui/exercise-media';
 import { MEDIA_CREDIT, getExercise } from '@/lib/catalog';
@@ -19,7 +20,8 @@ export default function ExerciseDetailModal({
   if (!exercise) return null;
   const video = exercise.media?.video;
   const showVideo = mode === 'video' && Boolean(video);
-  return (
+  // En un portal al `body`, como el selector del catálogo: así la ficha abierta desde él queda por encima.
+  const sheet = (
     <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal"
@@ -82,4 +84,5 @@ export default function ExerciseDetailModal({
       </div>
     </div>
   );
+  return typeof document === 'undefined' ? sheet : createPortal(sheet, document.body);
 }

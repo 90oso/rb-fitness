@@ -5,6 +5,7 @@ import AuthScreen from './auth-screen';
 import { AuthLoading } from './ui/auth-frame';
 import ExerciseDetailModal from './modals/exercise-detail-modal';
 import ExercisePickerModal from './modals/exercise-picker-modal';
+import SetupFlow, { type SetupResult } from './setup/setup-flow';
 import RoutineEditorModal from './modals/routine-editor-modal';
 import { BottomNav, Sidebar, Topbar, type Tab } from './shell/app-shell';
 import ActiveSessionView from './views/active-session-view';
@@ -23,7 +24,14 @@ import { useToast } from '@/hooks/use-toast';
 import { getExercise, initialData } from '@/lib/catalog';
 import { deleteCloudAccount } from '@/lib/cloud';
 import { forgetRememberedEmail } from '@/lib/remembered-email';
-import { addCycleDay, defaultCycleDay, duplicateCycleDay, moveCycleDay, removeCycleDay } from '@/lib/cycles';
+import {
+  addCycleDay,
+  appendCycleDays,
+  defaultCycleDay,
+  duplicateCycleDay,
+  moveCycleDay,
+  removeCycleDay,
+} from '@/lib/cycles';
 import { D, makeRx } from '@/lib/format';
 import {
   allSets,
@@ -68,6 +76,8 @@ export default function RBApp() {
   const [reps, setReps] = useState(10);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [editingRoutine, setEditingRoutine] = useState<string | null>(null);
+  // Arranque guiado: `setup === 'pending'` lo muestra a las cuentas nuevas; `setupOpen` lo relanza desde Entrenar.
+  const [setupOpen, setSetupOpen] = useState(false);
   const [picker, setPicker] = useState<null | { mode: 'replace'; exerciseId: string } | { mode: 'add' }>(
     null
   );
@@ -97,7 +107,10 @@ export default function RBApp() {
   const showUnit = (kg: number) => `${D(fromKg(kg))} ${unit}`;
 
   const routines = data.routines;
-  const nextRoutine = routines[data.cycleIndex % routines.length] || routines[0];
+  // Sin días (arranque pospuesto o todos quitados) no hay «próxima sesión»: las vistas muestran EmptyCycle.
+  const nextRoutine: Routine | null = routines.length
+    ? (routines[data.cycleIndex % routines.length] ?? routines[0])
+    : null;
   const activeRoutine = routines.find((r) => r.id === data.active?.routineId);
   const metrics = useMemo(() => weekMetrics(data), [data]);
   const trend = useMemo(() => volumeByWeek(data.workouts), [data.workouts]);
@@ -154,6 +167,61 @@ export default function RBApp() {
     setData((current) => ({
       ...current,
       routines: current.routines.map((r) => (r.id === routineId ? update(r) : r)),
+    }));
+  }
+  /** Fin del arranque guiado: nombre y respuestas al perfil, rutinas al ciclo, y la marca a «hecho». */
+  function applySetup(result: SetupResult, how: 'replace' | 'append') {
+    // Al añadir, los que no caben en 40 se quedan fuera (misma cuenta que hace `appendCycleDays`).
+    const dropped = how === 'append' ? Math.max(0, data.routines.length + result.routines.length - 40) : 0;
+    setData((current) => {
+      const profile = {
+        ...current.profile,
+        ...result.profile,
+        ...(result.name ? { name: result.name } : {}),
+      };
+      const base = { ...current, profile, setup: 'done' as const };
+      if (how === 'replace') return { ...base, routines: result.routines, cycleIndex: 0 };
+      return appendCycleDays(base, result.routines).data;
+    });
+    setSetupOpen(false);
+    setTab('today');
+    toast(
+      dropped > 0
+        ? `Se añadieron ${result.routines.length - dropped} días; el ciclo admite 40 como máximo.`
+        : result.routines.length
+          ? 'Tu ciclo está listo.'
+          : 'Listo. Puedes armar tu ciclo cuando quieras.'
+    );
+  }
+  async function finishSetup(result: SetupResult) {
+    const hasCycle = data.routines.length > 0;
+    if (setupOpen && hasCycle) {
+      if (data.active) {
+        applySetup(result, 'append');
+        toast('Con una sesión activa solo se puede añadir al final.');
+        return;
+      }
+      const room = 40 - data.routines.length;
+      const choice = await choose({
+        title: '¿Qué hacemos con tu ciclo actual?',
+        message:
+          room < result.routines.length
+            ? `Puedes reemplazarlo por el nuevo o añadir estos días al final. Solo caben ${room} días más: al añadir, el resto queda fuera.`
+            : 'Puedes reemplazarlo por el nuevo o añadir estos días al final.',
+        confirmLabel: 'Reemplazar',
+        cancelLabel: 'Añadir al final',
+      });
+      if (choice === null) return;
+      applySetup(result, choice === 'confirm' ? 'replace' : 'append');
+      return;
+    }
+    applySetup(result, 'replace');
+  }
+  function postponeSetup(name?: string) {
+    setData((current) => ({
+      ...current,
+      profile: name ? { ...current.profile, name } : current.profile,
+      setup: 'done',
     }));
   }
   function updateProfile(patch: Partial<Profile>) {
@@ -406,6 +474,7 @@ export default function RBApp() {
     setTab('today');
   }
   function markRest() {
+    if (!nextRoutine) return;
     setData((current) => ({
       ...current,
       cycleIndex: (current.cycleIndex + 1) % Math.max(1, current.routines.length),
@@ -422,6 +491,7 @@ export default function RBApp() {
     setTab('today');
   }
   function applyFlexible(exerciseIds: string[]) {
+    if (!nextRoutine) return;
     const targetId = nextRoutine.id;
     setData((current) => ({
       ...current,
@@ -537,6 +607,25 @@ export default function RBApp() {
     );
   }
 
+  // ---- Arranque guiado: cuenta nueva (antes de la app) o relanzado desde Entrenar ----------------
+  if (data.setup === 'pending' || setupOpen) {
+    return (
+      <>
+        <SetupFlow
+          mode={setupOpen ? 'relaunch' : 'first'}
+          profile={data.profile}
+          onFinish={(result) => void finishSetup(result)}
+          onLater={postponeSetup}
+          onCancel={() => setSetupOpen(false)}
+          onOpenDetail={setDetailId}
+        />
+        {detailId && <ExerciseDetailModal exerciseId={detailId} onClose={() => setDetailId(null)} />}
+        {dialog}
+        {toastNode}
+      </>
+    );
+  }
+
   // ---- App -----------------------------------------------------------------------------------
   return (
     <div className="app-root">
@@ -547,7 +636,7 @@ export default function RBApp() {
           syncStatus={sync.status}
           syncError={sync.error}
           inSession={data.active !== null}
-          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}|${picker?.mode ?? ''}`}
+          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}|${picker?.mode ?? ''}|${setupOpen ? 'setup' : ''}`}
           onSelect={setTab}
         />
         <main className="main-content">
@@ -572,6 +661,11 @@ export default function RBApp() {
               nextRoutine={nextRoutine}
               totalSessions={totalSessions}
               now={now}
+              onSetup={() => setSetupOpen(true)}
+              onNewDay={() => {
+                setTab('train');
+                addNewDay(false);
+              }}
               onContinue={() => setTab('train')}
               onStart={startWorkout}
               onMarkRest={markRest}
@@ -619,6 +713,7 @@ export default function RBApp() {
                 data={data}
                 nextRoutine={nextRoutine}
                 suggestionList={suggestionList}
+                onSetup={() => setSetupOpen(true)}
                 showCycleManager={showCycleManager}
                 cycleError={cycleError}
                 onToggleCycleManager={() => setShowCycleManager((v) => !v)}
