@@ -1,6 +1,7 @@
 'use client';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import ProgressRing from '@/components/progress-ring';
+import { EmptyCycle } from '@/components/ui/empty-cycle';
 import { RaiseLine } from '@/components/ui/bits';
 import { getExercise } from '@/lib/catalog';
 import { D, greeting, shortDate } from '@/lib/format';
@@ -32,6 +33,8 @@ export default function TodayView({
   nextRoutine,
   totalSessions,
   now,
+  onSetup,
+  onNewDay,
   onContinue,
   onStart,
   onMarkRest,
@@ -41,9 +44,11 @@ export default function TodayView({
   data: AppData;
   metrics: ReturnType<typeof weekMetrics>;
   trend: ReturnType<typeof volumeByWeek>;
-  nextRoutine: Routine;
+  nextRoutine: Routine | null;
   totalSessions: number;
   now: number;
+  onSetup: () => void;
+  onNewDay: () => void;
   onContinue: () => void;
   onStart: (routineId: string) => void;
   onMarkRest: () => void;
@@ -52,6 +57,20 @@ export default function TodayView({
 }) {
   const today = new Date(now);
   const shortName = data.profile.name.trim().split(/\s+/)[0] || 'Atleta';
+  if (!nextRoutine) {
+    return (
+      <div className="hoy hoy-empty">
+        <header className="hoy-greet">
+          <h1>
+            {greeting(today)}, {shortName}
+          </h1>
+          <time dateTime={today.toISOString()}>{shortDate(today)}</time>
+        </header>
+        <EmptyCycle onSetup={onSetup} onNewDay={onNewDay} />
+        <WeekTiles metrics={metrics} spark={sparkPoints(trend.map((week) => week.volumen))} />
+      </div>
+    );
+  }
   const nextIndex = Math.max(
     0,
     data.routines.findIndex((routine) => routine.id === nextRoutine.id)
@@ -111,42 +130,7 @@ export default function TodayView({
         </button>
       </section>
 
-      <section className="hoy-week" aria-labelledby="hoy-week-title">
-        <div className="hoy-row">
-          <h2 id="hoy-week-title">Esta semana</h2>
-          <span>
-            {metrics.sessions} de {metrics.sessionsGoal} sesiones
-          </span>
-        </div>
-        <div className="hoy-tiles">
-          <div className="hoy-tile hoy-tile-ring">
-            <ProgressRing current={metrics.sessions} goal={metrics.sessionsGoal} label="Progreso semanal" />
-            <div>
-              <strong>
-                {metrics.sessions}/{metrics.sessionsGoal}
-              </strong>
-              <small>Sesiones</small>
-            </div>
-          </div>
-          <div className="hoy-tile hoy-tile-vol">
-            <div className="hoy-vol">
-              <strong>{D(metrics.volume)}</strong>
-              <small>kg·rep</small>
-            </div>
-            {spark ? (
-              <svg
-                className="hoy-spark"
-                role="img"
-                aria-label="Volumen de las últimas semanas"
-                viewBox="0 0 120 28"
-                preserveAspectRatio="none"
-              >
-                <polyline points={spark} />
-              </svg>
-            ) : null}
-          </div>
-        </div>
-      </section>
+      <WeekTiles metrics={metrics} spark={spark} />
 
       <section className="hoy-cycle" aria-labelledby="hoy-cycle-title">
         <div className="hoy-cycle-head">
@@ -191,5 +175,47 @@ export default function TodayView({
         </div>
       )}
     </div>
+  );
+}
+
+/** «Esta semana»: anillo de sesiones y volumen con su tendencia. Se usa también en el estado vacío. */
+function WeekTiles({ metrics, spark }: { metrics: ReturnType<typeof weekMetrics>; spark: string }) {
+  return (
+    <section className="hoy-week" aria-labelledby="hoy-week-title">
+      <div className="hoy-row">
+        <h2 id="hoy-week-title">Esta semana</h2>
+        <span>
+          {metrics.sessions} de {metrics.sessionsGoal} sesiones
+        </span>
+      </div>
+      <div className="hoy-tiles">
+        <div className="hoy-tile hoy-tile-ring">
+          <ProgressRing current={metrics.sessions} goal={metrics.sessionsGoal} label="Progreso semanal" />
+          <div>
+            <strong>
+              {metrics.sessions}/{metrics.sessionsGoal}
+            </strong>
+            <small>Sesiones</small>
+          </div>
+        </div>
+        <div className="hoy-tile hoy-tile-vol">
+          <div className="hoy-vol">
+            <strong>{D(metrics.volume)}</strong>
+            <small>kg·rep</small>
+          </div>
+          {spark ? (
+            <svg
+              className="hoy-spark"
+              role="img"
+              aria-label="Volumen de las últimas semanas"
+              viewBox="0 0 120 28"
+              preserveAspectRatio="none"
+            >
+              <polyline points={spark} />
+            </svg>
+          ) : null}
+        </div>
+      </div>
+    </section>
   );
 }

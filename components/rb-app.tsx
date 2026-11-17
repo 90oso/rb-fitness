@@ -68,6 +68,8 @@ export default function RBApp() {
   const [reps, setReps] = useState(10);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [editingRoutine, setEditingRoutine] = useState<string | null>(null);
+  // Arranque guiado relanzado desde Entrenar o desde el estado vacío (se monta en la Tarea 6 del plan).
+  const [setupOpen, setSetupOpen] = useState(false);
   const [picker, setPicker] = useState<null | { mode: 'replace'; exerciseId: string } | { mode: 'add' }>(
     null
   );
@@ -97,7 +99,10 @@ export default function RBApp() {
   const showUnit = (kg: number) => `${D(fromKg(kg))} ${unit}`;
 
   const routines = data.routines;
-  const nextRoutine = routines[data.cycleIndex % routines.length] || routines[0];
+  // Sin días (arranque pospuesto o todos quitados) no hay «próxima sesión»: las vistas muestran EmptyCycle.
+  const nextRoutine: Routine | null = routines.length
+    ? (routines[data.cycleIndex % routines.length] ?? routines[0])
+    : null;
   const activeRoutine = routines.find((r) => r.id === data.active?.routineId);
   const metrics = useMemo(() => weekMetrics(data), [data]);
   const trend = useMemo(() => volumeByWeek(data.workouts), [data.workouts]);
@@ -406,6 +411,7 @@ export default function RBApp() {
     setTab('today');
   }
   function markRest() {
+    if (!nextRoutine) return;
     setData((current) => ({
       ...current,
       cycleIndex: (current.cycleIndex + 1) % Math.max(1, current.routines.length),
@@ -422,6 +428,7 @@ export default function RBApp() {
     setTab('today');
   }
   function applyFlexible(exerciseIds: string[]) {
+    if (!nextRoutine) return;
     const targetId = nextRoutine.id;
     setData((current) => ({
       ...current,
@@ -547,7 +554,7 @@ export default function RBApp() {
           syncStatus={sync.status}
           syncError={sync.error}
           inSession={data.active !== null}
-          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}|${picker?.mode ?? ''}`}
+          resetKey={`${tab}|${detailId ?? ''}|${editingRoutine ?? ''}|${picker?.mode ?? ''}|${setupOpen ? 'setup' : ''}`}
           onSelect={setTab}
         />
         <main className="main-content">
@@ -572,6 +579,11 @@ export default function RBApp() {
               nextRoutine={nextRoutine}
               totalSessions={totalSessions}
               now={now}
+              onSetup={() => setSetupOpen(true)}
+              onNewDay={() => {
+                setTab('train');
+                addNewDay(false);
+              }}
               onContinue={() => setTab('train')}
               onStart={startWorkout}
               onMarkRest={markRest}
@@ -619,6 +631,7 @@ export default function RBApp() {
                 data={data}
                 nextRoutine={nextRoutine}
                 suggestionList={suggestionList}
+                onSetup={() => setSetupOpen(true)}
                 showCycleManager={showCycleManager}
                 cycleError={cycleError}
                 onToggleCycleManager={() => setShowCycleManager((v) => !v)}

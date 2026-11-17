@@ -67,8 +67,11 @@ test('Removing current day moves to valid index', () => {
   const o = removeCycleDay(data, 'legs');
   assert.ok(o.cycleIndex < o.routines.length);
 });
-test('Cannot remove final day', () =>
-  assert.throws(() => removeCycleDay({ ...data, routines: [workout('x')] }, 'x')));
+test('Removing the final day leaves an empty cycle', () => {
+  const o = removeCycleDay({ ...data, routines: [workout('x')], cycleIndex: 0 }, 'x');
+  assert.deepEqual(o.routines, []);
+  assert.equal(o.cycleIndex, 0);
+});
 test('Cannot remove active session day', () =>
   assert.throws(() => removeCycleDay({ ...data, active: { routineId: 'push' } }, 'push')));
 test('Refuse duplicate ID', () => assert.throws(() => addCycleDay(data, workout('push'))));

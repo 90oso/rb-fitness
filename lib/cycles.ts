@@ -37,15 +37,15 @@ export function moveCycleDay(data: AppData, routineId: string, direction: -1 | 1
 }
 export function removeCycleDay(data: AppData, routineId: string): AppData {
   if (data.active?.routineId === routineId) throw new Error('Finaliza o descarta primero la sesión activa.');
-  if (data.routines.length <= 1) throw new Error('El ciclo necesita al menos un día.');
   if (!data.routines.some((r) => r.id === routineId)) return data;
+  // El ciclo puede quedar vacío: Hoy y Entrenar muestran entonces «Aún no tienes rutina».
   const nextId = data.routines[data.cycleIndex]?.id;
   const routines = data.routines.filter((r) => r.id !== routineId);
   const preserved = routines.findIndex((r) => r.id === nextId);
   return {
     ...data,
     routines,
-    cycleIndex: preserved >= 0 ? preserved : Math.min(data.cycleIndex, routines.length - 1),
+    cycleIndex: preserved >= 0 ? preserved : Math.max(0, Math.min(data.cycleIndex, routines.length - 1)),
   };
 }
 export function defaultCycleDay(id: string, isRest = false): Routine {

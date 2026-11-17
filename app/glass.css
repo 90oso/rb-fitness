@@ -1560,6 +1560,51 @@ html[data-theme='dark'] .log-remove {
   text-align: center;
 }
 
+/* ---- Ciclo vacío: «Aún no tienes rutina» en Hoy y Entrenar ---- */
+.empty-cycle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 28px 22px 24px;
+}
+.empty-cycle-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-card);
+  display: grid;
+  place-items: center;
+  background: rgb(var(--acid-rgb) / 0.16);
+  color: var(--acid);
+}
+html[data-theme='light'] .empty-cycle-icon {
+  color: var(--accent);
+}
+.empty-cycle h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+.empty-cycle p {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 32ch;
+}
+.empty-cycle .lime-btn {
+  min-height: 48px;
+  padding-inline: 22px;
+}
+.empty-cycle .text-link {
+  min-height: 44px;
+}
+.empty-cycle-compact {
+  padding: 18px 20px;
+}
+.hoy-empty .hoy-mark {
+  display: none;
+}
+
 /* ---- Barra de descanso: fija sobre la navegación en el teléfono vertical, pegajosa arriba en el resto ---- */
 .rest-bar {
   display: flex;
