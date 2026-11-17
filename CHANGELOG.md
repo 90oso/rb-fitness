@@ -2,6 +2,26 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Versionado semántico.
 
+## [0.11.0] — 2026-11-17
+
+### Añadido
+
+- **Arranque guiado** para cuentas nuevas: pide el nombre y pregunta «¿Ya tienes una rutina?» con tres caminos. **Sí, la paso a RB**: asistente día por día (nombre del día, músculos y ejercicios del catálogo con el selector prefiltrado). **No, propónme una**: seis preguntas (objetivo, experiencia, días, minutos, equipo y zonas que cuidar) y dos o tres propuestas de ciclo semanal con descansos, cada una con vista previa antes de usarla. **Empezar con el ciclo de ejemplo**: el ciclo de 5 días de siempre. **Más tarde** deja el ciclo vacío; el nombre escrito se conserva.
+- **Motor de propuestas** (`lib/planner.ts`): reparto de la semana por días (2 a 6, descansos en los huecos habituales), repartos cuerpo completo / torso-pierna / empuje-tirón-pierna según los días, volumen por objetivo y experiencia, presupuesto de ejercicios por minutos, exclusiones por zona que cuidar y candidatos por equipo. Pruebas en `npm run test:planner` (todas las combinaciones del cuestionario).
+- **Perfil**: experiencia, minutos por sesión, equipo y zonas que cuidar, editables; se rellenan con el cuestionario y son opcionales. Privacidad explica qué se guarda.
+- **Armar un ciclo nuevo** desde Entrenar: vuelve al arranque; con un ciclo ya hecho pregunta **Reemplazar** o **Añadir al final** (durante una sesión activa solo añade).
+- **Ciclo vacío** en Hoy y Entrenar: «Aún no tienes rutina» con **Armar mi ciclo** y **Crear un día desde cero**; se puede quitar el último día del ciclo.
+
+### Cambiado
+
+- Las cuentas nuevas empiezan sin ciclo hasta elegir uno en el arranque (antes traían el ciclo de ejemplo). Las cuentas existentes no ven el arranque.
+- La CI ejecuta `npm run verify` (lint, formato, tipos y las cuatro pruebas) además de la compilación.
+- El selector del catálogo se monta fuera del panel que lo abre (en horizontal perdía la cabecera dentro del arranque) y el cierre del aviso emergente tiene área táctil de 44 px.
+
+### Límites conocidos
+
+- Las propuestas son reglas sencillas (sin peso, altura ni sexo) y no sustituyen el consejo de un profesional; todo se puede editar después.
+
 ## [0.10.0] — 2026-11-11
 
 ### Cambiado
