@@ -13,7 +13,8 @@
     "test:metrics": "node scripts/check-metrics.cjs",
     "test:cycles": "node --no-warnings --experimental-strip-types scripts/check-cycles.mjs",
     "test:session": "node scripts/check-session.cjs",
-    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test:metrics && npm run test:cycles && npm run test:session"
+    "test:planner": "node scripts/check-planner.cjs",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test:metrics && npm run test:cycles && npm run test:session && npm run test:planner"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

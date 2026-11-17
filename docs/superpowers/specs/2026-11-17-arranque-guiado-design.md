@@ -113,7 +113,7 @@ export interface Proposal {
   minutes: number;
 }
 export function weekPattern(days: 2 | 3 | 4 | 5 | 6): boolean[]; // lunes primero: 2 T·R·R·T·R·R·R · 3 T·R·T·R·T·R·R · 4 T·T·R·T·T·R·R · 5 T·T·T·T·T·R·R · 6 T·T·T·T·T·T·R
-export function splitsFor(days: 2 | 3 | 4 | 5 | 6): Split[]; // principal primero: 2,3 → fullbody (3 también ppl) · 4 → upperlower, pplfull · 5 → pplul, bodypart · 6 → ppl, upperlower
+export function splitsFor(days: 2 | 3 | 4 | 5 | 6): Split[]; // principal primero: 2 → fullbody, upperlower · 3 → fullbody, ppl · 4 → upperlower, pplfull · 5 → pplul, bodypart · 6 → ppl, upperlower
 export function volumeFor(
   goal,
   experience,
