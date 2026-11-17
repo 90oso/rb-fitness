@@ -468,11 +468,27 @@ function buildDay(kind: DayKind, variant: number, index: number, input: PlannerI
     chosen.push({ id: exerciseId, role: 'accessory' });
   }
   const budget = exerciseBudget(input.experience, input.sessionMinutes);
-  const exercises = chosen.slice(0, budget).map(({ id: exerciseId, role }, i) => ({
-    exerciseId,
-    // El primer ejercicio del día es el principal aunque la plantilla lo tuviera como accesorio.
-    ...volumeFor(input.goal, input.experience, i === 0 ? 'compound' : role),
-  }));
+  const kept = chosen.slice(0, budget);
+  // Si las exclusiones dejaron el día sin básicos, el primero hace de principal con una serie más.
+  const noCompound = kept.every(({ role }) => role !== 'compound');
+  const exercises = kept.map(({ id: exerciseId, role }, i) => {
+    const volume = volumeFor(input.goal, input.experience, role);
+    return {
+      exerciseId,
+      ...volume,
+      targetSets: noCompound && i === 0 ? volume.targetSets + 1 : volume.targetSets,
+    };
+  });
+  // Los minutos elegidos mandan (margen de 10): primero sobran accesorios del final (mínimo 4 ejercicios),
+  // luego los descansos se acortan a 90 s y, si aún no cabe, se quita una serie a los que más tienen (mínimo 2).
+  const limit = input.sessionMinutes + 10;
+  const over = () => estimateMinutes({ exercises }) > limit;
+  while (exercises.length > 4 && over()) exercises.pop();
+  if (over()) for (const rx of exercises) rx.restSeconds = Math.min(rx.restSeconds, 90);
+  while (over() && exercises.some((rx) => rx.targetSets > 2)) {
+    const most = Math.max(...exercises.map((rx) => rx.targetSets));
+    for (const rx of exercises) if (rx.targetSets === most) rx.targetSets -= 1;
+  }
   const meta = DAY_META[kind];
   const letter = meta.lettered
     ? ` ${String.fromCharCode(65 + variant)}`
@@ -505,7 +521,7 @@ export function buildWeek(split: Split, input: PlannerInput, uid: () => string):
 }
 
 /** 5 min de calentamiento más series × (45 s de trabajo + descanso). */
-export function estimateMinutes(routine: Routine): number {
+export function estimateMinutes(routine: Pick<Routine, 'exercises'>): number {
   const seconds = routine.exercises.reduce((sum, rx) => sum + rx.targetSets * (45 + rx.restSeconds), 0);
   return Math.round(5 + seconds / 60);
 }

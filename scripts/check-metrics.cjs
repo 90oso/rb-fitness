@@ -13,7 +13,8 @@ Module._extensions['.ts'] = (module, filename) =>
     }).outputText,
     filename
   );
-const { initialData, defaultRoutines } = require(path.join(root, 'lib/catalog.ts'));
+const { initialData, defaultRoutines, exampleCycle } = require(path.join(root, 'lib/catalog.ts'));
+const { appendCycleDays } = require(path.join(root, 'lib/cycles.ts'));
 const {
   weekMetrics,
   muscleSets,
@@ -155,4 +156,18 @@ assert.equal(weekWorkouts([future, workout]).length, 1);
 const emptyName = structuredClone(data);
 emptyName.profile.name = '';
 assert.equal(safeParse(JSON.stringify(emptyName)).profile.name, '');
-console.log('RB metrics & storage: 19 checks OK');
+// El ciclo de ejemplo se entrega con ids nuevos: añadirlo al final de una cuenta que ya lo tenía no repite ids.
+{
+  let n = 0;
+  const week = exampleCycle(() => `x${++n}`);
+  const ids = week.map((r) => r.id);
+  assert.equal(new Set(ids).size, week.length);
+  assert.ok(ids.every((id) => !defaultRoutines.some((r) => r.id === id)));
+  assert.deepEqual(
+    week.map((r) => r.name),
+    defaultRoutines.map((r) => r.name)
+  );
+  const o = appendCycleDays({ ...data, routines: structuredClone(defaultRoutines), cycleIndex: 0 }, week);
+  assert.equal(new Set(o.data.routines.map((r) => r.id)).size, 10);
+}
+console.log('RB metrics & storage: 20 checks OK');

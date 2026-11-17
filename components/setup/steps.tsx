@@ -324,10 +324,15 @@ export function QuizStep({
   }
 }
 
+/** Lleva el foco al título al montarse: así cada paso se anuncia y el teclado sigue desde arriba. */
+const focusHeading = (element: HTMLHeadingElement | null) => element?.focus({ preventScroll: true });
+
 export function StepBlock({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
     <div className="setup-step">
-      <h2>{title}</h2>
+      <h2 key={title} tabIndex={-1} ref={focusHeading}>
+        {title}
+      </h2>
       {hint && <p className="setup-hint">{hint}</p>}
       {children}
     </div>

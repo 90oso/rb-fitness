@@ -24,7 +24,14 @@ import { useToast } from '@/hooks/use-toast';
 import { getExercise, initialData } from '@/lib/catalog';
 import { deleteCloudAccount } from '@/lib/cloud';
 import { forgetRememberedEmail } from '@/lib/remembered-email';
-import { addCycleDay, defaultCycleDay, duplicateCycleDay, moveCycleDay, removeCycleDay } from '@/lib/cycles';
+import {
+  addCycleDay,
+  appendCycleDays,
+  defaultCycleDay,
+  duplicateCycleDay,
+  moveCycleDay,
+  removeCycleDay,
+} from '@/lib/cycles';
 import { D, makeRx } from '@/lib/format';
 import {
   allSets,
@@ -164,6 +171,8 @@ export default function RBApp() {
   }
   /** Fin del arranque guiado: nombre y respuestas al perfil, rutinas al ciclo, y la marca a «hecho». */
   function applySetup(result: SetupResult, how: 'replace' | 'append') {
+    // Al añadir, los que no caben en 40 se quedan fuera (misma cuenta que hace `appendCycleDays`).
+    const dropped = how === 'append' ? Math.max(0, data.routines.length + result.routines.length - 40) : 0;
     setData((current) => {
       const profile = {
         ...current.profile,
@@ -172,12 +181,17 @@ export default function RBApp() {
       };
       const base = { ...current, profile, setup: 'done' as const };
       if (how === 'replace') return { ...base, routines: result.routines, cycleIndex: 0 };
-      const routines = [...current.routines, ...result.routines].slice(0, 40);
-      return { ...base, routines };
+      return appendCycleDays(base, result.routines).data;
     });
     setSetupOpen(false);
     setTab('today');
-    toast(result.routines.length ? 'Tu ciclo está listo.' : 'Listo. Puedes armar tu ciclo cuando quieras.');
+    toast(
+      dropped > 0
+        ? `Se añadieron ${result.routines.length - dropped} días; el ciclo admite 40 como máximo.`
+        : result.routines.length
+          ? 'Tu ciclo está listo.'
+          : 'Listo. Puedes armar tu ciclo cuando quieras.'
+    );
   }
   async function finishSetup(result: SetupResult) {
     const hasCycle = data.routines.length > 0;
@@ -187,9 +201,13 @@ export default function RBApp() {
         toast('Con una sesión activa solo se puede añadir al final.');
         return;
       }
+      const room = 40 - data.routines.length;
       const choice = await choose({
         title: '¿Qué hacemos con tu ciclo actual?',
-        message: 'Puedes reemplazarlo por el nuevo o añadir estos días al final.',
+        message:
+          room < result.routines.length
+            ? `Puedes reemplazarlo por el nuevo o añadir estos días al final. Solo caben ${room} días más: al añadir, el resto queda fuera.`
+            : 'Puedes reemplazarlo por el nuevo o añadir estos días al final.',
         confirmLabel: 'Reemplazar',
         cancelLabel: 'Añadir al final',
       });

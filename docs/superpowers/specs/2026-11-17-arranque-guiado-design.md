@@ -175,6 +175,10 @@ export function proposals(input, uid): Proposal[]; // [principal(días), alterna
 - **Volumen** (`series × reps mín–máx / descanso`): músculo → básico 3 × 6–10 / 120, accesorio 3 × 8–12 / 90; fuerza →
   básico 4 × 4–6 / 150, accesorio 3 × 6–8 / 90; perder grasa y mantenerme → básico 3 × 10–15 / 60, accesorio 3 × 12–15 / 60.
   Principiante: accesorios con 2 series y, en fuerza, básicos 3 × 5–8 / 120. Avanzado: básicos +1 serie (máximo 5).
+  Cada hueco conserva su rol; si las exclusiones dejan el día sin básicos, el primer ejercicio lleva una serie más.
+- **Los minutos mandan** (margen de 10): tras el presupuesto, si `estimateMinutes` supera `minutos + 10` se quitan
+  accesorios del final (mínimo 4 ejercicios); si aún no cabe, los descansos se acortan a 90 s y luego se quita una
+  serie a los ejercicios que más tienen (mínimo 2) hasta que quepa.
 - **Nombres y etiquetas**: Cuerpo completo A/B/C (`FULL BODY`), Torso A/B (`TORSO`), Pierna A/B (`PIERNA`), Empuje
   (`PUSH DAY`), Tirón (`PULL DAY`), Pierna (`LEG DAY`), Pecho/Espalda/Hombros/Brazos (`PECHO`…), Descanso (`REST DAY`,
   `isRest`). Subtítulo «Día N · Torso / Pierna». Ids con `uid()`.

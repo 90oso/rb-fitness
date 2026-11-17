@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   addCycleDay,
+  appendCycleDays,
   defaultCycleDay,
   duplicateCycleDay,
   moveCycleDay,
@@ -82,4 +83,24 @@ test('Enforce 40-day maximum', () =>
       workout('extra')
     )
   ));
+test('appendCycleDays keeps the next day and adds all when they fit', () => {
+  const o = appendCycleDays(data, [workout('a'), workout('b')]);
+  assert.equal(o.added, 2);
+  assert.equal(o.dropped, 0);
+  assert.equal(o.data.routines.length, 5);
+  assert.equal(o.data.routines[o.data.cycleIndex].id, 'legs');
+});
+test('appendCycleDays stops at 40 and reports the dropped days', () => {
+  const full = { ...data, routines: Array.from({ length: 35 }, (_, i) => workout('id' + i)), cycleIndex: 3 };
+  const o = appendCycleDays(
+    full,
+    Array.from({ length: 7 }, (_, i) => workout('n' + i))
+  );
+  assert.equal(o.added, 5);
+  assert.equal(o.dropped, 2);
+  assert.equal(o.data.routines.length, 40);
+  assert.equal(o.data.cycleIndex, 3);
+});
+test('appendCycleDays refuses duplicate ids', () =>
+  assert.throws(() => appendCycleDays(data, [workout('push')])));
 console.log(`OK: ${tests.length} pruebas de ciclos`);

@@ -1,20 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowRight, Check, Plus, X } from 'lucide-react';
 import ExercisePickerModal from '@/components/modals/exercise-picker-modal';
 import { ExercisePhoto } from '@/components/ui/exercise-media';
 import { getExercise, majorMuscles } from '@/lib/catalog';
-import { defaultCycleDay } from '@/lib/cycles';
 import { uid } from '@/lib/metrics';
-import { volumeFor, weekPattern, type DaysPerWeek } from '@/lib/planner';
-import type { Experience, Muscle, Profile, Routine, RoutineExercise } from '@/lib/types';
+import { buildOwnWeek, type OwnDay } from '@/lib/own-week';
+import type { DaysPerWeek } from '@/lib/planner';
+import type { Experience, Profile, Routine } from '@/lib/types';
 import { ChoiceChips, DAYS, StepBlock, WeekStrip } from './steps';
-
-interface OwnDay {
-  name: string;
-  muscles: Muscle[];
-  exerciseIds: string[];
-}
 
 /**
  * «Ya tengo rutina»: días por semana → por cada día de entrenamiento, nombre, músculos y ejercicios del
@@ -37,6 +31,7 @@ export default function OwnRoutineWizard({
   const [list, setList] = useState<OwnDay[]>([]);
   const [current, setCurrent] = useState(0); // índice del día de entrenamiento en edición; list.length = resumen
   const [picking, setPicking] = useState(false);
+  const addButton = useRef<HTMLButtonElement>(null);
   const stage: 'days' | 'day' | 'summary' = days === null ? 'days' : current < days ? 'day' : 'summary';
 
   const startDays = (value: DaysPerWeek) => {
@@ -50,31 +45,11 @@ export default function OwnRoutineWizard({
     setList((items) => items.map((day, i) => (i === current ? { ...day, ...changes } : day)));
   const day = list[current];
 
-  const build = (): Routine[] => {
+  // Vista previa con ids estables (no cambian entre renders); al crear, ids nuevos de verdad.
+  const preview = (): Routine[] => {
     if (!days) return [];
-    const pattern = weekPattern(days);
-    let n = 0;
-    return pattern.map((trains) => {
-      if (!trains)
-        return {
-          ...defaultCycleDay(uid(), true),
-          name: 'Descanso',
-          subtitle: 'Recuperación',
-          tag: 'REST DAY',
-        };
-      const own = list[n++];
-      const exercises: RoutineExercise[] = own.exerciseIds.map((exerciseId) => ({
-        exerciseId,
-        ...volumeFor(goal, experience, 'accessory'),
-      }));
-      return {
-        id: uid(),
-        name: own.name.trim() || `Día ${n}`,
-        subtitle: own.muscles.length ? own.muscles.join(' · ') : 'Mi rutina',
-        tag: (own.muscles[0] ?? 'MI RUTINA').toUpperCase(),
-        exercises,
-      };
-    });
+    let i = 0;
+    return buildOwnWeek(days, list, goal, experience, () => `own-${i++}`);
   };
 
   if (stage === 'days') {
@@ -94,7 +69,7 @@ export default function OwnRoutineWizard({
   }
 
   if (stage === 'summary') {
-    const week = build();
+    const week = preview();
     const empty = list.filter((d) => d.exerciseIds.length === 0).length;
     return (
       <StepBlock
@@ -123,7 +98,11 @@ export default function OwnRoutineWizard({
           <button type="button" className="secondary-btn" onClick={() => setCurrent(list.length - 1)}>
             Atrás
           </button>
-          <button type="button" className="lime-btn" onClick={() => onCreate(week, days!)}>
+          <button
+            type="button"
+            className="lime-btn"
+            onClick={() => onCreate(buildOwnWeek(days!, list, goal, experience, uid), days!)}
+          >
             <Check size={17} aria-hidden="true" /> Crear mi ciclo
           </button>
         </div>
@@ -183,7 +162,7 @@ export default function OwnRoutineWizard({
           })}
         </ul>
       )}
-      <button type="button" className="exercise-add" onClick={() => setPicking(true)}>
+      <button type="button" className="exercise-add" ref={addButton} onClick={() => setPicking(true)}>
         <Plus size={17} aria-hidden="true" />{' '}
         {day.exerciseIds.length ? 'Añadir más ejercicios' : 'Elegir ejercicios'}
       </button>
@@ -205,7 +184,10 @@ export default function OwnRoutineWizard({
           excluded={day.exerciseIds}
           preset={day.muscles}
           onConfirm={(ids) => patchDay({ exerciseIds: [...day.exerciseIds, ...ids] })}
-          onClose={() => setPicking(false)}
+          onClose={() => {
+            setPicking(false);
+            addButton.current?.focus();
+          }}
           onOpenDetail={onOpenDetail}
         />
       )}

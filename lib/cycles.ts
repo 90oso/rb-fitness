@@ -8,6 +8,23 @@ export function addCycleDay(data: AppData, routine: Routine): AppData {
   const routines = [...data.routines, routine];
   return { ...data, routines, cycleIndex: nextId ? routines.findIndex((r) => r.id === nextId) : 0 };
 }
+/**
+ * Añade días al final respetando las reglas de `addCycleDay` (ids únicos, máximo 40). Devuelve cuántos
+ * entraron y cuántos quedaron fuera por el límite; el día «siguiente» del ciclo no cambia.
+ */
+export function appendCycleDays(
+  data: AppData,
+  routines: Routine[]
+): { data: AppData; added: number; dropped: number } {
+  let next = data;
+  let added = 0;
+  for (const routine of routines) {
+    if (next.routines.length >= 40) break;
+    next = addCycleDay(next, routine);
+    added++;
+  }
+  return { data: next, added, dropped: routines.length - added };
+}
 export function duplicateCycleDay(data: AppData, routineId: string, newId: string): AppData {
   const r = data.routines.find((r) => r.id === routineId);
   if (!r) return data;

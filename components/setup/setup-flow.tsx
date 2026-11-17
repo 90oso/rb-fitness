@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Check, Sparkles, Wand2, X } from 'lucide-react';
 import ThemeToggle from '@/components/ui/theme-toggle';
-import { defaultRoutines } from '@/lib/catalog';
+import { exampleCycle } from '@/lib/catalog';
 import { uid } from '@/lib/metrics';
 import { proposals as planProposals, type DaysPerWeek, type Proposal } from '@/lib/planner';
 import type { Profile, Routine } from '@/lib/types';
@@ -173,11 +173,7 @@ export default function SetupFlow({
                   <small>Seis preguntas y te propongo dos o tres ciclos.</small>
                 </span>
               </button>
-              <button
-                type="button"
-                className="setup-choice"
-                onClick={() => finishWith(structuredClone(defaultRoutines))}
-              >
+              <button type="button" className="setup-choice" onClick={() => finishWith(exampleCycle(uid))}>
                 <Sparkles size={20} aria-hidden="true" />
                 <span>
                   <strong>Empezar con el ciclo de ejemplo</strong>

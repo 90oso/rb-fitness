@@ -23,7 +23,9 @@ const {
   estimateMinutes,
   proposals,
 } = require(path.join(root, 'lib/planner.ts'));
-const { catalog } = require(path.join(root, 'lib/catalog.ts'));
+const { catalog, initialData } = require(path.join(root, 'lib/catalog.ts'));
+const { buildOwnWeek } = require(path.join(root, 'lib/own-week.ts'));
+const { safeParse } = require(path.join(root, 'lib/storage.ts'));
 
 const ids = new Set(catalog.map((exercise) => exercise.id));
 let seq = 0;
@@ -84,51 +86,72 @@ for (const daysPerWeek of [2, 3, 4, 5, 6])
   for (const kit of kits)
     for (const limitations of limitationSets)
       for (const goal of goals)
-        for (const experience of experiences) {
-          const input = { goal, experience, daysPerWeek, sessionMinutes: 60, kit, limitations };
-          const label = JSON.stringify(input);
-          const list = proposals(input, uid);
-          assert.ok(list.length >= 2 && list.length <= 3, `2–3 propuestas ${label}`);
-          assert.equal(list[0].daysPerWeek, daysPerWeek, `principal con los días pedidos ${label}`);
-          assert.equal(
-            list.some((p) => p.daysPerWeek === daysPerWeek - 1),
-            daysPerWeek > 2,
-            `propuesta de un día menos ${label}`
-          );
-          const excluded = excludedBy(limitations);
-          for (const p of list) {
-            assert.equal(p.week.length, 7, `semana de 7 ${label}`);
-            const pattern = weekPattern(p.daysPerWeek);
-            p.week.forEach((routine, i) =>
-              assert.equal(!routine.isRest, pattern[i], `descansos en su sitio ${p.split} ${label}`)
+        for (const experience of experiences)
+          for (const minutes of [30, 45, 60, 75]) {
+            const input = { goal, experience, daysPerWeek, sessionMinutes: minutes, kit, limitations };
+            const label = JSON.stringify(input);
+            const list = proposals(input, uid);
+            assert.ok(list.length >= 2 && list.length <= 3, `2–3 propuestas ${label}`);
+            assert.equal(list[0].daysPerWeek, daysPerWeek, `principal con los días pedidos ${label}`);
+            assert.equal(
+              list.some((p) => p.daysPerWeek === daysPerWeek - 1),
+              daysPerWeek > 2,
+              `propuesta de un día menos ${label}`
             );
-            assert.ok(p.minutes >= 20 && p.minutes <= 100, `minutos ${p.minutes} ${label}`);
-            for (const routine of p.week.filter((r) => !r.isRest)) {
-              const exIds = routine.exercises.map((rx) => rx.exerciseId);
-              assert.ok(
-                exIds.length >= 4 && exIds.length <= 8,
-                `${exIds.length} ejercicios en ${routine.name} ${label}`
+            const excluded = excludedBy(limitations);
+            for (const p of list) {
+              assert.equal(p.week.length, 7, `semana de 7 ${label}`);
+              const pattern = weekPattern(p.daysPerWeek);
+              p.week.forEach((routine, i) =>
+                assert.equal(!routine.isRest, pattern[i], `descansos en su sitio ${p.split} ${label}`)
               );
-              assert.equal(new Set(exIds).size, exIds.length, `sin repetidos en ${routine.name} ${label}`);
-              for (const id of exIds) {
-                assert.ok(ids.has(id), `id ${id} existe`);
-                assert.ok(!excluded.has(id), `${id} excluido por ${limitations} en ${routine.name}`);
-              }
-              const expected = volumeFor(goal, experience, 'compound');
-              assert.deepEqual(
-                (({ targetSets, minReps, maxReps, restSeconds }) => ({
+              assert.ok(p.minutes >= 20 && p.minutes <= 100, `minutos ${p.minutes} ${label}`);
+              for (const routine of p.week.filter((r) => !r.isRest)) {
+                const exIds = routine.exercises.map((rx) => rx.exerciseId);
+                assert.ok(
+                  exIds.length >= 4 && exIds.length <= 8,
+                  `${exIds.length} ejercicios en ${routine.name} ${label}`
+                );
+                assert.equal(new Set(exIds).size, exIds.length, `sin repetidos en ${routine.name} ${label}`);
+                for (const id of exIds) {
+                  assert.ok(ids.has(id), `id ${id} existe`);
+                  assert.ok(!excluded.has(id), `${id} excluido por ${limitations} en ${routine.name}`);
+                }
+                // Los minutos elegidos mandan: la estimación nunca supera los minutos pedidos en más de 10.
+                const est = estimateMinutes(routine);
+                assert.ok(
+                  est <= minutes + 10,
+                  `${est} min con ${routine.exercises.length} ejercicios para ${minutes} min en ${routine.name} ${label}`
+                );
+                assert.ok(
+                  routine.exercises.every((rx) => rx.targetSets >= 2),
+                  `mínimo 2 series ${label}`
+                );
+                // Con 75 min no hay recorte de volumen: cada día tiene un básico con su volumen; si la plantilla se
+                // quedó sin básicos, el primero lleva una serie más.
+                const pick = ({ targetSets, minReps, maxReps, restSeconds }) => ({
                   targetSets,
                   minReps,
                   maxReps,
                   restSeconds,
-                }))(routine.exercises[0]),
-                expected,
-                `volumen del básico en ${routine.name} ${label}`
-              );
+                });
+                const compound = volumeFor(goal, experience, 'compound');
+                const accessory = volumeFor(goal, experience, 'accessory');
+                const hasCompound = routine.exercises.some(
+                  (rx) => JSON.stringify(pick(rx)) === JSON.stringify(compound)
+                );
+                const first = pick(routine.exercises[0]);
+                if (minutes === 75)
+                  assert.ok(
+                    hasCompound ||
+                      JSON.stringify(first) ===
+                        JSON.stringify({ ...accessory, targetSets: accessory.targetSets + 1 }),
+                    `volumen del primer ejercicio en ${routine.name} ${label}: ${JSON.stringify(first)}`
+                  );
+              }
             }
+            combos++;
           }
-          combos++;
-        }
 tests.push(`${combos} combinaciones del cuestionario`);
 
 test('Torso A y Torso B difieren', () => {
@@ -202,4 +225,32 @@ test('Minutos estimados crecen con el volumen', () => {
   assert.ok(estimateMinutes(light) < estimateMinutes(heavy));
 });
 
+test('buildOwnWeek: diez músculos siguen cabiendo en el subtítulo y pasan safeParse', () => {
+  const muscles = [
+    'Pecho',
+    'Espalda',
+    'Hombros',
+    'Tríceps',
+    'Bíceps',
+    'Cuádriceps',
+    'Femoral',
+    'Glúteos',
+    'Gemelos',
+    'Abdomen',
+  ];
+  const list = [
+    { name: 'Todo', muscles, exerciseIds: ['chest-press', 'lat-pulldown'] },
+    { name: '', muscles: [], exerciseIds: [] },
+  ];
+  const week = buildOwnWeek(2, list, 'muscle', 'intermediate', uid);
+  assert.equal(week.length, 7);
+  assert.equal(week.filter((r) => !r.isRest).length, 2);
+  const all = week.find((r) => r.name === 'Todo');
+  assert.ok(all.subtitle.length <= 90, all.subtitle);
+  assert.ok(all.subtitle.includes('+'), all.subtitle);
+  assert.equal(week.filter((r) => !r.isRest)[1].name, 'Día 2');
+  const parsed = safeParse(JSON.stringify({ ...initialData, routines: week, setup: 'done' }));
+  assert.ok(parsed, 'safeParse acepta la semana del asistente');
+  assert.equal(parsed.routines.length, 7);
+});
 console.log(`OK: ${tests.length} pruebas del planificador`);
