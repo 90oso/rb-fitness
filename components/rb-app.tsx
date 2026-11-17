@@ -5,6 +5,7 @@ import AuthScreen from './auth-screen';
 import { AuthLoading } from './ui/auth-frame';
 import ExerciseDetailModal from './modals/exercise-detail-modal';
 import ExercisePickerModal from './modals/exercise-picker-modal';
+import SetupFlow, { type SetupResult } from './setup/setup-flow';
 import RoutineEditorModal from './modals/routine-editor-modal';
 import { BottomNav, Sidebar, Topbar, type Tab } from './shell/app-shell';
 import ActiveSessionView from './views/active-session-view';
@@ -68,7 +69,7 @@ export default function RBApp() {
   const [reps, setReps] = useState(10);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [editingRoutine, setEditingRoutine] = useState<string | null>(null);
-  // Arranque guiado relanzado desde Entrenar o desde el estado vacío (se monta en la Tarea 6 del plan).
+  // Arranque guiado: `setup === 'pending'` lo muestra a las cuentas nuevas; `setupOpen` lo relanza desde Entrenar.
   const [setupOpen, setSetupOpen] = useState(false);
   const [picker, setPicker] = useState<null | { mode: 'replace'; exerciseId: string } | { mode: 'add' }>(
     null
@@ -159,6 +160,50 @@ export default function RBApp() {
     setData((current) => ({
       ...current,
       routines: current.routines.map((r) => (r.id === routineId ? update(r) : r)),
+    }));
+  }
+  /** Fin del arranque guiado: nombre y respuestas al perfil, rutinas al ciclo, y la marca a «hecho». */
+  function applySetup(result: SetupResult, how: 'replace' | 'append') {
+    setData((current) => {
+      const profile = {
+        ...current.profile,
+        ...result.profile,
+        ...(result.name ? { name: result.name } : {}),
+      };
+      const base = { ...current, profile, setup: 'done' as const };
+      if (how === 'replace') return { ...base, routines: result.routines, cycleIndex: 0 };
+      const routines = [...current.routines, ...result.routines].slice(0, 40);
+      return { ...base, routines };
+    });
+    setSetupOpen(false);
+    setTab('today');
+    toast(result.routines.length ? 'Tu ciclo está listo.' : 'Listo. Puedes armar tu ciclo cuando quieras.');
+  }
+  async function finishSetup(result: SetupResult) {
+    const hasCycle = data.routines.length > 0;
+    if (setupOpen && hasCycle) {
+      if (data.active) {
+        applySetup(result, 'append');
+        toast('Con una sesión activa solo se puede añadir al final.');
+        return;
+      }
+      const choice = await choose({
+        title: '¿Qué hacemos con tu ciclo actual?',
+        message: 'Puedes reemplazarlo por el nuevo o añadir estos días al final.',
+        confirmLabel: 'Reemplazar',
+        cancelLabel: 'Añadir al final',
+      });
+      if (choice === null) return;
+      applySetup(result, choice === 'confirm' ? 'replace' : 'append');
+      return;
+    }
+    applySetup(result, 'replace');
+  }
+  function postponeSetup(name?: string) {
+    setData((current) => ({
+      ...current,
+      profile: name ? { ...current.profile, name } : current.profile,
+      setup: 'done',
     }));
   }
   function updateProfile(patch: Partial<Profile>) {
@@ -541,6 +586,25 @@ export default function RBApp() {
           </div>
         )}
       </AuthLoading>
+    );
+  }
+
+  // ---- Arranque guiado: cuenta nueva (antes de la app) o relanzado desde Entrenar ----------------
+  if (data.setup === 'pending' || setupOpen) {
+    return (
+      <>
+        <SetupFlow
+          mode={setupOpen ? 'relaunch' : 'first'}
+          profile={data.profile}
+          onFinish={(result) => void finishSetup(result)}
+          onLater={postponeSetup}
+          onCancel={() => setSetupOpen(false)}
+          onOpenDetail={setDetailId}
+        />
+        {detailId && <ExerciseDetailModal exerciseId={detailId} onClose={() => setDetailId(null)} />}
+        {dialog}
+        {toastNode}
+      </>
     );
   }
 

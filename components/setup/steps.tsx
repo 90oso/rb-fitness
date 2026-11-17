@@ -334,13 +334,20 @@ export function StepBlock({ title, hint, children }: { title: string; hint?: str
   );
 }
 
-/** «¿Cómo te llamas?» */
-export function NameStep({ initial, onNext }: { initial: string; onNext: (name: string) => void }) {
-  const [name, setName] = useState(initial === 'Atleta' ? '' : initial);
+/** «¿Cómo te llamas?» El valor vive en el flujo para que «Más tarde» también lo guarde. */
+export function NameStep({
+  value,
+  onChange,
+  onNext,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onNext: (name: string) => void;
+}) {
   const [focus] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches
   );
-  const clean = name.trim();
+  const clean = value.trim();
   return (
     <form
       className="setup-step"
@@ -355,10 +362,10 @@ export function NameStep({ initial, onNext }: { initial: string; onNext: (name: 
         Nombre
         <input
           autoFocus={focus}
-          value={name}
+          value={value}
           maxLength={30}
           placeholder="Tu nombre"
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => onChange(event.target.value)}
         />
       </label>
       <div className="setup-actions">

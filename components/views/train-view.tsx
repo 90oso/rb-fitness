@@ -12,6 +12,7 @@ import {
   Settings2,
   Sparkles,
   Trash2,
+  Wand2,
   Waves,
 } from 'lucide-react';
 import { PageHead } from '@/components/ui/bits';
@@ -87,6 +88,9 @@ export default function TrainView({
         <div>
           <button className="secondary-btn" onClick={onToggleCycleManager}>
             <Settings2 size={16} /> Organizar ciclo
+          </button>
+          <button className="secondary-btn" onClick={onSetup}>
+            <Wand2 size={16} /> Armar un ciclo nuevo
           </button>
           <button className="lime-btn" onClick={() => onAddDay(false)}>
             <Plus size={16} /> Nuevo día

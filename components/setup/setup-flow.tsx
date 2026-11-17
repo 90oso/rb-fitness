@@ -47,7 +47,8 @@ export default function SetupFlow({
   onOpenDetail: (exerciseId: string) => void;
 }) {
   const [step, setStep] = useState<Step>(mode === 'first' ? 'name' : 'choice');
-  const [name, setName] = useState<string | undefined>(undefined);
+  const [nameDraft, setNameDraft] = useState(profile.name === 'Atleta' ? '' : profile.name);
+  const name = nameDraft.trim() ? nameDraft.trim().slice(0, 30) : undefined;
   const [quiz, setQuiz] = useState<QuizState>(() => quizFromProfile(profile));
   const [quizIndex, setQuizIndex] = useState(0);
   const [list, setList] = useState<Proposal[]>([]);
@@ -145,13 +146,7 @@ export default function SetupFlow({
         </header>
 
         {step === 'name' && (
-          <NameStep
-            initial={name ?? profile.name}
-            onNext={(value) => {
-              setName(value);
-              setStep('choice');
-            }}
-          />
+          <NameStep value={nameDraft} onChange={setNameDraft} onNext={() => setStep('choice')} />
         )}
 
         {step === 'choice' && (
