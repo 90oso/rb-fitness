@@ -16,11 +16,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/). Vers
 
 - Las cuentas nuevas empiezan sin ciclo hasta elegir uno en el arranque (antes traían el ciclo de ejemplo). Las cuentas existentes no ven el arranque.
 - La CI ejecuta `npm run verify` (lint, formato, tipos y las cuatro pruebas) además de la compilación.
-- El selector del catálogo se monta fuera del panel que lo abre (en horizontal perdía la cabecera dentro del arranque) y el cierre del aviso emergente tiene área táctil de 44 px.
+- El selector del catálogo y la ficha «Cómo se hace» se montan fuera del panel que los abre (en horizontal el selector perdía la cabecera dentro del arranque; en sesión la ficha quedaba detrás del selector) y el cierre del aviso emergente tiene área táctil de 44 px.
+- «Borrar historial y rutinas» deja la cuenta como nueva: vuelve a mostrar el arranque guiado.
 
 ### Límites conocidos
 
-- Las propuestas son reglas sencillas (sin peso, altura ni sexo) y no sustituyen el consejo de un profesional; todo se puede editar después.
+- Las propuestas son reglas sencillas (sin peso, altura ni sexo) y no sustituyen el consejo de un profesional; todo se puede editar después. Cuando los minutos elegidos no alcanzan para el volumen del objetivo, la propuesta acorta descansos (90 s) y series antes que dejar de caber.
+- Un dispositivo que siga en 0.10.0 no abre una cuenta con el ciclo vacío («formato no compatible») hasta actualizar la app; la página se recarga desde la red, así que basta con volver a entrar.
 
 ## [0.10.0] — 2026-11-11
 
