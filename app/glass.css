@@ -1560,6 +1560,37 @@ html[data-theme='dark'] .log-remove {
   text-align: center;
 }
 
+/* Perfil: zonas que cuidar como chips */
+.profile-limits {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.profile-limits legend {
+  padding: 0;
+  margin-bottom: 7px;
+}
+.profile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.profile-chip {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--r-chip);
+  border: 1px solid var(--stroke);
+  background: var(--field);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.profile-chip.chosen {
+  background: rgb(var(--acid-rgb) / 0.2);
+  border-color: rgb(var(--acid-rgb) / 0.55);
+}
+
 /* ---- Arranque guiado: pantalla completa, tarjeta ancha, chips grandes ---- */
 .setup-screen {
   min-height: 100dvh;

@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       </Link>
       <span className="overline">PRIVACIDAD</span>
       <h1>Tus datos son tuyos.</h1>
-      <p className="legal-date">Última actualización: 2 de noviembre de 2026</p>
+      <p className="legal-date">Última actualización: 17 de noviembre de 2026</p>
 
       <section>
         <h2>Qué guardamos</h2>
@@ -33,6 +33,10 @@ export default function PrivacyPage() {
           <li>
             Tus rutinas y tu historial de entrenamientos: ejercicios, series, peso, repeticiones, fechas y
             duración.
+          </li>
+          <li>
+            Si respondes el cuestionario de arranque: tu experiencia, minutos por sesión, equipo y, si las
+            indicas, limitaciones físicas (dato de salud, opcional). Se borran con la cuenta.
           </li>
         </ul>
         <p>Son datos de entrenamiento y bienestar. Solo se guardan los que tú escribes en la app.</p>
