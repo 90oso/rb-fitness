@@ -1657,6 +1657,7 @@ html[data-theme='dark'] .log-remove {
 .setup-top-actions .text-link {
   min-height: 44px;
   padding-inline: 10px;
+  margin: 0;
 }
 .setup-step {
   display: flex;
@@ -2073,6 +2074,7 @@ html[data-theme='light'] .empty-cycle-icon {
 }
 .empty-cycle .text-link {
   min-height: 44px;
+  margin: 0;
 }
 .empty-cycle-compact {
   padding: 18px 20px;

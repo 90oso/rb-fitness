@@ -185,7 +185,7 @@ export function proposals(input, uid): Proposal[]; // [principal(días), alterna
   Torso / Pierna · 5 días» / «Cinco días: los tres clásicos más un torso y una pierna extra.»; pplfull «Empuje / Tirón /
   Pierna + Cuerpo completo · 4 días» / «Tres días enfocados y uno de repaso general.»; bodypart «Un grupo por día · 5
   días» / «Pecho, espalda, pierna, hombros y brazos: sesiones enfocadas, muy usado en gimnasios de máquinas.»; la de
-  un día menos añade « · por si alguna semana no llegas» al «por qué».
+  un día menos añade « Por si alguna semana no llegas a todos.» al «por qué».
 
 ## 5. Estados vacíos
 

@@ -546,7 +546,7 @@ function proposal(
   return {
     id,
     title: `${SPLIT_LABEL[split]} · ${input.daysPerWeek} días`,
-    why: why(split, input.daysPerWeek) + (fallback ? ' · por si alguna semana no llegas' : ''),
+    why: why(split, input.daysPerWeek) + (fallback ? ' Por si alguna semana no llegas a todos.' : ''),
     split,
     daysPerWeek: input.daysPerWeek,
     week,
