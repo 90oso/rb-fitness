@@ -313,6 +313,15 @@ body::after {
 .toast svg {
   color: var(--acid-ink);
 }
+/* El cierre del aviso con área de 44 px sin agrandar el aviso */
+.toast button {
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -14px -12px auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-chip);
+}
 /* ---- Tipografía: Barlow en mixtas para titulares y cifras; condensada en mayúsculas solo en botones y etiquetas ---- */
 h1,
 h2,
@@ -1946,6 +1955,9 @@ html[data-theme='light'] .week-day-letter {
   background: transparent;
   flex: none;
   border-radius: 8px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
 }
 .week-day li > span strong {
   display: block;
@@ -2566,6 +2578,38 @@ html[data-theme='light'] .rest-bar-skip {
   }
   .routine-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Ciclo vacío en dos columnas para que el botón quede por encima de la barra */
+  .empty-cycle:not(.empty-cycle-compact) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 16px;
+    align-items: center;
+    text-align: left;
+    padding: 16px 18px;
+  }
+  .empty-cycle:not(.empty-cycle-compact) .empty-cycle-icon {
+    display: none;
+  }
+  .empty-cycle:not(.empty-cycle-compact) h2 {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    font-size: 20px;
+  }
+  .empty-cycle:not(.empty-cycle-compact) p {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0;
+  }
+  .empty-cycle:not(.empty-cycle-compact) .lime-btn {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .empty-cycle:not(.empty-cycle-compact) .text-link {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: center;
   }
 }
 
