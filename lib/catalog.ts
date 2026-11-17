@@ -1343,10 +1343,12 @@ export const initialData: AppData = {
     bodyweightKg: null,
     weightUnit: 'kg',
   },
-  routines: defaultRoutines,
+  // Las cuentas nuevas empiezan sin ciclo: el arranque guiado lo crea (o aplica `defaultRoutines` como ejemplo).
+  routines: [],
   workouts: [],
   active: null,
   cycleIndex: 0,
+  setup: 'pending',
   theme: 'dark',
   lastRestDate: null,
 };

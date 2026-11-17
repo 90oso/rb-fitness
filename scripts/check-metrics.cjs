@@ -13,7 +13,7 @@ Module._extensions['.ts'] = (module, filename) =>
     }).outputText,
     filename
   );
-const { initialData } = require(path.join(root, 'lib/catalog.ts'));
+const { initialData, defaultRoutines } = require(path.join(root, 'lib/catalog.ts'));
 const {
   weekMetrics,
   muscleSets,
@@ -48,7 +48,8 @@ assert.equal(
   videoSearchUrl('Press de pecho en máquina'),
   'https://www.youtube.com/results?search_query=Press%20de%20pecho%20en%20m%C3%A1quina%20t%C3%A9cnica%20correcta'
 );
-let data = structuredClone(initialData);
+// Las cuentas nuevas empiezan sin ciclo (arranque guiado); las pruebas usan el ciclo de ejemplo.
+let data = structuredClone({ ...initialData, routines: defaultRoutines, setup: 'done' });
 const now = new Date();
 const set = (id, weight, reps) => ({
   id: `s-${id}`,
@@ -106,6 +107,42 @@ assert.equal(prefs.restSound, false);
 assert.equal(prefs.keepAwake, false);
 assert.equal(withActive(null, { ...data.profile, restSound: 'no' }).profile.restSound, undefined);
 assert.equal(withActive(null).profile.keepAwake, undefined);
+// Arranque guiado (0.11.0): cuentas nuevas sin ciclo, marca `setup` y campos nuevos del perfil.
+assert.equal(initialData.routines.length, 0);
+assert.equal(initialData.setup, 'pending');
+assert.equal(defaultRoutines.length, 5);
+const withSetup = (setup, profile = data.profile, routines = data.routines) =>
+  safeParse(JSON.stringify({ ...data, active: null, setup, profile, routines }), true);
+assert.equal(withSetup('pending').setup, 'pending');
+assert.equal(withSetup('done').setup, 'done');
+assert.equal(withSetup('later').setup, undefined);
+assert.equal(withSetup(undefined).setup, undefined);
+const quiz = withSetup('done', {
+  ...data.profile,
+  experience: 'beginner',
+  sessionMinutes: 45,
+  kit: 'machines',
+  limitations: ['knees', 'wrists'],
+}).profile;
+assert.equal(quiz.experience, 'beginner');
+assert.equal(quiz.sessionMinutes, 45);
+assert.equal(quiz.kit, 'machines');
+assert.deepEqual(quiz.limitations, ['knees', 'wrists']);
+const bad = withSetup('done', {
+  ...data.profile,
+  experience: 'pro',
+  sessionMinutes: 50,
+  kit: 'garage',
+  limitations: ['knees', 'neck'],
+}).profile;
+assert.equal(bad.experience, undefined);
+assert.equal(bad.sessionMinutes, undefined);
+assert.equal(bad.kit, undefined);
+assert.deepEqual(bad.limitations, ['knees']);
+assert.equal(withSetup('done', { ...data.profile, limitations: [] }).profile.limitations, undefined);
+const empty = withSetup('pending', data.profile, []);
+assert.equal(empty.routines.length, 0);
+assert.equal(empty.cycleIndex, 0);
 const more = structuredClone(workout);
 more.sets = [set('chest-press', 40, 12), set('chest-press', 40, 12), set('chest-press', 40, 12)];
 const advice = progressionAdvice([more], 'chest-press', 3, 12);

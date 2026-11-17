@@ -71,6 +71,12 @@ export interface ActiveWorkout {
   /** Copia de los ejercicios de la rutina al iniciar; la sesión edita esta copia, nunca la rutina. */
   exercises?: RoutineExercise[]; // ausente en sesiones iniciadas antes de 0.9.0 → se usa la rutina
 }
+/** Arranque guiado: respuestas del cuestionario que también alimentan el motor de propuestas. */
+export type Experience = 'beginner' | 'intermediate' | 'advanced';
+export type SessionMinutes = 30 | 45 | 60 | 75;
+/** Máquinas y poleas · también mancuernas y barras · solo mancuernas y peso corporal. */
+export type GymKit = 'machines' | 'full' | 'dumbbells';
+export type Limitation = 'knees' | 'shoulders' | 'lowerBack' | 'wrists';
 export interface Profile {
   name: string;
   gym: string;
@@ -82,6 +88,11 @@ export interface Profile {
   restSound?: boolean;
   /** Mantener la pantalla encendida durante la sesión. Ausente = activado. */
   keepAwake?: boolean;
+  experience?: Experience;
+  sessionMinutes?: SessionMinutes;
+  kit?: GymKit;
+  /** Zonas a cuidar; opcional y dato de salud. */
+  limitations?: Limitation[];
 }
 export interface AppData {
   version: 1;
@@ -91,5 +102,7 @@ export interface AppData {
   active: ActiveWorkout | null;
   cycleIndex: number;
   theme: 'dark' | 'light';
+  /** 'pending' solo en cuentas creadas desde 0.11.0 hasta que terminan o posponen el arranque. Ausente = hecho. */
+  setup?: 'pending' | 'done';
   lastRestDate: string | null;
 }
