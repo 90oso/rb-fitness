@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Check, Play, Search, X } from 'lucide-react';
 import { ExercisePhoto } from '@/components/ui/exercise-media';
 import { catalog, majorMuscles } from '@/lib/catalog';
-import type { Exercise } from '@/lib/types';
+import type { Exercise, Muscle } from '@/lib/types';
 
 /**
  * Catálogo para elegir ejercicios. La fila entera marca o desmarca; la foto abre «Cómo se hace» sin perder
@@ -15,6 +15,7 @@ export default function ExercisePicker({
   title = 'Añadir ejercicios',
   subtitle,
   single = false,
+  preset,
   onConfirm,
   onClose,
   onOpenDetail,
@@ -24,12 +25,15 @@ export default function ExercisePicker({
   title?: string;
   subtitle?: string;
   single?: boolean;
+  /** Músculos del día (asistente del arranque): el filtro inicial «Elegidos» muestra solo esos. */
+  preset?: Muscle[];
   onConfirm: (exerciseIds: string[]) => void;
   onClose: () => void;
   onOpenDetail: (exerciseId: string) => void;
 }) {
   const [search, setSearch] = useState('');
-  const [muscle, setMuscle] = useState<string>('Todos');
+  const hasPreset = Boolean(preset?.length);
+  const [muscle, setMuscle] = useState<string>(hasPreset ? 'Elegidos' : 'Todos');
   const [selected, setSelected] = useState<string[]>([]);
   // Con dedo, el teclado del teléfono taparía las fotos: solo se enfoca el buscador cuando hay ratón.
   const [focusSearch] = useState(
@@ -38,7 +42,8 @@ export default function ExercisePicker({
   const needle = search.trim().toLowerCase();
   const results = catalog.filter(
     (exercise) =>
-      (muscle === 'Todos' || exercise.muscle === muscle) &&
+      (muscle === 'Todos' ||
+        (muscle === 'Elegidos' ? Boolean(preset?.includes(exercise.muscle)) : exercise.muscle === muscle)) &&
       `${exercise.name} ${exercise.equipment} ${exercise.muscle}`.toLowerCase().includes(needle)
   );
   const groups = majorMuscles
@@ -83,6 +88,15 @@ export default function ExercisePicker({
         />
       </label>
       <div className="filter-scroll">
+        {hasPreset && (
+          <button
+            type="button"
+            className={muscle === 'Elegidos' ? 'chosen' : ''}
+            onClick={() => setMuscle('Elegidos')}
+          >
+            Elegidos
+          </button>
+        )}
         <button
           type="button"
           className={muscle === 'Todos' ? 'chosen' : ''}

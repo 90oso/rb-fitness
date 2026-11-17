@@ -1,5 +1,6 @@
 'use client';
 import ExercisePicker from './exercise-picker';
+import type { Muscle } from '@/lib/types';
 
 /** El selector del catálogo como hoja modal (misma hoja que el editor). Se usa desde la sesión activa. */
 export default function ExercisePickerModal({
@@ -7,6 +8,7 @@ export default function ExercisePickerModal({
   subtitle,
   excluded,
   single = false,
+  preset,
   onConfirm,
   onClose,
   onOpenDetail,
@@ -15,6 +17,7 @@ export default function ExercisePickerModal({
   subtitle?: string;
   excluded: string[];
   single?: boolean;
+  preset?: Muscle[];
   onConfirm: (exerciseIds: string[]) => void;
   onClose: () => void;
   onOpenDetail: (exerciseId: string) => void;
@@ -33,6 +36,7 @@ export default function ExercisePickerModal({
           subtitle={subtitle}
           excluded={excluded}
           single={single}
+          preset={preset}
           onConfirm={(ids) => {
             onConfirm(ids);
             onClose();
